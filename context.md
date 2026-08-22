@@ -38,11 +38,13 @@ See [PRODUCT.md](PRODUCT.md).
 
 ## Current phase
 
-**UI/UX REDESIGN: AUDIT + PLAN COMPLETE — implementation not started.**
-`docs/UI-UX-AUDIT.md` (scores, P0–P3 matrix, evidence), `docs/UI-UX-REDESIGN.md`
-(workstreams W1–W15), `docs/DESIGN-SYSTEM.md` (tokens incl. new Ember accent direction).
-Implementation begins only after review/authorization; workstreams run token-first and
-each ends with tests+build+inspection gates.
+**UI/UX REDESIGN: ROUNDS 1–2 IMPLEMENTED, FINAL AUDIT WRITTEN.**
+Shipped: semantic design tokens + Ember accent (W1), typography scale (W2), keyboard
+accessibility for all list rows and sheets (W5), dashboard/routine/history polish (W7/W9),
+contrast + reduced-transparency/contrast media queries, chart aria-labels, settings
+labels/order/offline status (round 2). Product UX score ≈7.4 → ≈7.9
+(docs/UI-UX-AUDIT-FINAL.md). Remaining: ESLint decision, bundle split, drag-reorder,
+per-set aria-labels — tracked in the final audit's "Remaining issues".
 
 ## Completed phases
 
