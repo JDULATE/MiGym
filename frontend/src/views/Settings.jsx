@@ -8,7 +8,8 @@ import { EQUIPMENT, EXPERIENCE, GOALS, MEASUREMENT_KEYS, latestMeasurement, norm
 import { api, webauthnOK, passkeyLogin, passkeyRegister, IS_ANDROID } from '../lib/api.js'
 import { pushSupported, enablePush, disablePush, sendTestPush } from '../lib/push.js'
 import { wakeLockSupported } from '../lib/wakelock.js'
-import { t, LANGS, INSTR_LANGS } from '../lib/i18n.js'
+import { t, LANGS, INSTR_LANGS, dateLocale } from '../lib/i18n.js'
+import { mergeStates } from '../lib/sync.js'
 import { DEMO } from '../lib/demo.js'
 import { MOBILE, shareExport, syncReminder } from '../lib/mobile.js'
 import { loadStarterPlan, confirmSheet, importFromApp } from '../sheets.jsx'
@@ -90,6 +91,7 @@ export default function Settings() {
       </> : user ? <>
         <Row icon="personCircle" iconTint="var(--grey)" title={user.name} subtitle={t('Linked with passkey — every change syncs to this profile.')} />
         {user.admin && <Row icon="wrench" iconTint="var(--indigo)" title={t('Admin dashboard')} accessory="chevron" onClick={() => nav('/admin')} />}
+        <Row icon="history" iconTint="var(--blue)" title={t('Restore from snapshot')} accessory="chevron" onClick={restoreSnapshotSheet} />
         <Row icon="signOut" iconTint="var(--red)" title={t('Unlink from server')} danger onClick={() => confirmSheet({
           title: t('Unlink from server?'),
           message: t('A final backup is pushed first. Your plan, workouts and history stay on this device.'),
@@ -462,6 +464,52 @@ function CoachCard() {
       <div className="dim small" style={{ marginTop: 6 }}>{t('Stored only on this device — never synced, never in backups.')}</div>
     </div>
   </Section>
+}
+
+// Restore flow (ADR-0006 stage 1): list the server's snapshots, fetch the picked one,
+// and UNION-merge it into this device. Local-only history can never be lost — merge is
+// additive for workouts/measurements by design.
+function RestoreSnapshots({ close }) {
+  const toast = useUI(s => s.toast)
+  const [snaps, setSnaps] = useState(null)
+  useEffect(() => { api('/api/data/snapshots').then(r => setSnaps(r.snapshots || [])).catch(() => setSnaps([])) }, [])
+  return <>
+    <h3>{t('Restore from snapshot')}</h3>
+    <div className="muted small" style={{ marginBottom: 10 }}>
+      {t('Server-side copies taken before each sync. Restoring merges them into this device — nothing on it is deleted.')}
+    </div>
+    {snaps === null ? <div className="muted small">{t('Loading…')}</div>
+      : snaps.length === 0 ? <div className="muted small">{t('No snapshots yet — they appear after the first sync.')}</div>
+      : <div className="list">
+          {snaps.map(s => {
+            const d = new Date(s.ts)
+            const label = isNaN(d.getTime()) ? s.id : d.toLocaleString(dateLocale())
+            return <div key={s.id} className="item" onClick={() => {
+              confirmSheet({
+                title: t('Restore this snapshot?'),
+                message: t('It will be merged with what this device already has.'),
+                confirmText: t('Restore'),
+                onConfirm: async () => {
+                  try {
+                    const { state } = await api('/api/data/snapshot?id=' + encodeURIComponent(s.id))
+                    if (!state) throw new Error(t('No data in that snapshot.'))
+                    useStore.getState().update(st => Object.assign(st, mergeStates(useStore.getState().S, state)), true)
+                    toast(t('Snapshot restored and merged'))
+                  } catch (e) { toast(e.message || t('Restore failed')) }
+                },
+              })
+            }}>
+              <div className="grow"><div className="tt">{label}</div></div>
+              <Icon name="chevronRight" className="chev" />
+            </div>
+          })}
+        </div>}
+    <div style={{ height: 8 }} />
+  </>
+}
+
+function restoreSnapshotSheet() {
+  useUI.getState().openSheet(close => <RestoreSnapshots close={close} />)
 }
 
 function NotificationsCard({ S, update, toast }) {
