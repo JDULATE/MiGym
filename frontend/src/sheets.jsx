@@ -838,7 +838,9 @@ export function beginWorkout(routineId, bw) {
   // kept on the entry purely so the workout can explain the number it chose.
   const entries = (r ? r.ex : []).map(cfg => {
     const plan = nextPrescription(st, cfg, r)
-    return { id: cfg.id, sg: cfg.sg, target: { ...cfg }, plan, sets: applyPrescription(buildSets(st, cfg), plan) }
+    // a note saved on the routine entry (MiGym phase 3) rides into the session so the
+    // cue is on screen while you train — and the finished workout keeps its own copy.
+    return { id: cfg.id, sg: cfg.sg, target: { ...cfg }, ...(cfg.note ? { note: cfg.note } : {}), plan, sets: applyPrescription(buildSets(st, cfg), plan) }
   })
   update(s => {
     s.active = { id: uid(), d: todayISO(), start: Date.now(), routineId, name: r ? r.name : t('Freestyle'), bw: bw || null, cur: 0, entries }
