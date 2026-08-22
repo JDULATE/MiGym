@@ -35,4 +35,17 @@ describe('completed workout boundary', () => {
       n: 'Custom lift', muscleWeights: { chest: 1 },
     })
   })
+
+  it('carries an exercise note into history, and only when one exists', () => {
+    const active = {
+      id: 'active-1', d: '2026-08-08', start: 1000,
+      entries: [
+        { id: '0025', sets: [{ done: true, w: 60, r: 8 }], note: 'pause 2 s at the bottom' },
+        { id: '0047', sets: [{ done: true }] },
+      ],
+    }
+    const completed = buildCompletedWorkout(active, { end: 2000, prs: [] })
+    expect(completed.entries[0].note).toBe('pause 2 s at the bottom')
+    expect(completed.entries[1]).not.toHaveProperty('note')
+  })
 })

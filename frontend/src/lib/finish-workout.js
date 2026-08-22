@@ -8,6 +8,9 @@ export function buildCompletedWorkout(active, { end = Date.now(), prs = [], snap
       topW: entry.topW || null,
       target: entry.target || null,
     }
+    // In-session exercise note (MiGym phase 3). Written only when present, so records
+    // without one stay byte-identical to the legacy shape.
+    if (entry.note) completed.note = entry.note
     const snapshot = typeof snapshotFor === 'function' ? snapshotFor(entry) : null
     if (snapshot && typeof snapshot === 'object' && !Array.isArray(snapshot) && Object.keys(snapshot).length) {
       completed.muscleSnapshot = { ...snapshot }
