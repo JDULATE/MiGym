@@ -42,11 +42,20 @@ if (!fs.existsSync(secretFile)) fs.writeFileSync(secretFile, crypto.randomBytes(
 const SECRET = fs.readFileSync(secretFile, 'utf8').trim();
 
 const dbFile = path.join(DATA, 'db.json');
-let db = { users: [], creds: [], subs: [], invites: [] };
+let db = { users: [], creds: [], subs: [], invites: [], pairings: [], links: [] };
 try { db = JSON.parse(fs.readFileSync(dbFile, 'utf8')); } catch {}
 db.subs = db.subs || [];
 db.invites = db.invites || [];
+db.pairings = db.pairings || [];   // coach-platform pairing codes (ADR-0007)
+db.links = db.links || [];         // coach ↔ client links with consent scope
+// Coach role is operator-granted: list user ids in COACH_UIDS (like ADMIN_UIDS). The role
+// is stamped onto the stored user so /api/me reports it and routes can check it.
+const COACH_UIDS = (process.env.COACH_UIDS || '').split(',').map(s => s.trim()).filter(Boolean);
+for (const u of db.users) {
+  if (COACH_UIDS.includes(u.id) && u.role !== 'coach') u.role = 'coach';
+}
 const isAdmin = user => !!user && (user.admin === true || ADMIN_UIDS.includes(user.id));
+const isCoach = user => !!user && (user.role === 'coach' || isAdmin(user));
 function saveDb() { atomicWrite(dbFile, JSON.stringify(db, null, 2)); }
 function atomicWrite(file, content) {
   const tmp = file + '.tmp';
@@ -288,7 +297,7 @@ const routes = {
   'GET /api/me': async (req, res) => {
     const user = readSession(req);
     if (!user) return json(res, 401, { error: 'not signed in' });
-    json(res, 200, { user: { id: user.id, name: user.name, admin: isAdmin(user) } });
+    json(res, 200, { user: { id: user.id, name: user.name, admin: isAdmin(user), role: isCoach(user) ? 'coach' : 'user' } });
   },
 
   'POST /api/register/options': async (req, res) => {
@@ -505,6 +514,154 @@ const routes = {
     json(res, 200, { ok: true });
   },
 
+  /* ---------- coach platform (ADR-0007) ----------
+     Consent-based links: the client mints a pairing code and hands it to the coach;
+     the coach redeems it. Scopes are enforced HERE, before serialization — a summary
+     response is computed, never a redacted copy of the state blob. Either side can
+     unlink at any time; the client always sees every link and every coach note. */
+  'POST /api/coach/code': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    const body = await readBody(req);
+    const scope = body.scope === 'full' ? 'full' : 'summary';
+    const code = crypto.randomBytes(4).toString('hex').toUpperCase();
+    db.pairings = db.pairings.filter(p => p.uid !== user.id);   // one live code per user
+    db.pairings.push({ code, uid: user.id, scope, exp: Date.now() + 15 * 60000 });
+    saveDb();
+    json(res, 200, { code, scope, expiresInSec: 900 });
+  },
+
+  'POST /api/coach/link': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    if (!isCoach(user)) return json(res, 403, { error: 'coach account required' });
+    const body = await readBody(req);
+    const code = String(body.code || '').trim().toUpperCase();
+    const p = db.pairings.find(x => x.code === code);
+    if (!p || p.exp < Date.now()) return json(res, 400, { error: 'invalid or expired code' });
+    if (p.uid === user.id) return json(res, 400, { error: 'you cannot link to yourself' });
+    db.pairings = db.pairings.filter(x => x !== p);
+    let link = db.links.find(l => l.coachId === user.id && l.clientId === p.uid);
+    if (!link) {
+      link = { coachId: user.id, clientId: p.uid, scope: p.scope || 'summary', notes: [], created: new Date().toISOString() };
+      db.links.push(link);
+    } else link.scope = p.scope || link.scope;   // re-linking refreshes the consented scope
+    saveDb();
+    const client = db.users.find(u => u.id === p.uid);
+    json(res, 200, { ok: true, client: client ? client.name : p.uid, scope: link.scope });
+  },
+
+  'GET /api/coach/clients': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    if (!isCoach(user)) return json(res, 403, { error: 'coach account required' });
+    const clients = db.links.filter(l => l.coachId === user.id).map(l => {
+      const u = db.users.find(u => u.id === l.clientId);
+      const S = readState(l.clientId) || {};
+      const ws = S.workouts || [];
+      const last30 = ws.filter(w => (w.start || 0) > Date.now() - 30 * 86400000).length;
+      return {
+        clientId: l.clientId,
+        name: u ? u.name : l.clientId,
+        scope: l.scope,
+        totalWorkouts: ws.length,
+        last30,
+        lastSession: ws.length ? ws[ws.length - 1].d : null,
+        lastSync: S._ts || null,
+        notes: (l.notes || []).length,
+      };
+    });
+    json(res, 200, { clients });
+  },
+
+  // Summary is computed from the client's state — derived numbers only. Individual sets
+  // leave the server only when the link's consented scope says "full".
+  'GET /api/coach/client': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    if (!isCoach(user)) return json(res, 403, { error: 'coach account required' });
+    const id = new URL(req.url, 'http://x').searchParams.get('id');
+    const link = db.links.find(l => l.coachId === user.id && l.clientId === id);
+    if (!link) return json(res, 404, { error: 'no such client' });
+    const u = db.users.find(u => u.id === id);
+    const S = readState(id) || {};
+    const ws = S.workouts || [];
+    const now = Date.now();
+    const inWindow = days => ws.filter(w => (w.start || 0) > now - days * 86400000);
+    const volumeOf = w => w.entries.reduce((v, e) => v + e.sets.reduce((n, s) => n + (s.done && !s.warmup ? (s.w || 0) * (s.r || 0) : 0), 0), 0);
+    const summary = {
+      name: u ? u.name : id,
+      unit: S.unit || 'kg',
+      totalWorkouts: ws.length,
+      last30: inWindow(30).length,
+      last90: inWindow(90).length,
+      avgPerWeek28: Math.round(inWindow(28).length / 4 * 10) / 10,
+      volume30: Math.round(inWindow(30).reduce((v, w) => v + volumeOf(w), 0)),
+      lastSession: ws.length ? { d: ws[ws.length - 1].d, name: ws[ws.length - 1].name } : null,
+    };
+    json(res, 200, {
+      client: summary,
+      scope: link.scope,
+      notes: link.notes || [],
+      ...(link.scope === 'full' ? {
+        routines: (S.routines || []).map(r => ({ name: r.name, exercises: (r.ex || []).length })),
+        workouts: ws.slice(-20).reverse().map(w => ({
+          d: w.d, name: w.name, durationMin: w.end && w.start ? Math.round((w.end - w.start) / 60000) : null,
+          vol: Math.round(volumeOf(w)),
+          entries: (w.entries || []).map(e => ({
+            exercise: e.id,
+            sets: (e.sets || []).filter(s => s.done).map(s => s.min != null
+              ? `${s.min}min@${s.speed}`
+              : s.sec != null ? `${s.sec}s${s.w > 0 ? '+' + s.w : ''}`
+              : `${s.w || 0}×${s.r}${s.rir != null ? '@RIR' + s.rir : ''}`),
+          })),
+        })),
+      } : {}),
+    });
+  },
+
+  'POST /api/coach/note': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    if (!isCoach(user)) return json(res, 403, { error: 'coach account required' });
+    const body = await readBody(req);
+    const text = String(body.text || '').trim().slice(0, 1000);
+    const link = db.links.find(l => l.coachId === user.id && l.clientId === String(body.clientId || ''));
+    if (!link) return json(res, 404, { error: 'no such client' });
+    if (!text) return json(res, 400, { error: 'note required' });
+    link.notes = link.notes || [];
+    link.notes.push({ ts: Date.now(), by: user.name, text });
+    saveDb();
+    json(res, 200, { ok: true });
+  },
+
+  // Client side: what the server knows about sharing, plus revocation.
+  'GET /api/coach/mylinks': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    const links = db.links.filter(l => l.clientId === user.id).map(l => ({
+      coachId: l.coachId,
+      coachName: (db.users.find(u => u.id === l.coachId) || {}).name || l.coachId,
+      scope: l.scope,
+      created: l.created || null,
+      notes: l.notes || [],
+    }));
+    const pending = db.pairings.filter(p => p.uid === user.id)
+      .map(p => ({ code: p.code, scope: p.scope, expiresInSec: Math.max(0, Math.round((p.exp - Date.now()) / 1000)) }));
+    json(res, 200, { links, pending });
+  },
+
+  'POST /api/coach/revoke': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    const body = await readBody(req);
+    const before = db.links.length;
+    db.links = db.links.filter(l => !(l.clientId === user.id && l.coachId === String(body.coachId || '')));
+    if (db.links.length === before) return json(res, 404, { error: 'no such link' });
+    saveDb();
+    json(res, 200, { ok: true });
+  },
+
   /* ---------- admin dashboard ---------- */
   // One row per user, cheap enough for a personal instance (reads each state file once).
   'GET /api/admin/users': async (req, res) => {
@@ -591,7 +748,7 @@ const routes = {
   }
 };
 
-http.createServer(async (req, res) => {
+const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
   const key = req.method + ' ' + url.pathname;
   const handler = routes[key];
@@ -601,4 +758,5 @@ http.createServer(async (req, res) => {
     console.error(key, e);
     if (!res.headersSent) json(res, 500, { error: 'server error' });
   }
-}).listen(PORT, () => console.log(`gym-api on :${PORT} (rpID=${RP_ID}, origin=${ORIGIN})`));
+});
+server.listen(PORT, () => console.log(`gym-api on :${server.address().port} (rpID=${RP_ID}, origin=${ORIGIN})`));
