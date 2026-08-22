@@ -51,11 +51,17 @@ src/giwi/
 States map to CSS classes (`.giwi--happy` etc.). If a future state has no artwork it
 falls back to `idle` — no fake partial animations.
 
-## 4. Character design (original)
+## 4. Character design
 
-A rounded dark blob body (matches MiGym's near-black surfaces) with two light eyes and
-MiGym-accent highlights, drawn as inline SVG so it inherits theme colours via
-`currentColor`/CSS variables. Proportions tuned for 96–160 px render sizes.
+Ten pre-animated expression SVGs (250×250, self-contained CSS keyframes, ~16 kB each)
+provided as MiGym project assets under `src/giwi/expressions/`:
+
+`neutral · happy · excited · attentive · curious · shy · surprissed · unimpressed · scared · angry`
+
+They are embedded via `<img>` (animations run because the keyframes travel inside each
+file) which also isolates their styles from the app. State→expression mapping lives in
+`Giwi.jsx`; unused expressions (`angry`, `unimpressed`, `scared`) are shipped for future
+contextual moments.
 
 ## 5. Accessibility
 
