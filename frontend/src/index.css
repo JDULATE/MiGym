@@ -59,6 +59,33 @@
 
   --sab:env(safe-area-inset-bottom,0px);
   --sat:env(safe-area-inset-top,0px);
+
+  /* ------------------------------------------------------------------
+     Semantic design-system aliases (docs/DESIGN-SYSTEM.md).
+     These map onto the values above so themes keep working unchanged;
+     new code consumes THESE, not the raw palette. */
+  --color-bg:var(--bg);
+  --color-surface:var(--surface);
+  --color-surface-2:var(--surface-2);
+  --color-surface-elevated:var(--bg-el);
+  --text-1:var(--label);
+  --text-2:var(--label-2);
+  --text-3:var(--label-3);
+  --border:var(--sep);
+  --color-success:var(--green);
+  --color-warning:var(--yellow);
+  --color-danger:var(--red);
+  --color-info:var(--blue);
+
+  /* spacing scale — related elements one step apart, sections two to three */
+  --space-1:4px;  --space-2:8px;  --space-3:12px; --space-4:16px;
+  --space-5:20px; --space-6:24px; --space-7:32px; --space-8:40px;
+  --space-9:48px; --space-10:64px;
+
+  /* motion aliases */
+  --motion-fast:var(--fast);
+  --motion-normal:var(--med);
+  --motion-slow:320ms;
 }
 
 :root[data-theme="light"] {
@@ -83,7 +110,10 @@
   --on-acc:#ffffff;
 }
 
-/* accents — Apple's system colours, so a recolour never looks off-system */
+/* accents — Apple's system colours, so a recolour never looks off-system.
+   "ember" is the MiGym factory default: warm, fitness-forward, and clearly distinct
+   from success-green (actions no longer compete with status colours). */
+:root[data-accent="ember"]  { --acc:#ff7a1a;       --acc-2:#c2410c; --on-acc:#000 }
 :root[data-accent="lime"]  { --acc:var(--green);  --acc-2:#248a3d; --on-acc:#000 }
 :root[data-accent="sky"]   { --acc:var(--blue);   --acc-2:#0060df; --on-acc:#fff }
 :root[data-accent="orange"]{ --acc:var(--orange); --acc-2:#c76b00; --on-acc:#000 }
@@ -99,7 +129,8 @@
    9.46 / 8.16 there. Blue, purple, pink and red keep white (3.5–4.1:1), which both
    passes and matches the platform convention. */
 :root[data-theme="light"][data-accent="lime"],
-:root[data-theme="light"][data-accent="teal"]  { --on-acc:#000 }
+:root[data-theme="light"][data-accent="teal"],
+:root[data-theme="light"][data-accent="ember"] { --on-acc:#000 }
 :root[data-theme="light"][data-accent="sky"],
 :root[data-theme="light"][data-accent="violet"],
 :root[data-theme="light"][data-accent="pink"],
@@ -136,7 +167,42 @@ button,.chip,.tile,.item,.wday,.cal-d,.swatch,.hm-c,.lrow,.seg button,.stp butto
   stroke-linecap:round;stroke-linejoin:round;
 }
 
-@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+/* Reduced motion: remove travel, keep feedback. Transforms/springs collapse to their
+   end state instantly, while opacity and colour still transition (briefly) so state
+   changes remain perceivable — per docs/DESIGN-SYSTEM.md §8. */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+    transition-property:opacity,color!important;
+    scroll-behavior:auto!important
+  }
+}
+
+/* Reduced transparency: frostier surfaces — no blur, near-solid backgrounds.
+   Targets every surface that ships a backdrop-filter. */
+@media (prefers-reduced-transparency: reduce){
+  #tabbar,#timer,#toast{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--bg-el)}
+  .mback{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(0,0,0,.6)}
+  .exmedia .gifhint,.exmedia .giftoggle{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(0,0,0,.75)}
+  .sheet{background:var(--bg-el)}
+}
+
+/* Increased contrast: stronger boundaries and text. */
+@media (prefers-contrast: more){
+  :root{
+    --label-2:rgba(235,235,245,.88);
+    --label-3:rgba(235,235,245,.62);
+    --sep:rgba(235,235,245,.55);
+    --sep-op:rgba(235,235,245,.45)
+  }
+  :root[data-theme="light"]{
+    --label-2:rgba(0,0,0,.82);
+    --label-3:rgba(0,0,0,.58);
+    --sep:rgba(0,0,0,.5)
+  }
+}
 
 /* ------------------------------------------------------------ type scale -- */
 .t-large  {font-size:34px;line-height:1.06;font-weight:700;letter-spacing:-.028em}
