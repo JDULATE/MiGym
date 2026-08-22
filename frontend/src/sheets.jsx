@@ -7,7 +7,7 @@ import { lastEntryFor, bestWeightFor, buildSets, effectiveRoutineId, workoutVolu
 import { beep, vibrate } from './lib/sound.js'
 import { t, instrFor, getLang, INSTR_LANGS } from './lib/i18n.js'
 import { nav } from './lib/nav.js'
-import { starterRoutines } from './lib/starter.js'
+import { STARTER_TEMPLATES } from './lib/starter.js'
 import Media, { Thumb } from './components/Media.jsx'
 import Stepper from './components/Stepper.jsx'
 import Icon from './components/Icon.jsx'
@@ -46,13 +46,33 @@ export function confirmSheet(opts) {
 }
 
 /* ============================ starter plan ============================ */
+// A picker, not a single button: PPL, Upper/Lower and Full Body are starting points —
+// everything they create is an ordinary editable routine afterwards.
 export function loadStarterPlan() {
-  const [push, pull, legs] = starterRoutines()
-  update(st => {
-    st.routines.push(push, pull, legs)
-    st.week[1] = push.id; st.week[3] = pull.id; st.week[5] = legs.id
-  })
-  toast(t('Starter plan loaded — Mon Push · Wed Pull · Fri Legs'))
+  ui().openSheet(close => <>
+    <h3>{t('Load a starter plan')}</h3>
+    <div className="muted small" style={{ marginBottom: 12 }}>{t('A starting point, not a program — every routine stays fully editable. Your current routines are kept.')}</div>
+    <div className="list">
+      {STARTER_TEMPLATES.map(tpl => {
+        const preview = tpl.build()
+        return <div key={tpl.key} className="item" onClick={() => {
+          close()
+          update(st => {
+            st.routines.push(...preview.routines)
+            for (const [day, idx] of Object.entries(preview.week)) st.week[day] = preview.routines[idx].id
+          })
+          toast(t('Starter plan loaded'))
+          nav('/plan')
+        }}>
+          <span className="lrow-i"><Icon name={glyphOf('barbell')} /></span>
+          <div className="grow"><div className="tt">{t(tpl.label)}</div>
+            <div className="ss">{preview.routines.map(r => r.name).join(' · ')}</div></div>
+          <Icon name="plus" className="chev" />
+        </div>
+      })}
+    </div>
+  </>
+  )
 }
 
 /* ============================ weight picker (shared: body weight + goal) ============================ */
@@ -527,6 +547,12 @@ function ExConfig({ ex, existing, onSave, onDelete, close, routine, initial }) {
     const prog = {}
     if (c.prog) prog.prog = c.prog
     if (c.inc > 0) prog.inc = c.inc
+    // Session targets (phase 7): written only when actually chosen, so untouched configs
+    // keep producing exactly the plan-file shape they always did. RIR 0 is meaningful
+    // ("to failure") and must survive — hence the null check, never a truthiness test.
+    const session = {}
+    if (c.rirTarget != null && !Number.isNaN(+c.rirTarget)) session.rirTarget = Math.max(0, Math.round(+c.rirTarget))
+    if (c.rest > 0) session.rest = Math.round(c.rest)
     // Written only when it differs from what the dataset already says, so a barbell config
     // stays exactly the shape it was before these flags existed.
     // `bodyweight` is true of a hold as much as of a set of reps; `side` is not — it counts
@@ -534,14 +560,14 @@ function ExConfig({ ex, existing, onSave, onDelete, close, routine, initial }) {
     // rather than carrying a flag nothing downstream can read.
     const flags = {}
     if (bw !== isBodyweightEq(ex.id)) flags.bodyweight = bw
-    if (cardio) onSave({ sets, min: Math.max(1, Math.round(c.min) || 20), speed: Math.max(0, c.speed || 8) })
-    else if (mode === 'time') onSave({ sets, mode: 'time', sec: Math.max(1, Math.round(c.sec) || 45), weight: Math.max(0, c.weight || 0), ...flags, ...prog })
+    if (cardio) onSave({ sets, min: Math.max(1, Math.round(c.min) || 20), speed: Math.max(0, c.speed || 8), ...(session.rest ? { rest: session.rest } : {}) })
+    else if (mode === 'time') onSave({ sets, mode: 'time', sec: Math.max(1, Math.round(c.sec) || 45), weight: Math.max(0, c.weight || 0), ...flags, ...prog, ...session })
     else {
       // A unilateral target is stored even: the split has to divide, and a typed 15 would
       // otherwise plan seven reps on one side and eight on the other, every session.
       const typed = Math.max(1, Math.round(c.reps) || 10)
       const reps = perSide ? Math.ceil(typed / 2) * 2 : typed
-      const out = { sets, mode: 'reps', reps, weight: Math.max(0, c.weight || 0), ...flags, ...(perSide ? { side: true } : {}), ...prog }
+      const out = { sets, mode: 'reps', reps, weight: Math.max(0, c.weight || 0), ...flags, ...(perSide ? { side: true } : {}), ...prog, ...session }
       if (policyFor({ ...c, id: ex.id }, routine, 'reps') === 'double') out.repsMin = Math.min(reps, Math.max(1, Math.round(c.repsMin) || Math.max(1, reps - 2)))
       // A ceiling below the working reps would tell you to add a set on day one.
       if (bw && !(out.weight > 0) && c.repsMax > 0) out.repsMax = Math.max(reps, Math.round(c.repsMax))
@@ -616,6 +642,23 @@ function ExConfig({ ex, existing, onSave, onDelete, close, routine, initial }) {
         : t('Reps climb by one whenever every set was clean. Set a ceiling to add sets instead of reps forever.')}
     </div>}
     <ProgressionFields ex={ex} mode={mode} c={c} setC={setC} routine={routine} unit={st.unit} />
+    {!cardio && <>
+      {/* ---------- session targets (MiGym phase 7): informational until the engine
+          phase consumes them — recorded on the config so plans can say what they want ---------- */}
+      <h4 className="sec">{t('Session')}</h4>
+      <div className="sect-b" style={{ marginBottom: 8 }}>
+        {mode === 'reps' && <SelectRow title={t('Target RIR')} sheetTitle={t('Target RIR')}
+          value={c.rirTarget ?? ''}
+          onChange={v => setC(x => ({ ...x, rirTarget: v === '' ? undefined : v }))}
+          options={[{ value: '', label: t('Not set') },
+            ...[0, 1, 2, 3, 4].map(n => ({ value: n, label: n === 0 ? t('To failure') : String(n) }))]} />}
+        <SelectRow title={t('Rest')} sheetTitle={t('Rest')}
+          value={c.rest > 0 ? c.rest : ''}
+          onChange={v => setC(x => ({ ...x, rest: v === '' ? undefined : v }))}
+          options={[{ value: '', label: t('Default ({0}s)', st.restSec || 90) },
+            ...[60, 90, 120, 150, 180].map(s => ({ value: s, label: s + 's' }))]} />
+      </div>
+    </>}
     <Button variant="primary" onClick={save}>{existing ? t('Save') : t('Add to routine')}</Button>
     {ex.custom && <><div style={{ height: 8 }} /><Button icon="pencil" onClick={() => { close(); customExSheet(ex) }}>{t('Edit or delete this exercise')}</Button></>}
     {onDelete && <><div style={{ height: 8 }} /><Button variant="danger" onClick={() => { close(); onDelete() }}>{t('Remove from routine')}</Button></>}
