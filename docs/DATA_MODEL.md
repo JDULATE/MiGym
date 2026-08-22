@@ -45,8 +45,12 @@ MiGym extends this incrementally; every extension gets documented here.
   ex: [ { id,                    // exercise id (dataset or custom)
           sets, reps, weight,     // classic prescription
           sec, min, speed,        // timed / cardio modes
-          repsMin, repsMax,       // double-progression range
+          repsMin, repsMax,       // double-progression range / bodyweight ceiling
           inc,                    // load step override
+          rirTarget,              // MiGym phase 7: target effort (0 = to failure) — informational;
+                                  // absent unless chosen in the config sheet
+          rest,                   // MiGym phase 7: per-exercise rest seconds; absent = profile default
+          note,                   // MiGym phase 3: cue mirrored from sessions
           mode: 'reps'|'time'|'cardio',   // absent = derived from exercise type
           bodyweight: true,       // no external load; w means ADDED weight
           side: true,             // unilateral: logged total covers both sides

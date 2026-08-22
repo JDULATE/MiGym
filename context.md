@@ -38,8 +38,8 @@ See [PRODUCT.md](PRODUCT.md).
 
 ## Current phase
 
-**PHASE 6 — Exercise Library: COMPLETE.**
-Next phase requires explicit authorization: **PHASE 7 — Routine Builder**.
+**PHASE 7 — Routine Builder: COMPLETE.**
+Next phase requires explicit authorization: **PHASE 8 — Adaptive Training**.
 
 ## Completed phases
 
@@ -63,6 +63,10 @@ Next phase requires explicit authorization: **PHASE 7 — Routine Builder**.
   existing dataset fields (1,322/1,324 placed); Library gains movement-group filter chips;
   detail sheets gain type/difficulty tags and ranked Alternatives. Compound-vs-isolation
   intentionally NOT provided (not honestly derivable). No new dataset content authored.
+* Phase 7 — Routine Builder: Target RIR per exercise (stored + shown in-session, not yet
+  enforced by the engine), per-exercise rest override honored by the session flow, starter
+  template picker (PPL / Upper-Lower / Full Body) with tests; configs stay byte-identical
+  unless new fields are set.
 
 ## Planned phases
 

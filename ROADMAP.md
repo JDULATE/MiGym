@@ -68,11 +68,13 @@ with an empty curated-override extension point, and ranked alternatives on the d
 sheet. Library gains movement-group chips. Compound-vs-isolation intentionally not derived;
 no new dataset content authored (licensing boundary).
 
-## Phase 7 — Routine builder
+## Phase 7 — Routine builder ✅ (complete, 2026-08-22)
 
-Extend RoutineEdit: rep ranges (min–max already partially supported via progression),
-target RIR, rest defaults, day templates (PPL/UL/full-body/custom as *starting points*, never
-forced), supersets (exists), ordering (exists). Plan-share format versioned.
+Target RIR per exercise (stored, shown in-session; engine enforcement deferred to Phase 8),
+per-exercise rest override honored by the session flow (supersets included), starter
+template picker (PPL / Upper-Lower / Full Body) with validity tests. Additive only:
+configs without the new fields serialize exactly as before. Ordering/supersets/notes were
+already present from earlier phases/upstream.
 
 ## Phase 8 — Adaptive training
 

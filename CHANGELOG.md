@@ -6,6 +6,33 @@ This repository continues openGym (© Duarte Santos, AGPL-3.0-or-later) as **MiG
 Upstream history below is preserved unchanged; MiGym phases add entries above the upstream
 log from this point on.
 
+### Phase 7 — Routine Builder (2026-08-22)
+
+🧩 **Builder depth + real starting points** — additive only; existing plan files and
+configs keep their exact shape unless you set the new fields.
+
+#### Added
+
+- 🎯 **Target RIR per exercise**: choose Off / To failure / 0–4 in the exercise config;
+  plans can now *state* their effort intent. Shown in-session next to the exercise
+  ("RIR ≤ 2"). Informational by design — nothing judges your sets against it yet
+  (that is Phase 8's job).
+- ⏱️ **Per-exercise rest override**: pick a rest length per exercise; the session uses it
+  instead of the profile default (supersets included). Absent = profile default.
+- 🗂️ **Three starter templates behind a picker**: Push / Pull / Legs (as before), Upper /
+  Lower, and Full Body — each with sensible weekday defaults. Starting points only: what
+  they create is an ordinary editable routine, and loading one keeps every routine you
+  already have.
+- 🧪 5 new tests guarding that template exercises all exist in the library and that builds
+  stay fresh-id/deterministic; demo seed keeps its exact PPL dependency via the unchanged
+  `starterRoutines()` export.
+
+#### Notes
+
+- `rirTarget` / `rest` are written on a config only when actually chosen — untouched
+  configs serialize byte-identically to before (same principle as `bodyweight`/`side`).
+- All new strings translated across all 11 locale packs (726 keys each).
+
 ### Phase 6 — Exercise Library (2026-08-22)
 
 🏋️ **The library now browses by movement and suggests alternatives** — computed honestly
