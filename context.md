@@ -38,8 +38,8 @@ See [PRODUCT.md](PRODUCT.md).
 
 ## Current phase
 
-**PHASE 7 — Routine Builder: COMPLETE.**
-Next phase requires explicit authorization: **PHASE 8 — Adaptive Training**.
+**PHASE 8 — Adaptive Training: COMPLETE.**
+Next phase requires explicit authorization: **PHASE 9 — AI Coach**.
 
 ## Completed phases
 
@@ -67,6 +67,10 @@ Next phase requires explicit authorization: **PHASE 8 — Adaptive Training**.
   enforced by the engine), per-exercise rest override honored by the session flow, starter
   template picker (PPL / Upper-Lower / Full Body) with tests; configs stay byte-identical
   unless new fields are set.
+* Phase 8 — Adaptive Training: `lib/adaptive.js` deterministic suggestions (increase/ease/
+  review/adhere) each with explanation templates; rendered under *Adjustments* in the Stats
+  progress-overview card. Read-only over history; consumes rirTarget from Phase 7;
+  thresholds are named constants. Nothing stored or auto-applied.
 
 ## Planned phases
 

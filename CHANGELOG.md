@@ -6,6 +6,35 @@ This repository continues openGym (© Duarte Santos, AGPL-3.0-or-later) as **MiG
 Upstream history below is preserved unchanged; MiGym phases add entries above the upstream
 log from this point on.
 
+### Phase 8 — Adaptive Training (2026-08-22)
+
+🎯 **Deterministic coaching suggestions with their reasoning attached** — layered on the
+progression engine, never replacing it, never touching history.
+
+#### Added
+
+- 🧠 New pure module `lib/adaptive.js` (+9 tests). Four suggestion kinds, each carrying its
+  own explanation as i18n templates:
+  - **Increase** — two consecutive clean sessions with effort inside the plan's target RIR
+    ("Raise bench press to 72.5 kg — every rep hit in your last two sessions, within the
+    target RIR of 2"). This also gives progression-policy-less lifts their only load ladder,
+    and consumes Phase 7's per-exercise RIR targets at last.
+  - **Ease** — reps landing short while grinding *harder* than the plan asked → step back
+    one deload-style step for a session.
+  - **Review** — flat estimated 1RM and untouched ≥21 days → consider a deload week or a
+    variation (same thresholds as the Stats momentum card).
+  - **Adherence** — planned weekly sessions vs the last four weeks' reality, once and gently.
+- 📋 Suggestions render in the Stats "Progress overview" card under *Adjustments*
+  (icon-coded by severity, capped at five, empty when there's nothing honest to say).
+
+#### Guarantees
+
+- Deterministic: same history ⇒ same suggestions (test-enforced).
+- Read-only: no suggestion ever modifies workouts, routines or settings.
+- Thresholds are named constants (`CONFIRM_SESSIONS`, `RIR_TOLERANCE`,
+  `ADHERENCE_WINDOW_DAYS`); partial effort coverage never masquerades as "on target".
+- Nothing stored: suggestions are re-derived from history every render.
+
 ### Phase 7 — Routine Builder (2026-08-22)
 
 🧩 **Builder depth + real starting points** — additive only; existing plan files and

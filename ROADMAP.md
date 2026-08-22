@@ -76,10 +76,13 @@ template picker (PPL / Upper-Lower / Full Body) with validity tests. Additive on
 configs without the new fields serialize exactly as before. Ordering/supersets/notes were
 already present from earlier phases/upstream.
 
-## Phase 8 — Adaptive training
+## Phase 8 — Adaptive training ✅ (complete, 2026-08-22)
 
-Recommendations on top of the progression engine using recent performance/RIR/volume/
-consistency. Deterministic, each with an explanation template. Never auto-modifies history.
+`lib/adaptive.js`: deterministic, explainable suggestions (increase / ease / review /
+adherence) layered on the engine and the Phase-7 RIR targets; rendered as *Adjustments*
+in the Stats progress-overview card. Read-only over history, nothing auto-applied,
+thresholds are named constants. AI remains excluded from these rules (Phase 9 builds on
+top of them).
 
 ## Phase 9 — AI Coach
 
