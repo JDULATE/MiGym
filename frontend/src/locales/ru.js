@@ -727,4 +727,8 @@ export default {
   'Coach notes': 'Заметки тренера',
   'Revoke': 'Отозвать',
   'You decide what a coach sees — and you can revoke it at any time. Notes coaches write are visible to you too.': 'Вы решаете, что видит тренер — и можете отозвать это в любой момент. Заметки тренеров вам тоже видны.',
+  'Set up your weekly routine to get going — or load a ready-made starter plan.': 'Настрой недельную программу — или загрузи готовый стартовый план.',
+  'No workouts yet — finish your first session and it will appear here.': 'Пока нет тренировок — заверши первую, и она появится здесь.',
+  'Move up': 'Вверх',
+  'Move down': 'Вниз',
 }

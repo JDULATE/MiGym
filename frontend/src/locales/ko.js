@@ -727,4 +727,8 @@ export default {
   'Coach notes': '코치 메모',
   'Revoke': '철회',
   'You decide what a coach sees — and you can revoke it at any time. Notes coaches write are visible to you too.': '코치가 무엇을 보는지 결정하고 언제든 철회할 수 있습니다. 코치가 작성한 메모도 회원님에게 표시됩니다।',
+  'Set up your weekly routine to get going — or load a ready-made starter plan.': '주간 루틴을 설정해 시작하거나 준비된 스타터 플랜을 불러오세요.',
+  'No workouts yet — finish your first session and it will appear here.': '아직 운동이 없습니다 — 첫 세션을 끝내면 여기에 표시됩니다।',
+  'Move up': '위로',
+  'Move down': '아래로',
 }

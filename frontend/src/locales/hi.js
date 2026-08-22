@@ -727,4 +727,8 @@ export default {
   'Coach notes': 'कोच नोट्स',
   'Revoke': 'रद्द करें',
   'You decide what a coach sees — and you can revoke it at any time. Notes coaches write are visible to you too.': 'आप तय करते हैं कि कोच क्या देखे — और आप कभी भी उसे रद्द कर सकते हैं। कोच के लिखे नोट्स भी आपको दिखाई देते हैं।',
+  'Set up your weekly routine to get going — or load a ready-made starter plan.': 'Configure sua rotina semanal para começar, ou carregue um plano inicial pronto.',
+  'No workouts yet — finish your first session and it will appear here.': 'अभी कोई वर्कआउट नहीं — पहला सत्र पूरा करें, यह यहाँ दिखेगा।',
+  'Move up': 'ऊपर ले जाएँ',
+  'Move down': 'नीचे ले जाएँ',
 }

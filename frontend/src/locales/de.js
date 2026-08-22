@@ -744,4 +744,8 @@ export default {
   'Coach notes': 'Coach-Notizen',
   'Revoke': 'Widerrufen',
   'You decide what a coach sees — and you can revoke it at any time. Notes coaches write are visible to you too.': 'Du entscheidest, was ein Coach sieht — und kannst es jederzeit entziehen. Notizen von Coaches siehst du auch.',
+  'Set up your weekly routine to get going — or load a ready-made starter plan.': 'Richte deinen Wochenplan ein — oder lade einen fertigen Starterplan.',
+  'No workouts yet — finish your first session and it will appear here.': 'Noch keine Workouts — beende deine erste Einheit und sie erscheint hier.',
+  'Move up': 'Nach oben',
+  'Move down': 'Nach unten',
 }

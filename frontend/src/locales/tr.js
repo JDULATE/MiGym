@@ -727,4 +727,8 @@ export default {
   'Coach notes': 'Koç notları',
   'Revoke': 'İptal',
   'You decide what a coach sees — and you can revoke it at any time. Notes coaches write are visible to you too.': 'Koçun ne göreceğine sen karar verirsin — ve istediğin an iptal edebilirsin. Koçların yazdığı notlar da sana görünür.',
+  'Set up your weekly routine to get going — or load a ready-made starter plan.': 'Haftalık rutinini kur ve başla — ya da hazır bir başlangıç planı yükle.',
+  'No workouts yet — finish your first session and it will appear here.': 'Henüz antrenman yok — ilk seansını bitir, burada görünecek.',
+  'Move up': 'Yukarı taşı',
+  'Move down': 'Aşağı taşı',
 }

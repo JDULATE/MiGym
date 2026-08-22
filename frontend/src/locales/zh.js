@@ -727,4 +727,8 @@ export default {
   'Coach notes': '教练备注',
   'Revoke': '撤销',
   'You decide what a coach sees — and you can revoke it at any time. Notes coaches write are visible to you too.': '你决定教练能看到什么——并且可以随时撤销。教练写的备注对你也可见。',
+  'Set up your weekly routine to get going — or load a ready-made starter plan.': '设置每周计划即可开始——也可以加载现成的入门计划。',
+  'No workouts yet — finish your first session and it will appear here.': '还没有训练记录——完成第一次训练后就会显示在这里。',
+  'Move up': '上移',
+  'Move down': '下移',
 }
