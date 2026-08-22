@@ -115,9 +115,36 @@ invites: [ { code, note?, createdBy, created, usedBy?, usedAt?, revoked? } ]
   Apple Health XML (bodyweight records). Unknown exercise names become custom exercises —
   nothing is dropped.
 
+## Fitness profile & measurements (MiGym Phase 2)
+
+Added to `S` (see `frontend/src/lib/profile.js` — constants, normalisation rules, tests):
+
+```js
+S.profile = {              // structured facts; consumed by nothing yet, shaped for later phases
+  name: '',                // display name override (≤60 chars)
+  image: null,             // ≤256px square JPEG data URL (client-side resized)
+  goal: null,              // 'hypertrophy' | 'strength' | 'weight_loss' | 'general' | 'performance'
+  experience: null,        // 'beginner' | 'intermediate' | 'advanced'
+  daysPerWeek: null,       // 1..7 | null
+  sessionMinutes: null,    // 5..300 | null
+  equipment: [],           // subset of the dataset's own `eq` vocabulary (curated list in lib/profile.js)
+  preferences: '',         // free text ≤500 chars
+  heightCm: null           // 50..280 | null
+}
+S.measurements = [         // append-only tape log, same spirit as S.bodyweight
+  { d: 'YYYY-MM-DD', k: 'waist', v: 80 }   // k ∈ neck|shoulders|chest|waist|hips|upper_arm|thigh|calf
+]
+```
+
+Rules: `normalizeProfile` / `normalizeMeasurements` run on every write path (Settings edits,
+demo seed) so corrupt backups or hand-edited state degrade to defaults instead of poisoning
+the app. Measurements are never rewritten — a correction is a new record; `latestMeasurement`
+reads the newest per key. No medical interpretation exists anywhere in this feature.
+Old states without these keys overlay onto DEF unchanged; old clients ignore them on sync.
+
 ## Planned extensions (not yet implemented)
 
-* Phase 2: `S.profile = { goal, experience, daysPerWeek, sessionMinutes, equipment[],
-  preferences[], heightCm, measurements[] }`.
 * Phase 4+: engine modules consume `S` read-only; recommendations carry explanation payloads.
 * Phase 10: versioned/per-record sync to replace LWW (design doc required before implementation).
+* Profile consumers: progression/analytics/coaching features are expected to read
+  `S.profile`/`S.measurements` rather than re-ask the user.

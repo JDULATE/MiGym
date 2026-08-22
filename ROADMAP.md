@@ -28,12 +28,13 @@ Rename/brand to MiGym without touching workout logic.
 
 Acceptance: app launches, 326 tests pass, build passes, PWA installs, auth + workout flow work.
 
-## Phase 2 — Fitness profile
+## Phase 2 — Fitness profile ✅ (complete)
 
-Extend state `S.profile = { goal, experience, daysPerWeek, sessionMinutes, equipment[],
-preferences[], heightCm, measurements[] }` (name/theme/unit already exist). Body weight stays
-the existing time-series `S.bodyweight`. No medical claims anywhere; data shaped so the
-progression/analytics/AI layers can consume it later. Includes export of profile fields.
+`S.profile = { name, image, goal, experience, daysPerWeek, sessionMinutes, equipment[],
+preferences, heightCm }` plus append-only `S.measurements[]` — implemented in
+`lib/profile.js` with normalisation + tests, UI in Settings (Profile & Body sections),
+translated in all packs. No medical claims anywhere; data shaped for future consumers.
+See docs/DATA_MODEL.md.
 
 ## Phase 3 — Workout system polish
 

@@ -6,6 +6,33 @@ This repository continues openGym (© Duarte Santos, AGPL-3.0-or-later) as **MiG
 Upstream history below is preserved unchanged; MiGym phases add entries above the upstream
 log from this point on.
 
+### Phase 2 — Fitness Profile (2026-08-22)
+
+👤 **A fitness-oriented profile** — structured facts about the person training, ready for
+later progression/analytics/coaching features to consume. Purely descriptive; nothing
+medical, nothing auto-interpreted.
+
+#### Added
+
+- 🎯 **Fitness profile section in Settings:** training goal (hypertrophy / strength /
+  weight loss / general fitness / performance), experience level, intended days per week,
+  preferred session length, available equipment (multi-select using the exercise dataset's
+  own equipment vocabulary, so future matching needs no mapping table).
+- 🖼️ **Name & photo sheet** with client-side square-cropped 256 px JPEG avatar (kept small so
+  the synced state blob stays tiny) and a free-text preferences field.
+- 📏 **Body section:** height (cm) and an append-only measurement log (neck/shoulders/chest/
+  waist/hips/upper arm/thigh/calf). A new reading is *added* — history is never rewritten,
+  same principle as the body-weight log.
+- 🧪 New pure module `lib/profile.js` (constants + defensive normalisation) with unit tests,
+  plus a Settings-section smoke test. Demo build ships with a filled-in profile and a waist
+  log tracking its weight trend.
+
+#### Notes
+
+- All new strings translated across all 11 locale packs (693 keys each, parity checker green).
+- `S.profile` and `S.measurements` ride the existing sync/export/import paths unchanged;
+  states saved by older versions overlay onto defaults harmlessly (see docs/DATA_MODEL.md).
+
 ### Phase 1 — MiGym Foundation (2026-08-22)
 
 🎨 **The app is now MiGym.** Branding only — no workout, sync or auth behaviour changed.

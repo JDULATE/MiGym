@@ -1,7 +1,7 @@
 # MiGym — Agent Context
 
 > **Every coding agent MUST read this file before modifying any code.**
-> Last updated: Phase 1 (MiGym Foundation), 2026-08-22.
+> Last updated: Phase 2 (Fitness Profile), 2026-08-22.
 
 ## Project identity
 
@@ -38,8 +38,8 @@ See [PRODUCT.md](PRODUCT.md).
 
 ## Current phase
 
-**PHASE 1 — MiGym Foundation: COMPLETE** (branding/metadata only; no behavioural changes).
-Next phase requires explicit authorization: **PHASE 2 — Fitness Profile**.
+**PHASE 2 — Fitness Profile: COMPLETE.**
+Next phase requires explicit authorization: **PHASE 3 — Workout System Polish**.
 
 ## Completed phases
 
@@ -48,7 +48,12 @@ Next phase requires explicit authorization: **PHASE 2 — Fitness Profile**.
   metadata, API RP_NAME + push strings, UI strings + all 11 locale packs in lockstep,
   regenerated icons/splashes via `frontend/scripts/make-icons.ps1`, compose now builds local
   `migym-api`/`migym-web` images, Node >=22 pinned). Design system documented in
-  ARCHITECTURE.md, not redesigned. Verified: 326/326 tests, build OK, locale parity OK.
+  ARCHITECTURE.md, not redesigned. Verified: tests green, build OK, locale parity OK.
+* Phase 2 — Fitness Profile: `S.profile` (goal/experience/days/session/equipment/name/photo/
+  preferences/height) + append-only `S.measurements` log; new pure module `lib/profile.js`
+  with normalisation + tests; Profile & Body sections in Settings (sheets for identity,
+  equipment multi-select, measurements); demo seed extended; strings translated in all packs.
+  No medical interpretation; data shaped for future consumers. See docs/DATA_MODEL.md.
 
 ## Planned phases
 
