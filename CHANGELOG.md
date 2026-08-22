@@ -6,6 +6,35 @@ This repository continues openGym (© Duarte Santos, AGPL-3.0-or-later) as **MiG
 Upstream history below is preserved unchanged; MiGym phases add entries above the upstream
 log from this point on.
 
+### Phase 6 — Exercise Library (2026-08-22)
+
+🏋️ **The library now browses by movement and suggests alternatives** — computed honestly
+from data the dataset already carries, never fabricated.
+
+#### Added
+
+- 🧭 **Movement-group filter** in the Library: Push / Pull / Legs / Core / Cardio chips
+  (composable with the existing body-part and equipment filters). 1,322 of 1,324 exercises
+  classify automatically from target muscle and body part; the remaining two simply stay
+  ungrouped instead of being guessed into a bucket.
+- 🔁 **Alternatives** on every exercise detail sheet: same primary target preferred within
+  the same movement group, ranked by shared secondary muscles — deterministic and
+  explainable, tap through to any suggestion.
+- 🏷️ **Type & learning-curve tags** on the detail sheet: bodyweight / machine / cable /
+  free weight / cardio derived from equipment, plus an explicitly *derived* difficulty
+  estimate (how guided the movement is: machine → beginner … free barbell → advanced).
+  The heuristic is documented in `lib/exercise-taxonomy.js`; curated per-exercise overrides
+  have an obvious extension point (`DIFFICULTY_OVERRIDES`) that starts empty.
+- 🧪 12 new unit tests covering grouping, tags, difficulty and alternative ranking
+  (including custom exercises and catalogue-order independence).
+
+#### Deliberate scope decisions
+
+- Compound-vs-isolation is **not** provided: it cannot be derived reliably without joint
+  analysis, and inventing it would be fake metadata. Documented in the module header.
+- No new per-exercise content is authored over the upstream dataset — licensing boundary
+  respected (docs/LICENSING.md).
+
 ### Phase 5 — Analytics (2026-08-22)
 
 📈 **A progress overview that answers the five training questions in one look** — built on

@@ -38,8 +38,8 @@ See [PRODUCT.md](PRODUCT.md).
 
 ## Current phase
 
-**PHASE 5 — Analytics: COMPLETE.**
-Next phase requires explicit authorization: **PHASE 6 — Exercise Library**.
+**PHASE 6 — Exercise Library: COMPLETE.**
+Next phase requires explicit authorization: **PHASE 7 — Routine Builder**.
 
 ## Completed phases
 
@@ -58,6 +58,11 @@ Next phase requires explicit authorization: **PHASE 6 — Exercise Library**.
 * Phase 5 — Analytics: `lib/analytics.js` (trainingSummary + exerciseMomentum with explicit
   thresholds) + "Progress overview" card in Stats answering the five spec questions;
   volume math from the engine. All-pack translations complete.
+* Phase 6 — Exercise Library: `lib/exercise-taxonomy.js` derives movement groups (push/
+  pull/legs/core/cardio), equipment-class tags and a documented difficulty heuristic from
+  existing dataset fields (1,322/1,324 placed); Library gains movement-group filter chips;
+  detail sheets gain type/difficulty tags and ranked Alternatives. Compound-vs-isolation
+  intentionally NOT provided (not honestly derivable). No new dataset content authored.
 
 ## Planned phases
 

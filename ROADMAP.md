@@ -60,12 +60,13 @@ stable paths; future code consumes only the engine barrel. Public API in docs/AP
 PRs · 30 d, plus Improving/Stalled lists with reasons. Questions already covered by
 inherited views (muscle map, heatmap/streak, per-exercise charts) are not duplicated.
 
-## Phase 6 — Exercise library
+## Phase 6 — Exercise library ✅ (complete, 2026-08-22)
 
-Enrich exercise records: movement pattern, difficulty, type categories (compound/isolation/
-bodyweight/machine/cable/free-weight/cardio), instructions/common mistakes/alternatives where
-the dataset provides them; keep user exercises first-class. No exercise-specific logic in UI
-components. Respect dataset licensing (docs/LICENSING.md).
+Derived taxonomy in `lib/exercise-taxonomy.js`: movement groups (push/pull/legs/core/
+cardio; 1,322/1,324 placed), equipment-class type tags, documented difficulty heuristic
+with an empty curated-override extension point, and ranked alternatives on the detail
+sheet. Library gains movement-group chips. Compound-vs-isolation intentionally not derived;
+no new dataset content authored (licensing boundary).
 
 ## Phase 7 — Routine builder
 
