@@ -38,8 +38,9 @@ See [PRODUCT.md](PRODUCT.md).
 
 ## Current phase
 
-**PHASE 9 — AI Coach: COMPLETE.**
-Next phase requires explicit authorization: **PHASE 10 — Cloud Architecture**.
+**PHASE 10 — Cloud Architecture: IN PROGRESS.** Local-first single mode shipped (ADR-0005);
+cloud-backup design doc + sync redesign ADR come next, before any server-side work.
+No further phase starts without explicit authorization.
 
 ## Completed phases
 
@@ -75,8 +76,10 @@ Next phase requires explicit authorization: **PHASE 10 — Cloud Architecture**.
   system prompt (labelled answers, no invention, no medicine, subordinate to deterministic
   rules), OpenAI-compatible transport via plain fetch. Settings provider card (endpoint/
   model/key in a dedicated localStorage key OUTSIDE S — never synced or backed up);
-  "Ask" chat sheet in Stats. Opt-in + local-first per ADR-0004: works in guest mode and
-  the mobile build; without a configured endpoint the coach does not exist.
+  "Ask" chat sheet in Stats. Opt-in + local-first per ADR-0004.
+* Phase 10 (part 1) — Local-first single mode (ADR-0005): login screen and guest concept
+  removed; boot always enters local data; optional passkey **link** to a server profile for
+  sync/backup; unlink keeps the local base (store-tested).
 
 ## Planned phases
 

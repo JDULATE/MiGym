@@ -92,11 +92,16 @@ card (credentials outside S — never synced/backed up), "Ask" chat sheet in Sta
 guest and mobile builds; without a configured endpoint the coach does not exist. The
 deterministic adaptive rules stay authoritative; the model explains, never overrides.
 
-## Phase 10 — Cloud architecture
+## Phase 10 — Cloud architecture ⏳ (in progress — re-scoped by product decision, ADR-0005)
 
-Real sync design (per-record merge or CRDT-ish approach replacing whole-state LWW), cloud
-auth, backups. Community edition must remain fully functional offline/self-hosted. Cloud is an
-optional deployment target, never a hard dependency.
+**Local-first single mode shipped:** no login screen, guest concept removed, boot always
+enters local data, optional passkey link to a server profile for sync/backup, unlink keeps
+the local base (store-tested).
+
+Remaining in this phase: design doc + ADR for the cloud **security-copy** service
+(device-restore copies, not a feature gate) and the sync redesign replacing whole-state
+LWW — before any server-side implementation. Community edition remains fully independent
+forever.
 
 ## Phase 11 — Coach platform
 

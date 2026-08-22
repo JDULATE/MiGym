@@ -6,6 +6,31 @@ This repository continues openGym (© Duarte Santos, AGPL-3.0-or-later) as **MiG
 Upstream history below is preserved unchanged; MiGym phases add entries above the upstream
 log from this point on.
 
+### Phase 10 — Local-first single mode (2026-08-22) · ADR-0005
+
+🏠 **The login screen is gone. Local is the only mode** — cloud later exists solely for
+security copies.
+
+#### Changed
+
+- 🚪 **No more login gate.** The app boots straight into your data — offline, air-gapped,
+  first run, always. The tab bar and every feature are available immediately.
+- 👤 **Guest mode removed as a concept.** There are no "guests" anymore: your base lives on
+  your device, full stop. The legacy `gym_guest` flag is dropped on boot.
+- 🔗 **Server profiles became an optional link.** Settings → *Sync & backup*: create or
+  link a passkey profile purely to keep a synced copy for new devices.
+- 🛟 **Unlinking can no longer lose data**: a final push runs first when possible, and the
+  local base always stays (previously "Sign out" wiped this device's copy). Covered by new
+  store tests: boot-without-server, boot-with-link, 401 handling, unlink online & offline.
+- 🧹 Removed: `Login` view, `lib/guest.js` (+ its suite), `ALLOW_GUEST` client gating
+  (server-side flag kept for upstream compatibility; ignored by MiGym clients).
+
+#### Notes
+
+- Existing signed-in users are unaffected: their link restores silently on next boot.
+- Phase 10 continues with the cloud-backup design doc + sync redesign ADR before any
+  server-side work.
+
 ### Phase 9 — AI Coach (2026-08-22)
 
 🤖 **An opt-in, local-first AI coach** (ADR-0004) — it explains your training; it never
