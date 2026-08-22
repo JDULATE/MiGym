@@ -4,7 +4,6 @@ import { localTZ } from '../lib/format.js'
 import { registerCustom } from '../lib/exercises.js'
 import { EMPTY_PROFILE } from '../lib/profile.js'
 import { DEMO, DEMO_SEEDED } from '../lib/demo.js'
-import { guestAllowed } from '../lib/guest.js'
 import { MOBILE, nativeLoad, nativeSave, syncReminder } from '../lib/mobile.js'
 
 const KEY = 'gym_state_v1'
@@ -76,17 +75,19 @@ export const useStore = create((set, get) => {
     }
   })
 
-  // Everything a sign-out leaves behind on this device, whichever way it was triggered.
-  const clearLocalSession = () => {
+  // Unlinking (or ending sessions remotely) keeps the local base intact — the device's
+  // data is THE data; the server was only a sync/backup target. Only the link and the
+  // dirty marker go away.
+  const clearLink = () => {
     get().setUser(null)
-    localStorage.removeItem('gym_guest')
     localStorage.removeItem('gym_dirty')
-    localStorage.removeItem(KEY)
-    persist(clone(DEF), false)
+    localStorage.removeItem('gym_guest')   // legacy flag from the guest-mode era
   }
 
   return {
     S: (() => { const s = loadState(); registerCustom(s.customEx); return s })(),
+    // `user` is an OPTIONAL linked server profile (sync/backup target). The app is fully
+    // functional without it — local-first is the only mode.
     user: (() => { try { return JSON.parse(localStorage.getItem('gym_user')) || null } catch { return null } })(),
     ready: false,
 
@@ -98,21 +99,8 @@ export const useStore = create((set, get) => {
     },
     replaceState(S, push = false) { persist(clone(S), push) },
 
-    isGuest: () => localStorage.getItem('gym_guest') === '1',
-    setGuest(v) { if (v) localStorage.setItem('gym_guest', '1'); else localStorage.removeItem('gym_guest'); set({}) },
-
-    // Public config from /api/config (invite_only, allow_guest). null until the first successful
-    // fetch — the login screen and boot both read it, so it is fetched once and cached here
-    // rather than by each screen that happens to need it.
-    config: null,
-    async loadConfig() {
-      if (get().config) return get().config
-      try { const c = await api('/api/config'); set({ config: c }); return c }
-      catch { return null }
-    },
-
     setUser(u) {
-      if (u) { localStorage.setItem('gym_user', JSON.stringify(u)); localStorage.removeItem('gym_guest') }
+      if (u) { localStorage.setItem('gym_user', JSON.stringify(u)) }
       else localStorage.removeItem('gym_user')
       set({ user: u })
     },
@@ -137,20 +125,22 @@ export const useStore = create((set, get) => {
       } catch (e) { /* offline — keep local */ }
     },
 
+    // Unlink this device from its server profile. The local base is THE data and stays
+    // exactly as it is — only the link (and the sync marker) goes away. A final push runs
+    // first so the server copy isn't left behind.
     async signOut() {
-      try { await get().pushState(); await api('/api/logout', { method: 'POST', body: '{}' }) } catch (e) { /* */ }
-      clearLocalSession()
+      try { await get().pushState(); await api('/api/logout', { method: 'POST', body: '{}' }) } catch (e) { /* offline — link cleared anyway */ }
+      clearLink()
     },
 
-    // "Sign out everywhere": the server bumps this profile's session version, which kills every
-    // session it has on any device — this browser included, so the app has to end up exactly
-    // where a normal signOut leaves it. Unlike signOut the request is NOT swallowed: if it fails
-    // the sessions elsewhere are all still valid, and wiping this device's copy of the data
-    // would sign the user out of the one place the bump didn't reach. Caller reports the error.
+    // "End all sessions": the server bumps this profile's session version, which kills every
+    // session it has on any device — this one included, so the app has to end up unlinked
+    // here too. Unlike unlink() the request is NOT swallowed: if it fails, sessions elsewhere
+    // are still valid and saying otherwise would be a lie. Local data always stays.
     async signOutAll() {
       await get().pushState()   // never throws — stores gym_dirty and moves on when offline
       await api('/api/logout/all', { method: 'POST', body: '{}' })
-      clearLocalSession()
+      clearLink()
     },
 
     // Demo build only: drop the seeded example profile back in (Settings → "Reset demo data").
@@ -161,7 +151,8 @@ export const useStore = create((set, get) => {
       persist(Object.assign(clone(DEF), buildDemoState()), false)
     },
 
-    // Boot: ask the server who we are, then pull.
+    // Boot: local data first, always. A linked server profile (if any) is restored in the
+    // background for sync/backup — an unreachable or signed-out server never blocks entry.
     async boot() {
       // Mobile build: no backend either — restore from the file mirror (the durable copy;
       // localStorage may have been evicted since the last run) and go straight in.
@@ -173,27 +164,21 @@ export const useStore = create((set, get) => {
         } else if (hasData(S)) {
           nativeSave(S)   // first run after an update from a file-less version: seed the mirror
         }
-        get().setGuest(true)
         syncReminder(get().S)
         set({ ready: true })
         return
       }
-      // Demo build (GitHub Pages): no backend at all — seed once, stay in guest mode.
+      // Demo build (GitHub Pages): no backend at all — seed once, straight in.
       if (DEMO) {
         if (!localStorage.getItem(DEMO_SEEDED)) {
           localStorage.setItem(DEMO_SEEDED, '1')
           await get().resetDemo()
         }
-        get().setGuest(true)
         set({ ready: true })
         return
       }
-      // Guests never authenticate, so an instance that turned guest mode off has no request to
-      // refuse — the only way the switch reaches someone already inside is here, on their next
-      // boot. Ending the session needs a positive `allow_guest: false`; see lib/guest.js for why
-      // an unreachable server must not be allowed to lock anyone out (#42).
-      const cfg = await get().loadConfig()
-      if (!guestAllowed(cfg)) get().setGuest(false)
+      // Local-first: the app is usable immediately. If a previously linked profile still has a
+      // valid session, restore the link and pull its copy; any failure just means "stay local".
       try {
         const me = await api('/api/me')
         get().setUser(me.user)

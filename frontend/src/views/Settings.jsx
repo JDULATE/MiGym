@@ -9,7 +9,7 @@ import { api, webauthnOK, passkeyLogin, passkeyRegister, IS_ANDROID } from '../l
 import { pushSupported, enablePush, disablePush, sendTestPush } from '../lib/push.js'
 import { wakeLockSupported } from '../lib/wakelock.js'
 import { t, LANGS, INSTR_LANGS } from '../lib/i18n.js'
-import { DEMO, REPO } from '../lib/demo.js'
+import { DEMO } from '../lib/demo.js'
 import { MOBILE, shareExport, syncReminder } from '../lib/mobile.js'
 import { loadStarterPlan, confirmSheet, importFromApp } from '../sheets.jsx'
 import { coachConfigured, loadCoachCfg, saveCoachCfg } from '../lib/coach.js'
@@ -76,31 +76,35 @@ export default function Settings() {
       <div style={{ flex: 1, marginLeft: 10 }}><h1>{t('Settings')}</h1></div>
     </div>
 
-    {/* ---------- account (demo and mobile builds have nothing to sign in to) ---------- */}
-    <Section title={MOBILE ? t('Your data') : DEMO ? t('Demo') : t('Account')}>
+    {/* ---------- sync & backup (MiGym phase 10) ----------
+        Local-first: the base always lives on this device. Linking a server profile is
+        optional — it only adds sync and a security copy for device changes. Unlinking
+        never touches the local data. */}
+    <Section title={t('Sync & backup')} footer={user ? t('Your base lives on this device; the linked profile keeps a synced copy.') : t('Everything already works without an account. Link one only to keep a synced copy for new devices.')}>
       {MOBILE ? <>
         <Row icon="lock" iconTint="var(--acc)" title={t('All data stays on this phone')} subtitle={t('No account, no cloud — back it up anytime with Export below.')} />
-        <Row icon="rocket" iconTint="var(--indigo)" title={t('Self-host MiGym')} subtitle={t('Passkey sign-in, sync across your devices, your own data.')} accessory="chevron"
-          onClick={() => window.open(REPO, '_blank', 'noopener')} />
       </> : DEMO ? <>
         <Row icon="sparkles" iconTint="var(--acc)" title={t('You’re in the demo')} subtitle={t('Example data, stored only in this browser — change anything you like.')} />
         <Row icon="reset" iconTint="var(--blue)" title={t('Reset demo data')} accessory="chevron"
           onClick={() => confirmSheet({ title: t('Reset demo data?'), message: t('Puts the example plan, workouts and weigh-ins back the way they started.'), confirmText: t('Reset'), onConfirm: () => { resetDemo(); nav('/home'); toast(t('Demo data reset')) } })} />
-        <Row icon="rocket" iconTint="var(--indigo)" title={t('Self-host MiGym')} subtitle={t('Passkey sign-in, sync across your devices, your own data.')} accessory="chevron"
-          onClick={() => window.open(REPO, '_blank', 'noopener')} />
       </> : user ? <>
-        <Row icon="personCircle" iconTint="var(--grey)" title={user.name} subtitle={t('Signed in with passkey — data syncs to this profile.')} />
+        <Row icon="personCircle" iconTint="var(--grey)" title={user.name} subtitle={t('Linked with passkey — every change syncs to this profile.')} />
         {user.admin && <Row icon="wrench" iconTint="var(--indigo)" title={t('Admin dashboard')} accessory="chevron" onClick={() => nav('/admin')} />}
-        <Row icon="signOut" iconTint="var(--red)" title={t('Sign out')} danger onClick={() => confirmSheet({ title: t('Sign out?'), message: t('Your data is synced to your profile first, then cleared from this device.'), confirmText: t('Sign out'), danger: true, onConfirm: () => { signOut(); nav('/home') } })} />
-        <Row icon="shield" iconTint="var(--red)" title={t('Sign out everywhere')} subtitle={t('Ends this profile’s sessions on all your devices.')} danger onClick={signOutEverywhere} />
+        <Row icon="signOut" iconTint="var(--red)" title={t('Unlink from server')} danger onClick={() => confirmSheet({
+          title: t('Unlink from server?'),
+          message: t('A final backup is pushed first. Your plan, workouts and history stay on this device.'),
+          confirmText: t('Unlink'), danger: true,
+          onConfirm: () => { signOut(); toast(t('Device unlinked — your data stayed here')) },
+        })} />
+        <Row icon="shield" iconTint="var(--red)" title={t('End all sessions')} subtitle={t('Signs this profile out on all your other devices too.')} danger onClick={signOutEverywhere} />
       </> : webauthnOK() ? <>
-        <Row icon="sparkles" iconTint="var(--acc)" title={t('Create passkey profile')} subtitle={t('Keeps your data safe and separate per person.')} accessory="chevron" onClick={registerHere} />
-        <Row icon="person" iconTint="var(--blue)" title={t('Sign in with passkey')} accessory="chevron" onClick={signInHere} />
+        <Row icon="personCircle" iconTint="var(--acc)" title={t('Create a server backup profile')} subtitle={t('Keeps a synced copy for new devices — with passkeys, no passwords.')} accessory="chevron" onClick={registerHere} />
+        <Row icon="person" iconTint="var(--blue)" title={t('Link to an existing profile')} accessory="chevron" onClick={signInHere} />
       </> : (
         <Row icon="lock" iconTint="var(--grey)" title={t('Passkeys not supported in this browser.')} />
       )}
     </Section>
-    {!user && !DEMO && !MOBILE && <p className="sect-f" style={{ marginTop: -18, marginBottom: 22 }}>{t('Guest mode — data lives only in this browser.')}</p>}
+    {!user && !DEMO && !MOBILE && webauthnOK() && <p className="sect-f" style={{ marginTop: -18, marginBottom: 22 }}>{t('Local-first: nothing leaves this device unless you link a server above.')}</p>}
 
     {/* ---------- fitness profile (MiGym phase 2) ----------
         Structured facts about the person training — consumed by nothing yet beyond
