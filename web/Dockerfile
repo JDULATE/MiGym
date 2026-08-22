@@ -20,8 +20,8 @@ ARG VCS_REF=dev
 ARG BUILD_DATE=unknown
 
 LABEL maintainer="Duarte Santos https://github.com/DuarteSantos8" \
-    org.opencontainers.image.title="opengym-web" \
-    org.opencontainers.image.description="Frontend for Self-hosted gym & body-weight tracker — plan routines, log workouts (supersets & cardio too), track your weight and progress, passkey login. Your data, your server." \
+    org.opencontainers.image.title="migym-web" \
+    org.opencontainers.image.description="Frontend for MiGym, a self-hosted fitness tracker — plan routines, log workouts (supersets & cardio too), track your weight and progress, passkey login. Your data, your server. Forked from openGym (AGPL-3.0-or-later)." \
     org.opencontainers.image.source="https://github.com/DuarteSantos8/openGym" \
     org.opencontainers.image.url="https://ghcr.io/duartesantos8/opengym-web" \
     org.opencontainers.image.documentation="https://github.com/DuarteSantos8/openGym#readme" \
