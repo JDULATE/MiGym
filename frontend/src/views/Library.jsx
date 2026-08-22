@@ -31,15 +31,15 @@ export default function Library() {
     <div className="hdr"><div><h1>{t('Exercises')}</h1><div className="sub">{t('{0} exercises with animations', EXDB.length)}</div></div></div>
     <div className="search" style={{ marginBottom: 10 }}><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
       <input className="input" placeholder={t('Search…')} value={q} onChange={e => { setQ(e.target.value); setShown(40) }} /></div>
-    <div className="chips" style={{ marginBottom: 8 }}>
-      <button className={'chip nocap' + (!mg ? ' on' : '')} onClick={() => { setMg(''); setShown(40) }}>{t('All')}</button>
+    <div className="chips chips-scroll" style={{ marginBottom: 8 }}>
+      <button className={'chip nocap' + (!mg ? ' on' : '')} onClick={() => { setMg(''); setEq(''); setShown(40) }}>{t('All')}</button>
       {MOVEMENT_GROUPS.map(g => <button key={g} className={'chip nocap' + (mg === g ? ' on' : '')} onClick={() => { setMg(g); setEq(''); setShown(40) }}>{t(g)}</button>)}
     </div>
-    <div className="chips" style={{ marginBottom: eqOpts.length > 1 ? 8 : 12 }}>
+    <div className="chips chips-scroll" style={{ marginBottom: eqOpts.length > 1 ? 8 : 12 }}>
       <button className={'chip nocap' + (!bp ? ' on' : '')} onClick={() => { setBp(''); setEq(''); setShown(40) }}>{t('All')}</button>
       {BODYPARTS.map(b => <button key={b} className={'chip' + (bp === b ? ' on' : '')} onClick={() => { setBp(b); setEq(''); setShown(40) }}>{t(b)}</button>)}
     </div>
-    {eqOpts.length > 1 && <div className="chips" style={{ marginBottom: 12 }}>
+    {eqOpts.length > 1 && <div className="chips chips-scroll" style={{ marginBottom: 12 }}>
       <button className={'chip nocap' + (!eqOn ? ' on' : '')} onClick={() => { setEq(''); setShown(40) }}>{t('Any equipment')}</button>
       {eqOpts.map(x => <button key={x} className={'chip' + (eqOn === x ? ' on' : '')} onClick={() => { setEq(x); setShown(40) }}>{t(x)}</button>)}
     </div>}

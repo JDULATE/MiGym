@@ -27,7 +27,7 @@ export async function setLang(l) {
   try {
     dict = l === 'en' ? {} : (await localePacks['../locales/' + l + '.js']()).default
     instr = l === 'en' || !INSTR_LANGS.includes(l) ? null : (await instrPacks['../instr/' + l + '.js']()).default
-  } catch (e) { dict = {}; instr = null }
+  } catch { /* keep defaults — a failed pack load must not half-apply */ }
   _setLangState(l, dict, instr)
   notify()
 }

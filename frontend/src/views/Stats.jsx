@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore.js'
+import { useUI } from '../store/useUI.js'
 import { EXIDX } from '../lib/exercises.js'
 import { lastBW, streakWeeks, setLabel, modeOf, effortOf, metricModeForEntry, metricRowsForEntry, bestWeightForEntry } from '../lib/history.js'
 import { fmtNum, fmtDate, fmtVol, todayISO, weekKey } from '../lib/format.js'
@@ -17,7 +18,7 @@ import { fatigueStateOf } from '../lib/recovery-view.js'
 import { e1rmSeries, best1RM } from '../lib/onerm.js'
 import { exerciseMomentum, trainingSummary } from '../lib/analytics.js'
 import { adaptiveSuggestions } from '../lib/adaptive.js'
-import { askCoach, buildCoachContext, coachConfigured, loadCoachCfg } from '../lib/coach.js'
+import { askCoach, buildCoachContext, buildMessages, coachConfigured, loadCoachCfg } from '../lib/coach.js'
 import {
   hasEffort, displayScale, scaleName, toScale, avgRir, effortSummary, effortWeeks,
   effortHistogram, isHardSet, HARD_RIR
@@ -65,6 +66,7 @@ function useNow() {
     const iv = setInterval(() => setTick(tick => tick + 1), 60000)
     return () => clearInterval(iv)
   }, [])
+  // eslint-disable-next-line react-hooks/purity -- this hook IS a clock; impurity is the point
   return Date.now()
 }
 
@@ -118,11 +120,6 @@ function MuscleBalance({ S }) {
   const strength = useMemo(() => strengthOf(workouts, now, { bodyweightKg, unit: S.unit }), [workouts, now, bodyweightKg, S.unit])
   const muscleExercises = useMemo(() => (sel ? strengthExerciseRowsForMuscle(S, now, sel) : []), [S, now, sel])
   const lastTrained = useMemo(() => latestMuscleTraining(workouts), [workouts])
-  const strengthHint = slug => {
-    if (lastTrained[slug] == null) return t('not trained')
-    const weeks = weeksSinceTraining(now, lastTrained[slug])
-    return t('Weeks since training: {0}', weeks)
-  }
   const toggleSel = m => setSel(s => (s === m ? null : m))
   const inWin = S.workouts.filter(w =>
     win === 0 ? true
@@ -389,7 +386,7 @@ export default function Stats() {
   const [range, setRange] = useState(90)
   const [exId, setExId] = useState(null)
   const [exMetric, setExMetric] = useState('top')
-  const now = Date.now()
+  const now = Date.now() // eslint-disable-line react-hooks/purity -- range filters must track "now" per render; a ticking tick state re-renders this screen every minute
   const kind = displayScale(S)
   const hd = scaleName(kind)
 

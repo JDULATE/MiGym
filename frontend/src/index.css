@@ -416,6 +416,13 @@ h4.sec{
   justify-content:center;margin:2px auto;
 }
 
+.chips-scroll{
+  display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+}
+.chips-scroll::-webkit-scrollbar{display:none}
+.chips-scroll .chip{flex:none}
+
 /* ----------------------------------------------------------------- list -- */
 .list{display:flex;flex-direction:column;gap:8px}
 .item{

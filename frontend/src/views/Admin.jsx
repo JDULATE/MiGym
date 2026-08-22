@@ -105,6 +105,7 @@ export default function Admin() {
 
   const openUser = id => openSheet(close => <UserDetail id={id} onChanged={loadUsers} close={close} />)
   const liveUsers = (users || []).filter(u => u.live)
+  // eslint-disable-next-line react-hooks/purity -- recency is measured against wall-clock time on purpose
   const activeCount = (users || []).filter(u => u.lastSync && Date.now() - u.lastSync < 7 * 86400000).length
   const disabledCount = (users || []).filter(u => u.disabled).length
 
@@ -128,7 +129,7 @@ export default function Admin() {
       {liveUsers.map(u => <div key={u.id} className="row between" style={{ padding: '8px 2px', borderBottom: '1px solid var(--sep)' }} onClick={() => openUser(u.id)}>
         <div><div className="small" style={{ fontWeight: 600 }}>{u.name}</div>
           <div className="dim" style={{ fontSize: '.72rem' }}>{u.live.name} · ex {u.live.exIdx}/{u.live.exTotal} · {u.live.setsDone}/{u.live.setsTotal} sets</div></div>
-        <span className="tag acc">{dur(Date.now() - u.live.startedAt)}</span>
+        <span className="tag acc">{dur(Date.now() - u.live.startedAt)}</span> {/* eslint-disable-line react-hooks/purity -- live elapsed time is the point */}
       </div>)}
     </div>}
 

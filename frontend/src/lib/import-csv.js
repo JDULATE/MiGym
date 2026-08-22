@@ -32,7 +32,7 @@ import { isWarmupRow } from './workout-model.js'
 export function parseCSV(text) {
   const rows = []
   let row = [], field = '', quoted = false
-  const s = String(text).replace(/^﻿/, '')
+  const s = String(text).replace(/^/, '')
   for (let i = 0; i < s.length; i++) {
     const c = s[i]
     if (quoted) {
@@ -328,7 +328,7 @@ export function parseWorkoutCSV(text, { unit = 'kg' } = {}) {
     if (!name || !when) { skipped++; continue }
 
     // explicit kg/lb columns beat a generic column plus a unit column
-    let w = 0, rowUnit = ''
+    let w, rowUnit
     if (map.weightKg !== undefined && cell(r, 'weightKg')) { w = num(cell(r, 'weightKg')); rowUnit = 'kg' }
     else if (map.weightLb !== undefined && cell(r, 'weightLb')) { w = num(cell(r, 'weightLb')); rowUnit = 'lb' }
     else {

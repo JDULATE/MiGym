@@ -106,7 +106,7 @@ export function buildCoachContext(S) {
           const ex = EXIDX[x.id]
           return {
             name: ex?.n || x.id,
-            prescription: `${x.sets}×${x.reps ?? (x.sec + 's') ?? '?'}${x.weight > 0 ? ` @ ${x.weight}${unit}` : ''}`,
+            prescription: `${x.sets}×${x.reps ?? (x.sec != null ? x.sec + 's' : '?')}${x.weight > 0 ? ` @ ${x.weight}${unit}` : ''}`,
             progressionPolicy: x.prog || 'routine default',
             ...(x.rirTarget != null ? { targetRIR: x.rirTarget } : {}),
             ...(x.rest ? { restSeconds: x.rest } : {}),
@@ -188,7 +188,7 @@ export async function askCoach(cfg, messages, signal) {
       signal,
     })
   } catch (e) {
-    throw new Error(e.name === 'AbortError' ? 'Request cancelled.' : 'Could not reach the coach endpoint.')
+    throw new Error(e.name === 'AbortError' ? 'Request cancelled.' : 'Could not reach the coach endpoint.', { cause: e })
   }
   if (!res.ok) {
     let detail = ''

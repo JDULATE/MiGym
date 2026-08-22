@@ -206,7 +206,8 @@ function ExerciseBlock({ entryIdx, compact, onToggle, onField, onAddSet, onRemov
               onClick={() => onStartTimed(i)}><Icon name="play" /></button>}
             {warm && <button className="iconbtn" style={{ fontSize: 13 }} aria-label={t('Remove set')}
               disabled={entry.sets.length <= 1} onClick={() => onRemoveSetAt(i)}><Icon name="xmark" /></button>}
-            <Check checked={s.done} onChange={() => onToggle(i)} />
+            <Check checked={s.done} onChange={() => onToggle(i)}
+              aria-label={`${t('Set')} ${phaseNum}${warm ? ' · ' + t('Warm-up') : ''} — ${ex.n}`} />
           </div>
         </div>
       })}

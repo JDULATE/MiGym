@@ -27,6 +27,9 @@ export function NumberField({ value, onChange, decimal = true, nullable = false,
   const [draft, setDraft] = useState(null)
   const committed = useRef(null)
   // null and undefined are the same "empty" here — a nullable field's key is dropped once cleared.
+  // Reading the ref during render is deliberate: it discards a stale draft the moment the
+  // incoming value changes, which is what keeps partial input like "33," alive while typed.
+  // eslint-disable-next-line react-hooks/refs -- intentional draft-reset pattern (upstream design)
   if (draft !== null && (committed.current ?? null) !== (value ?? null)) { setDraft(null); committed.current = null }
   const commit = raw => {
     let s = raw.replace(/,/g, '.').replace(/[^0-9.]/g, '')
@@ -196,7 +199,7 @@ export function Slider({ value, min = 0, max = 100, step = 1, onChange, classNam
 
 /* ============================ checkbox ============================ */
 
-export function Check({ checked, onChange, className = '', size }) {
+export function Check({ checked, onChange, className = '', size, ...rest }) {
   return (
     <button
       role="checkbox"
@@ -204,6 +207,7 @@ export function Check({ checked, onChange, className = '', size }) {
       className={'chk' + (checked ? ' on' : '') + ' ' + className}
       style={size ? { width: size, height: size } : null}
       onClick={() => onChange(!checked)}
+      {...rest}
     >
       <Icon name="check" />
     </button>

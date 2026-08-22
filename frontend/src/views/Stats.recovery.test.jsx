@@ -34,6 +34,7 @@ vi.mock('../components/Icon.jsx', () => ({ default: props => React.createElement
 vi.mock('../components/BodyMap.jsx', () => ({
   default: props => {
     mocks.maps.push(props)
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- this arrow IS the mocked component body
     React.useEffect(() => {
       mocks.mapMounts += 1
       return () => {}
