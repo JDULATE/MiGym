@@ -12,7 +12,7 @@ const W = 340   // viewBox width; the svg stretches to its container, height com
 // opts: { h, unit, color, axes, goal, invert }
 //   invert flips the y axis, for a scale that counts down as it gets harder (RIR). Without it
 //   a curve of reps-in-reserve reads upside down, with the hardest sets at the floor.
-export default function LineChart({ points, h = 150, unit = '', color = 'var(--acc)', axes = true, goal = null, invert = false }) {
+export default function LineChart({ points, h = 150, unit = '', color = 'var(--acc)', axes = true, goal = null, invert = false, label }) {
   const svgRef = useRef(null)
   const wrapRef = useRef(null)
   const tipRef = useRef(null)
@@ -106,7 +106,7 @@ export default function LineChart({ points, h = 150, unit = '', color = 'var(--a
   }
 
   return (
-    <div className="chart-i" ref={wrapRef}
+    <div className="chart-i" ref={wrapRef} role="img" aria-label={label}
       onMouseMove={onMove} onMouseDown={onMove}
       onMouseLeave={() => setHover(null)}
       onTouchStart={onMove} onTouchMove={onMove}>
