@@ -2,10 +2,33 @@ import { useEffect, useRef } from 'react'
 import { useUI } from '../store/useUI.js'
 
 // One bottom sheet (or centered dialog) with swipe-to-dismiss.
+// Accessibility (phase 11 UI work): role=dialog + aria-modal, focus moves into the panel
+// on open and returns to the trigger on close, and Tab is trapped inside so keyboard
+// users can never land on the dimmed page behind the sheet.
+const FOCUSABLE = 'button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'
+
+function trapTab(e, root) {
+  if (e.key !== 'Tab') return
+  const list = [...root.querySelectorAll(FOCUSABLE)].filter(el => !el.disabled && el.offsetParent !== null)
+  if (!list.length) { e.preventDefault(); return }
+  const first = list[0], last = list[list.length - 1]
+  if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault() }
+  else if (!e.shiftKey && document.activeElement === last) { first.focus(); e.preventDefault() }
+}
+
 function Sheet({ sheet }) {
   const { closeSheet } = useUI()
   const ref = useRef(null)
   const drag = useRef({ startY: null, delta: 0 })
+
+  // focus in on open, restore to the trigger on close
+  useEffect(() => {
+    const prev = document.activeElement
+    const el = ref.current
+    el?.setAttribute('tabindex', '-1')
+    el?.focus({ preventScroll: true })
+    return () => { try { prev?.focus({ preventScroll: true }) } catch { /* element gone */ } }
+  }, [])
 
   const onTouchStart = e => {
     const el = ref.current
@@ -74,15 +97,20 @@ function Sheet({ sheet }) {
     return (
       <div>
         <div className="mback" onClick={() => { if (!sheet.locked) close() }} />
-        <div className="center">{sheet.render(close)}</div>
+        <div className="center" role="dialog" aria-modal="true" tabIndex={-1}
+          ref={ref} onKeyDown={e => trapTab(e, e.currentTarget)}>
+          {sheet.render(close)}
+        </div>
       </div>
     )
   }
   return (
     <div>
       <div className="mback" onClick={() => { if (!sheet.locked) close() }} />
-      <div className="sheet" ref={ref} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}
-        onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}>
+      <div className="sheet" role="dialog" aria-modal="true" ref={ref}
+        onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}
+        onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
+        onKeyDown={e => trapTab(e, e.currentTarget)}>
         <div className="grab" />
         {sheet.render(close)}
       </div>

@@ -212,9 +212,29 @@ export function Check({ checked, onChange, className = '', size }) {
 
 /* ============================ grouped list ============================ */
 
+// Keyboard-accessible clickable row. Every tappable list row in the app should use this
+// (or gain role/tabIndex/keydown the same way) so pointer-only markup never locks out
+// keyboard and screen-reader users.
+export function ListItem({ onClick, className = '', children, ...rest }) {
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      className={className}
+      onClick={onClick}
+      onKeyDown={e => {
+        if ((e.key === 'Enter' || e.key === ' ') && onClick) { e.preventDefault(); onClick(e) }
+      }}
+      {...rest}
+    >
+      {children}
+    </div>
+  )
+}
+
 // The inset-grouped list is the app's main structural primitive: a titled
 // section holding rows separated by hairlines that stop short of the leading
-// edge, so the icon column reads as a continuous rail.
+// edge, so a list reads as one object instead of a stack of outlined boxes.
 export function Section({ title, footer, children, className = '' }) {
   return (
     <section className={'sect ' + className}>

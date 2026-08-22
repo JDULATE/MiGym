@@ -55,7 +55,7 @@ export function loadStarterPlan() {
     <div className="list">
       {STARTER_TEMPLATES.map(tpl => {
         const preview = tpl.build()
-        return <div key={tpl.key} className="item" onClick={() => {
+        return <ListItem key={tpl.key} onClick={() => {
           close()
           update(st => {
             st.routines.push(...preview.routines)
@@ -68,7 +68,7 @@ export function loadStarterPlan() {
           <div className="grow"><div className="tt">{t(tpl.label)}</div>
             <div className="ss">{preview.routines.map(r => r.name).join(' · ')}</div></div>
           <Icon name="plus" className="chev" />
-        </div>
+        </ListItem>
       })}
     </div>
   </>
@@ -335,11 +335,11 @@ function ExerciseDetail({ ex, close }) {
     {alternatives.length > 0 && <>
       <h4 className="sec">{t('Alternatives')}</h4>
       <div className="list">
-        {alternatives.map(a => <div key={a.id} className="item" onClick={() => exerciseDetailSheet(a)}>
+        {alternatives.map(a => <ListItem key={a.id} onClick={() => exerciseDetailSheet(a)}>
           <Thumb ex={a} />
           <div className="grow"><div className="tt capitalize">{a.n}</div><div className="ss capitalize">{t(a.tg || a.bp)} · {t(a.eq)}</div></div>
           <Icon name="chevronRight" className="chev" />
-        </div>)}
+        </ListItem>)}
       </div>
     </>}
   </>
@@ -367,13 +367,13 @@ function AddToRoutine({ ex, close }) {
     <h3 className="capitalize">{t('Add “{0}”', ex.n)}</h3>
     <div className="muted small" style={{ marginBottom: 12 }}>{t('Pick a routine — sets, reps & weight come next.')}</div>
     <div className="list">
-      {st.routines.map(r => <div key={r.id} className="item" onClick={() => pick(r.id)}>
+      {st.routines.map(r => <ListItem key={r.id} onClick={() => pick(r.id)}>
         <span className="lrow-i"><Icon name={glyphOf(r.emoji)} /></span>
         <div className="grow"><div className="tt">{r.name}</div><div className="ss">{exCount(r.ex.length)}</div></div>
         {r.ex.some(e => e.id === ex.id) && <span className="tag">{t('already in')}</span>}<Icon name="plus" className="chev" />
-      </div>)}
-      <div className="item" onClick={() => pick('_new')}><span className="lrow-i" style={{ background: 'var(--surface-3)' }}><Icon name="sparkles" /></span>
-        <div className="grow"><div className="tt">{t('New routine')}</div><div className="ss">{t('Create one and start with this exercise')}</div></div><Icon name="plus" className="chev" /></div>
+      </ListItem>)}
+      <ListItem onClick={() => pick('_new')}><span className="lrow-i" style={{ background: 'var(--surface-3)' }}><Icon name="sparkles" /></span>
+        <div className="grow"><div className="tt">{t('New routine')}</div><div className="ss">{t('Create one and start with this exercise')}</div></div><Icon name="plus" className="chev" /></ListItem>
     </div>
   </>
 }
@@ -485,14 +485,14 @@ function ExercisePicker({ onPick, close }) {
       {eqOpts.map(x => <button key={x} className={'chip' + (eqOn === x ? ' on' : '')} onClick={() => { setEq(x); setShown(50) }}>{t(x)}</button>)}
     </div>}
     <div className="list">
-      {bp !== '★' && <div className="item" onClick={() => customExSheet(null, ex => onPick(ex), q.trim())}>
+      {bp !== '★' && <ListItem onClick={() => customExSheet(null, ex => onPick(ex), q.trim())}>
         <div className="thumb thumb-x"><Icon name="sparkles" /></div>
         <div className="grow"><div className="tt">{t('Create your own exercise')}</div><div className="ss">{t('name + body part, no animation')}</div></div><Icon name="plus" className="chev" />
-      </div>}
-      {f.slice(0, shown).map(e => <div key={e.id} className="item" onClick={() => onPick(e)}>
+      </ListItem>}
+      {f.slice(0, shown).map(e => <ListItem key={e.id} onClick={() => onPick(e)}>
         <Thumb ex={e} /><div className="grow"><div className="tt capitalize">{e.n}</div><div className="ss capitalize">{t(e.tg || e.bp)} · {t(e.eq)}</div></div>
         {usage[e.id] && <span className="tag acc"><Icon name="starFill" /></span>}<Icon name="plus" className="chev" />
-      </div>)}
+      </ListItem>)}
       {f.length === 0 && bp === '★' && <div className="empty">{t('Nothing chosen yet — add exercises and they’ll show up here.')}</div>}
     </div>
     {f.length > shown && <><div style={{ height: 8 }} /><Button onClick={() => setShown(s => s + 50)}>{t('Show more')}</Button></>}
@@ -786,12 +786,12 @@ function DayOverride({ iso, close }) {
     <h3>{fmtDate(iso, true)}</h3>
     <div className="muted small" style={{ marginBottom: 12 }}>{t('Weekly plan:')} {weeklyR ? weeklyR.name : t('Rest')}{hasOvr && <span style={{ color: 'var(--orange)' }}> · {t('changed for this day')}</span>}<br />{t('Sick, missed a day or want a different session? Pick what to train instead.')}</div>
     <div className="list">
-      {st.routines.map(r => <div key={r.id} className="item" onClick={() => set(r.id)}>
+      {st.routines.map(r => <ListItem key={r.id} onClick={() => set(r.id)}>
         <span className="lrow-i"><Icon name={glyphOf(r.emoji)} /></span>
         <div className="grow"><div className="tt">{r.name}</div><div className="ss">{exCount(r.ex.length)}</div></div>
-        {effId === r.id && <Icon name="check" className="accent" />}</div>)}
-      <div className="item" onClick={() => set('rest')}><span className="lrow-i" style={{ background: 'var(--surface-3)' }}><Icon name="moon" /></span><div className="grow"><div className="tt">{t('Rest / skip this day')}</div></div>{effId === null && <Icon name="check" className="accent" />}</div>
-      {hasOvr && <div className="item" onClick={() => set('')}><span className="lrow-i" style={{ background: 'var(--surface-3)' }}><Icon name="reset" /></span><div className="grow"><div className="tt">{t('Back to weekly plan')}</div></div></div>}
+        {effId === r.id && <Icon name="check" className="accent" />}</ListItem>)}
+      <ListItem onClick={() => set('rest')}><span className="lrow-i" style={{ background: 'var(--surface-3)' }}><Icon name="moon" /></span><div className="grow"><div className="tt">{t('Rest / skip this day')}</div></div>{effId === null && <Icon name="check" className="accent" />}</ListItem>
+      {hasOvr && <ListItem onClick={() => set('')}><span className="lrow-i" style={{ background: 'var(--surface-3)' }}><Icon name="reset" /></span><div className="grow"><div className="tt">{t('Back to weekly plan')}</div></div></ListItem>}
     </div>
   </>
 }
@@ -803,11 +803,11 @@ function DayAssign({ day, close }) {
   return <>
     <h3>{t(DAYN[day])}</h3>
     <div className="list">
-      <div className="item" onClick={() => set('')}><span className="lrow-i" style={{ background: 'var(--surface-3)' }}><Icon name="moon" /></span><div className="grow"><div className="tt">{t('Rest day')}</div></div>{!st.week[day] && <Icon name="check" className="accent" />}</div>
-      {st.routines.map(r => <div key={r.id} className="item" onClick={() => set(r.id)}>
+      <ListItem onClick={() => set('')}><span className="lrow-i" style={{ background: 'var(--surface-3)' }}><Icon name="moon" /></span><div className="grow"><div className="tt">{t('Rest day')}</div></div>{!st.week[day] && <Icon name="check" className="accent" />}</ListItem>
+      {st.routines.map(r => <ListItem key={r.id} onClick={() => set(r.id)}>
         <span className="lrow-i"><Icon name={glyphOf(r.emoji)} /></span>
         <div className="grow"><div className="tt">{r.name}</div><div className="ss">{exCount(r.ex.length)}</div></div>
-        {st.week[day] === r.id && <Icon name="check" className="accent" />}</div>)}
+        {st.week[day] === r.id && <Icon name="check" className="accent" />}</ListItem>)}
     </div>
   </>
 }
@@ -878,13 +878,13 @@ export const calendarSheet = start => ui().openSheet(close => <Calendar start={s
 export function WorkoutRow({ w, onClick }) {
   const st = useStore(s => s.S)
   const glyph = glyphOf((st.routines.find(r => r.id === w.routineId) || {}).emoji)
-  return <div className="item" onClick={onClick}>
+  return <ListItem onClick={onClick}>
     <span className="lrow-i" style={{ width: 34, height: 34, borderRadius: 8, fontSize: 19 }}><Icon name={glyph} /></span>
     <div className="grow"><div className="tt">{w.name}</div>
       <div className="ss">{[fmtDate(w.d, true), ...durPart(w.end - w.start), t('{0} sets', setsDone(w)), fmtVol(w.vol, st.unit)].join(' · ')}</div></div>
     {w.prs && w.prs.length > 0 && <span className="pr"><Icon name="trophy" />{w.prs.length} PR</span>}
     <Icon name="chevronRight" className="chev" />
-  </div>
+  </ListItem>
 }
 
 /* ============================ workout lifecycle ============================ */

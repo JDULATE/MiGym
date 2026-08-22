@@ -15,7 +15,7 @@ import { MOBILE, shareExport, syncReminder } from '../lib/mobile.js'
 import { loadStarterPlan, confirmSheet, importFromApp } from '../sheets.jsx'
 import { coachConfigured, loadCoachCfg, saveCoachCfg } from '../lib/coach.js'
 import Icon from '../components/Icon.jsx'
-import { Section, Row, SelectRow, Switch, Segmented, Button, TextField, TextArea, NumberField } from '../components/ui.jsx'
+import { Section, Row, SelectRow, Switch, Segmented, Button, TextField, TextArea, NumberField , ListItem} from '../components/ui.jsx'
 
 export default function Settings() {
   const nav = useNavigate()
@@ -224,7 +224,7 @@ export default function Settings() {
         <span className="lrow-t">{t('Accent color')}</span>
         <div className="swatches">
           {Object.entries(ACCENTS).map(([k, c]) => (
-            <button key={k} className={'swatch' + ((S.accent || 'lime') === k ? ' on' : '')}
+            <button key={k} className={'swatch' + ((S.accent || 'ember') === k ? ' on' : '')}
               style={{ background: c }} onClick={() => update(s => { s.accent = k })} aria-label={k} />
           ))}
         </div>
@@ -486,7 +486,7 @@ function RestoreSnapshots({ close }) {
           {snaps.map(s => {
             const d = new Date(s.ts)
             const label = isNaN(d.getTime()) ? s.id : d.toLocaleString(dateLocale())
-            return <div key={s.id} className="item" onClick={() => {
+            return <ListItem key={s.id} onClick={() => {
               confirmSheet({
                 title: t('Restore this snapshot?'),
                 message: t('It will be merged with what this device already has.'),
@@ -503,7 +503,7 @@ function RestoreSnapshots({ close }) {
             }}>
               <div className="grow"><div className="tt">{label}</div></div>
               <Icon name="chevronRight" className="chev" />
-            </div>
+            </ListItem>
           })}
         </div>}
     <div style={{ height: 8 }} />
