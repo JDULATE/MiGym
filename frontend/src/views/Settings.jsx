@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore, DEF, hasData } from '../store/useStore.js'
 import { useUI } from '../store/useUI.js'
-import { ACCENTS, todayISO, localTZ, fmtNum } from '../lib/format.js'
+import { ACCENTS, todayISO, localTZ, fmtNum, fmtVol } from '../lib/format.js'
 import { effortOf } from '../lib/history.js'
 import { EQUIPMENT, EXPERIENCE, GOALS, MEASUREMENT_KEYS, latestMeasurement, normalizeMeasurements, normalizeProfile, profileSummary } from '../lib/profile.js'
 import { api, webauthnOK, passkeyLogin, passkeyRegister, IS_ANDROID } from '../lib/api.js'
@@ -198,6 +198,8 @@ export default function Settings() {
 
     {(user || MOBILE) && <NotificationsCard S={S} update={update} toast={toast} />}
     <CoachCard />
+    {!MOBILE && !DEMO && <CoachSection />}
+    {user?.role === 'coach' && <ClientsSection />}
 
     {/* ---------- appearance ---------- */}
     <Section title={t('Appearance')} footer={DEMO || MOBILE ? undefined : t('synced with your profile')}>
@@ -510,6 +512,128 @@ function RestoreSnapshots({ close }) {
 
 function restoreSnapshotSheet() {
   useUI.getState().openSheet(close => <RestoreSnapshots close={close} />)
+}
+
+// Coach platform (phase 11 / ADR-0007). Client side: mint a pairing code, choose the
+// scope a coach may see, review links and revoke. Server enforces scopes — this UI is
+// convenience, not the security boundary.
+function CoachSection() {
+  const user = useStore(s => s.user)
+  const toast = useUI(s => s.toast)
+  const [scope, setScope] = useState('summary')
+  const [code, setCode] = useState(null)
+  const [links, setLinks] = useState(null)
+
+  const loadLinks = () => api('/api/coach/mylinks').then(r => setLinks(r)).catch(() => setLinks({ links: [], pending: [] }))
+  useEffect(() => { if (user) loadLinks() }, [user])
+
+  const generate = async () => {
+    try { const r = await api('/api/coach/code', { method: 'POST', body: JSON.stringify({ scope }) }); setCode(r) }
+    catch (e) { toast(e.message || t('Could not create a code')) }
+  }
+  const revoke = coachId => confirmSheet({
+    title: t('Revoke access?'),
+    message: t('The coach immediately loses access to your data. Nothing is deleted on your side.'),
+    confirmText: t('Revoke'), danger: true,
+    onConfirm: async () => {
+      try { await api('/api/coach/revoke', { method: 'POST', body: JSON.stringify({ coachId }) }); await loadLinks(); toast(t('Access revoked')) }
+      catch (e) { toast(e.message || t('Restore failed')) }
+    },
+  })
+
+  return <Section title={t('Coach')} footer={t('You decide what a coach sees — and you can revoke it at any time. Notes coaches write are visible to you too.')}>
+    {!user ? (
+      <Row icon="lock" iconTint="var(--grey)" title={t('Link a server profile first (Sync & backup above).')} />
+    ) : <>
+      <Row icon="person" iconTint="var(--indigo)" title={t('Share your training with a coach')}
+        subtitle={code ? t('Give this code to your coach — it expires in 15 minutes.') : t('Choose what a coach may see:')} />
+      <div style={{ padding: '0 0 10px' }}>
+        <Segmented className="seg-range" value={scope} onChange={setScope}
+          options={[{ value: 'summary', label: t('Summary only') }, { value: 'full', label: t('Full workouts') }]} />
+        <div style={{ height: 8 }} />
+        {code
+          ? <div className="card small" style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: '.2em' }}>{code.code}</div>
+            </div>
+          : <Button variant="primary" icon="key" onClick={generate}>{t('Generate pairing code')}</Button>}
+      </div>
+      <h4 className="sec">{t('Your coaches')}</h4>
+      {links === null ? <div className="muted small">{t('Loading…')}</div>
+        : links.links.length === 0 ? <div className="muted small">{t('No coach linked.')}</div>
+        : links.links.map(l => <div key={l.coachId} className="lrow">
+            <span className="lrow-m">
+              <span className="lrow-t">{l.coachName} · <span className="dim nocap">{l.scope}</span></span>
+              {(l.notes || []).map((n, i) => <span key={i} className="lrow-s">📝 {n.text}</span>)}
+            </span>
+            <Button size="sm" variant="danger" onClick={() => revoke(l.coachId)}>{t('Revoke access')}</Button>
+          </div>)}
+    </>}
+  </Section>
+}
+
+// Coach side (phase 11): the roster and per-client review. Reads are scoped server-side
+// by the link's consent; notes are the only thing a coach writes in this phase.
+function ClientsSection() {
+  const toast = useUI(s => s.toast)
+  const [clients, setClients] = useState(null)
+  const load = () => api('/api/coach/clients').then(r => setClients(r.clients || [])).catch(() => setClients([]))
+  useEffect(() => { load() }, [])
+  const openClient = clientId => useUI.getState().openSheet(close => <ClientSheet close={close} clientId={clientId} onNote={load} />)
+  return <Section title={t('Clients')} footer={t('You see what each client consented to — nothing more.')}>
+    {clients === null ? <div className="muted small">{t('Loading…')}</div>
+      : clients.length === 0 ? <div className="muted small">{t('No clients yet — redeem a pairing code from a client.')}</div>
+      : clients.map(c => <Row key={c.clientId} icon="personCircle" iconTint="var(--teal)"
+          title={c.name}
+          subtitle={c.lastSession ? t('Last session: {0}', c.lastSession.d) : undefined}
+          value={t('30-day sessions') + ': ' + c.last30} accessory="chevron"
+          onClick={() => openClient(c.clientId)} />)}
+  </Section>
+}
+
+function ClientSheet({ close, clientId }) {
+  const toast = useUI(s => s.toast)
+  const [data, setData] = useState(null)
+  const [note, setNote] = useState('')
+  const load = () => api('/api/coach/client?id=' + encodeURIComponent(clientId)).then(setData).catch(e => toast(e.message))
+  useEffect(() => { load() }, [])
+  const saveNote = async () => {
+    const text = note.trim(); if (!text) return
+    try {
+      await api('/api/coach/note', { method: 'POST', body: JSON.stringify({ clientId, text }) })
+      setNote(''); toast(t('Note saved')); load()
+    } catch (e) { toast(e.message) }
+  }
+  if (!data) return <>
+    <h3>{t('Clients')}</h3><div className="muted small">{t('Loading…')}</div>
+  </>
+  const c = data.client
+  return <>
+    <h3 className="capitalize">{c.name}</h3>
+    <div className="tiles" style={{ marginBottom: 8 }}>
+      <div className="tile"><div className="l"><Icon name="dumbbell" />{t('Workouts')}</div><div className="v">{c.totalWorkouts}</div></div>
+      <div className="tile"><div className="l"><Icon name="calendar" />{t('30-day sessions')}</div><div className="v">{c.last30}</div></div>
+      <div className="tile"><div className="l"><Icon name="chartLine" />{t('Volume · 7 days')}</div>
+        <div className="v" style={{ fontSize: 18 }}>{fmtVol(c.volume30)}</div></div>
+    </div>
+    <div className="dim small" style={{ marginBottom: 8 }}>{c.lastSession ? t('Last session: {0}', c.lastSession.d + ' · ' + c.lastSession.name) : t('No sessions logged yet.')}</div>
+    {data.scope === 'full' && <>
+      <h4 className="sec">{t('Recent workouts')}</h4>
+      {(data.workouts || []).map(w => (
+        <div key={w.d + w.name} className="card small" style={{ marginBottom: 6 }}>
+          <b>{w.name}</b> <span className="dim">{w.d}{w.durationMin != null ? ` · ${w.durationMin} min` : ''}</span>
+          {(w.entries || []).map(e => <div key={e.exercise} className="dim small capitalize">{e.exercise}: {e.sets.join(', ') || '—'}</div>)}
+        </div>
+      ))}
+    </>}
+    {data.scope !== 'full' && <div className="muted small">{t('This client shares a summary only.')}</div>}
+    <h4 className="sec">{t('Coach notes')}</h4>
+    {(data.notes || []).map((n, i) => <div key={i} className="small dim">📝 {n.text}</div>)}
+    <textarea className="input" rows={2} maxLength={1000} value={note} onChange={e => setNote(e.target.value)}
+      placeholder={t('Add a note (visible to the client)')} style={{ marginTop: 8 }} />
+    <div style={{ height: 10 }} />
+    <Button variant="primary" onClick={saveNote}>{t('Save')}</Button>
+    <div style={{ height: 8 }} />
+  </>
 }
 
 function NotificationsCard({ S, update, toast }) {
