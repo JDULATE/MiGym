@@ -15,7 +15,7 @@ export const CARDIO_TONNAGE_PER_MIN = 50  // duration proxy for cardio/timed wor
 
 // Preserve the shipped set-count signal when a completed custom/imported exercise has no load.
 // Two such sets therefore retain the old 1 - exp(-2 / 3) starting-fatigue reading.
-const ZERO_LOAD_SET_STIMULUS = FATIGUE_REF_VOLUME / 3
+export const ZERO_LOAD_SET_STIMULUS = FATIGUE_REF_VOLUME / 3
 
 /** Exponential half-life for fatigue stimulus. */
 export const FATIGUE_HALF_LIFE_MS = 129600000

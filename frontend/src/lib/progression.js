@@ -47,7 +47,7 @@ export const POLICY_DESC = {
 // Sessions of repeated misses before a deload. Greyskull resets on the first failure by
 // design; the general linear policy gives you two more cracks at it first.
 export const DELOAD_AFTER = { linear: 3, greyskull: 1, double: 3, time: 3 }
-const DELOAD_FACTOR = 0.9
+export const DELOAD_FACTOR = 0.9
 
 // Body parts where a 5 kg jump is normal rather than brutal.
 const HEAVY_BP = ['upper legs', 'lower legs', 'back', 'hips', 'glutes']
@@ -84,7 +84,7 @@ function snap(v, step) {
 // nearest step keeps the cut close to the intended 10 %, but on small weights the nearest
 // step can be the weight you started from — so a deload that did not actually reduce
 // anything takes one step down instead. Never goes below a single step.
-function deloadTo(cur, step) {
+export function deloadTo(cur, step) {
   let next = snap(cur * DELOAD_FACTOR, step)
   if (next >= cur) next = snap(cur - step, step)
   return Math.max(step, next)
