@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { mergeStates } from './sync.js'
+import { computeWorkoutTombstones, mergeStates, TOMBSTONE_TTL_MS } from './sync.js'
+
+const DAY = 86400000
+const at = daysAgo => Date.now() - daysAgo * DAY
 
 // Two devices' blobs: local edited while remote also moved.
 const local = {
@@ -80,5 +83,76 @@ describe('mergeStates (ADR-0006 stage 1)', () => {
     expect(mergeStates(null, remote).workouts.length).toBe(3)
     expect(mergeStates(local, null).workouts.length).toBe(2)
     expect(mergeStates({}, {}).measurements).toEqual([])
+  })
+})
+
+describe('stage 1b — per-section timestamps (_mts)', () => {
+  it('an older blob wins the one section it edited more recently', () => {
+    const newer = { _ts: 200, _mts: { routines: 1000 }, routines: [{ id: 'rNew', name: 'Newest', ex: [] }], week: {} }
+    const older = { _ts: 300, _mts: { routines: 2000 }, routines: [{ id: 'rOld', name: 'Older but fresher', ex: [] }] }
+    // blob "older" has the higher overall _ts AND the fresher routines stamp
+    const m = mergeStates(newer, older)
+    expect(m.routines[0].name).toBe('Older but fresher')
+  })
+
+  it('per-section stamps split a tie that whole-blob LWW would get wrong', () => {
+    // same overall _ts on both sides; only the section stamps differ
+    const a = { _ts: 500, _mts: { profile: 900 }, profile: { goal: 'strength' }, routines: [{ id: 'ra', name: 'A', ex: [] }] }
+    const b = { _ts: 500, _mts: { routines: 950 }, routines: [{ id: 'rb', name: 'B', ex: [] }], profile: { goal: 'hypertrophy' } }
+    const m = mergeStates(a, b)                 // b's routines are fresher…
+    expect(m.routines[0].id).toBe('rb')
+    expect(m.profile.goal).toBe('strength')     // …while a's profile is untouched by b
+  })
+
+  it('falls back to blob-level _ts when neither side carries stamps (pre-1b clients)', () => {
+    const m = mergeStates(local, remote)        // no _mts anywhere — stage-1 behaviour
+    expect(m.routines[0].name).toBe('Remote Pull')
+  })
+})
+
+describe('stage 2 — workout deletion tombstones', () => {
+  it('computeWorkoutTombstones records exactly the removed ids', () => {
+    const prev = { workouts: [{ id: 'w1' }, { id: 'w2' }], _tomb: { workouts: { w0: 111 } } }
+    const next = { workouts: [{ id: 'w2' }] }
+    const t = computeWorkoutTombstones(prev, next, 5000)
+    expect(t.w1).toBe(5000)
+    expect(t.w0).toBe(111)                     // existing tombstones preserved
+    expect(t.w2).toBeUndefined()
+  })
+
+  it('a tombstoned workout is dropped on merge even when the other side still has it', () => {
+    const local = { _ts: 300, workouts: [{ id: 'wGone', start: 10, entries: [] }] }
+    const remote = { _ts: 200, workouts: [{ id: 'wGone', start: 10, entries: [] }], _tomb: { workouts: { wGone: at(1) } } }
+    const m = mergeStates(local, remote)
+    expect(m.workouts).toHaveLength(0)
+  })
+
+  it('a workout logged again AFTER the tombstone survives and grows', () => {
+    const t = Date.now() - DAY
+    const local = { _ts: 300, workouts: [{ id: 'wBack', start: Date.now(), entries: [] }], _tomb: { workouts: { wBack: t } } }
+    const remote = { _ts: 200, workouts: [{ id: 'wBack', start: Date.now() + 1000, entries: [] }] }
+    const m = mergeStates(local, remote)
+    expect(m.workouts).toHaveLength(1)
+  })
+
+  it('expired tombstones stop suppressing (re-created lifts live)', () => {
+    const old = Date.now() - TOMBSTONE_TTL_MS - DAY
+    const local = { _ts: 300, workouts: [{ id: 'wRevived', start: Date.now(), entries: [] }], _tomb: { workouts: { wRevived: old } } }
+    const m = mergeStates(local, local)
+    expect(m.workouts).toHaveLength(1)
+  })
+
+  it('tombstone maps union with max-ts semantics', () => {
+    const a = { _tomb: { workouts: { w1: 100, w2: 200 } } }
+    const b = { _tomb: { workouts: { w1: 150 } } }
+    const m = mergeStates(a, b)
+    expect(m._tomb.workouts).toEqual({ w1: 150, w2: 200 })
+  })
+
+  it('importing a backup that removes workouts records tombstones via replaceState path helper', () => {
+    const prev = { workouts: [{ id: 'wA' }, { id: 'wB' }] }
+    const t1 = computeWorkoutTombstones(prev, { workouts: [] }, 1000)
+    // re-import a superset later: fresh copy of wA arrives after its tombstone → survives
+    expect(Object.keys(t1)).toEqual(['wA', 'wB'])
   })
 })

@@ -3,7 +3,7 @@ import { api } from '../lib/api.js'
 import { localTZ } from '../lib/format.js'
 import { registerCustom } from '../lib/exercises.js'
 import { EMPTY_PROFILE } from '../lib/profile.js'
-import { mergeStates } from '../lib/sync.js'
+import { mergeStates, MT_SECTIONS, computeWorkoutTombstones } from '../lib/sync.js'
 import { DEMO, DEMO_SEEDED } from '../lib/demo.js'
 import { MOBILE, nativeLoad, nativeSave, syncReminder } from '../lib/mobile.js'
 
@@ -46,7 +46,27 @@ export const useStore = create((set, get) => {
     saveTm = setTimeout(() => { saveTm = null; nativeSave(get().S); syncReminder(get().S) }, 800)
   }
 
+  // Stage-1b section stamps: whichever config sections actually changed get a fresh
+  // timestamp, so the sync merge can resolve conflicts per section. Sections compare
+  // by JSON (update() clones S, so references always differ). Workouts are excluded —
+  // they merge by id and deletions carry tombstones instead.
+  const stampSections = (next, prev) => {
+    const mts = { ...(prev?._mts || {}), ...(next._mts || {}) }
+    const now = Date.now()
+    for (const key of MT_SECTIONS) {
+      const a = key === 'settings'
+        ? JSON.stringify(Object.fromEntries(Object.entries(next).filter(([k]) => !k.startsWith('_') && !['routines', 'week', 'dayPlan', 'exWeights', 'profile', 'workouts', 'bodyweight', 'measurements', 'customEx', 'active'].includes(k))))
+        : JSON.stringify(next[key] ?? null)
+      const b = key === 'settings'
+        ? JSON.stringify(Object.fromEntries(Object.entries(prev || {}).filter(([k]) => !k.startsWith('_') && !['routines', 'week', 'dayPlan', 'exWeights', 'profile', 'workouts', 'bodyweight', 'measurements', 'customEx', 'active'].includes(k))))
+        : JSON.stringify(prev?.[key] ?? null)
+      if (a !== b) mts[key] = now
+    }
+    next._mts = mts
+  }
+
   const persist = (S, push = true) => {
+    stampSections(S, get().S)
     S._ts = Date.now()
     registerCustom(S.customEx)
     localStorage.setItem(KEY, JSON.stringify(S))
@@ -98,7 +118,13 @@ export const useStore = create((set, get) => {
       mut(S)
       persist(S, push)
     },
-    replaceState(S, push = false) { persist(clone(S), push) },
+    replaceState(S, push = false) {
+      // Stage 2: a wholesale replacement (backup import, reset) that removes workouts
+      // records deletion tombstones, so the removal propagates instead of being undone
+      // by the next merge.
+      S._tomb = { ...(S._tomb || {}), workouts: computeWorkoutTombstones(get().S, S) }
+      persist(clone(S), push)
+    },
 
     setUser(u) {
       if (u) { localStorage.setItem('gym_user', JSON.stringify(u)) }
