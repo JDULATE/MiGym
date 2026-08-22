@@ -38,11 +38,10 @@ See [PRODUCT.md](PRODUCT.md).
 
 ## Current phase
 
-**PHASE 10 — Cloud Architecture: Stage 1, 1b and 2 COMPLETE.**
-Sync is now merge-based with per-section conflict resolution and deletion tombstones;
-server snapshots + restore flow shipped; local-first single mode shipped (ADR-0005/0006).
-Remaining optional: Recovery-Secret encryption at rest, managed-hosting runbook.
-Next phase requires explicit authorization.
+**PHASE 11 — Coach Platform: COMPLETE.**
+Pairing-code links with client-chosen scopes enforced server-side; coach roster + review
+sheet + notes; first API integration suite (node --test). Routine assignment deferred to
+Phase 12 (needs its own consent protocol). Next phase requires explicit authorization.
 
 ## Completed phases
 

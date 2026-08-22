@@ -102,11 +102,13 @@ Settings restore flow; CLOUD_DESIGN.md for the managed security-copy service.
 **Optional leftovers:** Recovery-Secret encryption at rest, managed-hosting runbook.
 Community edition remains fully independent.
 
-## Phase 11 — Coach platform
+## Phase 11 — Coach platform ✅ (complete, 2026-08-22)
 
-Roles USER/COACH/ADMIN enforced server-side (API currently has no role concept — design
-authorization explicitly; never trust client role claims). Client consent for data sharing;
-explicit tenant-style access checks on every endpoint.
+ADR-0007: roles (`COACH_UIDS` env), pairing-code links with client-chosen scopes
+(summary/full) enforced server-side before serialization, unilateral revocation, two-way
+visible notes. Coach roster + client review sheet in Settings. First API integration
+suite (node --test, temp DATA_DIR, minted cookies) covering the consent lifecycle and
+authorization negatives. Routine assignment deferred to Phase 12.
 
 ## Phase 12 — Gym platform
 

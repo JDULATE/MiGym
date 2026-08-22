@@ -49,6 +49,26 @@ Authentication (unless noted) = `gymsid` HttpOnly cookie: HMAC-signed `uid:expir
 |---|---|---|
 | `POST /api/activity` | ✓ | heartbeat `{ active:true, name≤60, exIdx, exTotal, setsDone, setsTotal, startedAt }` or `{active:false}` to drop; ephemeral, TTL ~70 s |
 
+## Coach platform (MiGym phase 11, ADR-0007)
+
+Consent-based links: the client mints a single-use pairing code (15-min TTL) with a chosen
+scope; a coach account (role via `COACH_UIDS` env) redeems it. Scopes are enforced
+server-side before serialization; either side can revoke at any time.
+
+| Method & path | Auth | Description |
+|---|---|---|
+| `POST /api/coach/code` | ✓ user | `{ scope: 'summary'\|'full' }` → `{ code, expiresInSec }`; one live code per user |
+| `POST /api/coach/link` | ✓ coach | `{ code }` → creates/refreshes link with the code's scope; codes are single-use |
+| `GET /api/coach/clients` | ✓ coach | roster: name, scope, total workouts, last-30 count, last session/sync, note count |
+| `GET /api/coach/client?id=` | ✓ coach | summary always; `workouts[]`+`routines[]` only when link scope = `full`; includes link notes |
+| `POST /api/coach/note` | ✓ coach | `{ clientId, text ≤1000 }` — stored on the link, visible to both sides |
+| `GET /api/coach/mylinks` | ✓ user | the caller's links (coach names, scopes, notes) + pending pairing codes |
+| `POST /api/coach/revoke` | ✓ user | `{ coachId }` — immediate unilateral unlink |
+
+Authorization notes: every route re-verifies session + role + link on each request;
+summary responses are computed from state (never redacted copies); `/api/me` now reports
+`role`.
+
 ## Admin (`requireAdmin`: valid session AND admin)
 
 | Method & path | Description |

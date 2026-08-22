@@ -6,6 +6,34 @@ This repository continues openGym (© Duarte Santos, AGPL-3.0-or-later) as **MiG
 Upstream history below is preserved unchanged; MiGym phases add entries above the upstream
 log from this point on.
 
+### Phase 11 — Coach Platform (2026-08-22) · ADR-0007
+
+🧑‍🏫 **Consent-based coach links with server-enforced scopes** — the client always holds
+the keys.
+
+#### Added
+
+- 🔑 **Pairing-code flow**: client generates an 8-char code (15 min TTL, single-use,
+  chosen scope: *summary* or *full*); the coach redeems it in Settings. Either side can
+  unlink; revocation is immediate and unilateral.
+- 🛡️ **Server-enforced scopes** (ADR-0007): `GET /api/coach/client` serves derived summary
+  numbers by default and only includes finished workouts when the link's consented scope
+  is `full`. Scope filtering happens before serialization — responses are computed, never
+  redacted copies.
+- 👥 **Coach roster**: coaches see linked clients (workout counts, last-30 frequency, last
+  session), open a review sheet (full-scope links show recent workouts with sets incl.
+  RIR), and write notes.
+- 📝 **Notes are two-way visible**: stored on the link, shown to the coach and to the
+  client, who also sees every link and can revoke from their own Settings section.
+- 🧪 **First API integration suite** (`node --test`, zero new dependencies): spawns the
+  real server on a temp DATA_DIR with minted session cookies and covers the whole consent
+  lifecycle plus authorization negatives (401/403/404). `COACH_UIDS` env grants the role.
+
+#### Deferred to Phase 12 (documented in ADR-0007)
+
+Routine assignment / program modification — writing into a client's state needs its own
+consent-and-acceptance protocol.
+
 ### Phase 10 — Cloud Architecture, Stage 1b + 2 (2026-08-22)
 
 🧬 **Conflict resolution gets precise, and deletions propagate** (ADR-0006).
