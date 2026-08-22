@@ -1,0 +1,24 @@
+// Centralized Giwi dialogue (docs/MASCOT.md §dialogue). Source strings double as i18n
+// keys via the app's t(); localization lands in the locale packs like every other string.
+export const DIALOGUE = {
+  welcomeTitle: 'Welcome to MiGym',
+  welcomeLine: 'Hi! I’m Giwi — I’ll help you set MiGym up for you.',
+  start: 'Start',
+  skip: 'Skip',
+  askName: 'First, what’s your name?',
+  yourName: 'Your name',
+  niceToMeet: 'Nice to meet you, {0}!',
+  askAge: 'How old are you?',
+  age: 'Age',
+  askWeight: 'What do you weigh right now?',
+  currentWeight: 'Current weight',
+  askHeight: 'What’s your height?',
+  height: 'Height',
+  askGoal: 'What’s your main goal?',
+  yourProfile: 'Your profile',
+  confirmProfile: 'Confirm',
+  editProfile: 'Edit',
+  perfectLine: 'Perfect! I know a little about you now.',
+  tourLine: 'Now I’ll show you how MiGym works.',
+  years: 'years',
+}

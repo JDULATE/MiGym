@@ -1,15 +1,17 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { HashRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { useStore } from './store/useStore.js'
 import { useUI } from './store/useUI.js'
+import { hasData } from './store/useStore.js'
 import { bindUI } from './components/ui.jsx'
 import { ACCENTS } from './lib/format.js'
 import { setLang, useLang } from './lib/i18n.js'
 import { setNav } from './lib/nav.js'
 import { initBackButton } from './lib/back.js'
 import { useWakeLock } from './lib/wakelock.js'
+import { needsOnboarding, completeOnboarding } from './giwi/flags.js'
+import GiwiOnboarding from './giwi/GiwiOnboarding.jsx'
 import { startFlow } from './sheets.jsx'
-import Icon from './components/Icon.jsx'
 import TabBar from './components/TabBar.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import Modals from './components/Modals.jsx'
@@ -48,6 +50,13 @@ function Shell() {
   useEffect(() => { window.scrollTo(0, 0) }, [loc.pathname])
   // bound to the workout, not to the route — checking Stats mid-session keeps the screen on
   useWakeLock(!!S.active && S.keepAwake !== false)
+
+  // Giwi onboarding gate (docs/ONBOARDING.md). Existing users with data are grandfathered:
+  // a missing flag + existing history means "seen it", so the tour never ambushes an upgrade.
+  const [onboardingDone, setOnboardingDone] = useState(() => !needsOnboarding() || hasData(S))
+  if (!onboardingDone) {
+    return <GiwiOnboarding onDone={() => { completeOnboarding(); setOnboardingDone(true) }} />
+  }
 
   return (
     <>
