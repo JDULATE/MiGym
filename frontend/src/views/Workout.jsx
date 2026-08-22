@@ -12,7 +12,7 @@ import { setProgressHighWater, supersetFlowStep } from '../lib/supersetFlow.js'
 import Media from '../components/Media.jsx'
 import { startFlow, exercisePicker, exConfigSheet, exerciseDetailSheet, topWeightSheet, finishWorkout, workoutCompleteSheet, confirmSheet } from '../sheets.jsx'
 import Icon from '../components/Icon.jsx'
-import { Button, Check, NumberField } from '../components/ui.jsx'
+import { Button, Check, NumberField, TextArea } from '../components/ui.jsx'
 import { nextPrescription, applyPrescription } from '../lib/progression.js'
 import { glyphOf } from '../lib/glyphs.js'
 import { isWarmupRow } from '../lib/workout-model.js'
@@ -53,6 +53,51 @@ function Elapsed({ start }) {
     tick(); const iv = setInterval(tick, 1000); return () => clearInterval(iv)
   }, [start])
   return <span>{t}</span>
+}
+
+/* ---------- per-exercise note (MiGym phase 3) ---------- */
+// Saved on the session entry (and mirrored back to the routine's matching entries, so the
+// cue comes back next time); the finished workout keeps its own copy. Clearing the text
+// removes the note everywhere it was mirrored.
+function EntryNoteSheet({ close, entryIdx }) {
+  const A = useStore(s => s.S.active)
+  const update = useStore(s => s.update)
+  const entry = A?.entries?.[entryIdx]
+  const [text, setText] = useState(entry?.note || '')
+  return <>
+    <h3>{t('Exercise note')}</h3>
+    <TextArea rows={3} maxLength={500} value={text} onChange={e => setText(e.target.value)}
+      placeholder={t('Form cues and setup reminders — “pause 2 s at the bottom”, “elbows tucked”…')} />
+    <div style={{ height: 12 }} />
+    <Button variant="primary" icon="check" onClick={() => {
+      const v = (text || '').trim().slice(0, 500)
+      update(s => {
+        if (!s.active || !Array.isArray(s.active.entries)) return
+        const e = s.active.entries[entryIdx]
+        if (!e) return
+        if (v) e.note = v; else delete e.note
+        // mirror to the routine so the cue returns next session (same movement id)
+        const r = s.routines.find(r => r.id === s.active.routineId)
+        if (r) r.ex.forEach(x => { if (x.id === e.id) { if (v) x.note = v; else delete x.note } })
+      }, true)
+      close()
+    }}>{t('Save')}</Button>
+    <div style={{ height: 8 }} />
+  </>
+}
+
+function NoteRow({ entryIdx, note }) {
+  const open = () => useUI.getState().openSheet(close => <EntryNoteSheet close={close} entryIdx={entryIdx} />)
+  if (!note) return <div style={{ marginBottom: 6 }}>
+    <Button size="xs" variant="ghost" icon="pencil" onClick={open}>{t('Add note')}</Button>
+  </div>
+  return <div className="row" style={{ alignItems: 'flex-start', gap: 4, marginBottom: 6 }}>
+    <span className="small dim" style={{ flex: 1, lineHeight: 1.45 }}>
+      <Icon name="clipboard" size={13} style={{ verticalAlign: '-2px', marginRight: 4 }} />
+      {note}
+    </span>
+    <button className="iconbtn" style={{ fontSize: 13 }} aria-label={t('Edit note')} onClick={open}><Icon name="pencil" /></button>
+  </div>
 }
 
 /* ---------- one exercise block (reps: weight×reps · time: a held duration · cardio: duration+speed) ---------- */
@@ -130,6 +175,7 @@ function ExerciseBlock({ entryIdx, compact, onToggle, onField, onAddSet, onRemov
       {best > 0 && <span className="tag nocap">{t('Best:')} {fmtNum(best)} {S.unit}</span>}
     </div>
     {last && <div className="small dim" style={{ marginBottom: 4 }}>{t('Last time')} ({fmtDate(last.d)}): {last.sets.map(s => setLabel(entry.id, s, last.target)).join(', ')}</div>}
+    <NoteRow entryIdx={entryIdx} note={entry.note} />
     {plan && plan.why && plan.kind !== 'off' && <div className={'progline' + (plan.kind === 'deload' ? ' warn' : '')}>
       <Icon name={plan.kind === 'up' ? 'arrowUp' : plan.kind === 'deload' ? 'arrowDown' : 'lightbulb'} />
       <span>{t(...plan.why)}</span>
