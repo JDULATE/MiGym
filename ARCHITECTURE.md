@@ -140,27 +140,28 @@ images on ghcr.io; building from source needs no local Node. See docs/DEPLOYMENT
 
 ## Weaknesses / technical debt
 
-1. **Sync model:** whole-state PUT + `_ts` last-write-wins can lose concurrent edits from two
-   devices. Acceptable now; must be redesigned before Cloud phase (Phase 10).
-2. **Storage:** single JSON files; no indexes/transactions; admin endpoints read all users'
+1. **Config-section sync conflicts**: per-section timestamps (`S._mts`) and workout
+   deletion tombstones (`S._tomb`, ADR-0006 stages 1b/2) now cover history collections
+   and config sections; same-section concurrent edits resolve by timestamp and are
+   snapshot-recoverable. Full per-record ops journal remains deferred.
+2. **Storage**: single JSON files; no indexes/transactions; admin endpoints read all users'
    state files per request. Fine at family scale, not beyond.
-3. **No tooling:** no ESLint/Prettier/TypeScript anywhere; style discipline lives in review only.
-4. **Bundle:** generated `exercises-data.js` (~888 KB source) pushes main chunk past 1.5 MB
-   (warning configured up to exactly that limit).
-5. **Tests:** excellent coverage of lib logic; component tests are few and rely on linkedom/
-   happy-dom shims; no E2E tests; no API tests at all (the only untested runtime code).
-6. **Node version sensitivity:** happy-dom-based test fails under Node ≥26 (experimental global
-   `localStorage`); CI pins Node 22 — document/enforce engines.
-7. Upstream `coach` branch diverges (~9.7k lines, AI-coach oriented) — potential reuse for
-   Phases 9/11 but must be evaluated, not merged blindly.
+3. **No ESLint/Prettier/TypeScript** anywhere; style discipline lives in review only.
+4. **Bundle**: generated `exercises-data.js` (~888 KB source) pushes main chunk past 1.5 MB.
+5. **Test coverage gaps remaining**: no E2E tests; Settings/Stats overview cards have module-
+   level tests but thin render coverage; locale source-string check is partly advisory.
+6. **Node ≥26 quirk**: happy-dom tests need a functional localStorage; solved permanently by
+   `vitest.config.js` + `tests.setup.mjs` shim (no CLI flags required anymore).
+7. Upstream `origin/coach` branch diverges (~9.7k lines) — largely superseded by MiGym
+   phases 8–11; evaluate before ever merging.
 
-## Recommended changes (for later phases, in order)
+## Recommended changes — status
 
-1. Add repo-level tooling: ESLint (+ react hooks plugin) and `npm run lint` wired into CI (Phase 1).
-2. Pin Node 22 via `engines` field + `.nvmrc` to prevent environment drift (Phase 1).
-3. Extract API route tests (supertest-style against the raw http server) before any auth change.
-4. Keep growing logic in `lib/` (or a future `progression-engine/` workspace) — never inside views.
-5. Defer storage/sync redesign until Phase 10; until then document the LWW risk clearly.
+* ~~Add ESLint~~ — still open (dev-dependency decision per ADR-0003).
+* ~~Pin Node 22~~ — done: `engines >=22` + `.nvmrc`.
+* ~~API route tests~~ — partially done: full coach-platform integration suite exists
+  (`api/test/coach.test.mjs`, node --test); auth/register flows still uncovered.
+* ~~Engine boundary~~ — done: `frontend/src/lib/engine/` (ADR-0006/Phase 4).
 
 ## Features to preserve untouched
 

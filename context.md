@@ -120,11 +120,10 @@ Recorded in [docs/DECISIONS/](docs/DECISIONS/). Summary:
   invite codes are the brute-force mitigation for signup.
 * Session cookies are HMAC-signed but carry no rotation beyond the `sv` counter; expiry baked
   in at issue time (lowering SESSION_DAYS does not shorten existing sessions).
-* Tests require Node ≥22 to match CI/Docker. On Node ≥26, Node's experimental global
-  `localStorage` breaks the happy-dom environment used by `Workout.remove.test.jsx`;
-  workaround: run vitest with `NODE_OPTIONS="--localstorage-file=<path>"`, or use Node 22.
-* The upstream `origin/coach` branch (~9.7k lines) remains unmerged and is now largely
-  superseded by MiGym Phases 8–11; do not merge without re-evaluation.
+* Tests require Node ≥22 to match CI/Docker. The Node ≥26 happy-dom/localStorage clash is
+  **solved** (vitest.config.js + tests.setup.mjs shim) — `npm test` runs clean on modern Node.
+* An upstream `origin/coach` branch exists (~9.7k lines) — largely superseded by MiGym
+  Phases 8–11; do not merge without re-evaluation.
 
 ## License constraints
 

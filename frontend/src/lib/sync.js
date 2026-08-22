@@ -38,11 +38,6 @@ function sectionWinner(local, remote, key, newerRemote) {
   return newerRemote ? remote : local
 }
 
-function pickSection(local, remote, key, newerRemote) {
-  const src = sectionWinner(local, remote, key, newerRemote)
-  return src?.[key] !== undefined ? src[key] : src === remote ? undefined : undefined
-}
-
 /** Union of two lists keyed by `id`. On duplicate ids the NEWER side's copy wins whole. */
 function unionById(localList, remoteList, newerRemote) {
   const lm = byId(localList)
