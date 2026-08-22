@@ -28,7 +28,9 @@ Authentication (unless noted) = `gymsid` HttpOnly cookie: HMAC-signed `uid:expir
 | Method & path | Auth | Description |
 |---|---|---|
 | `GET /api/data` | ✓ | `{ state }` — full per-user state blob (`state-<uid>.json`); `{ state: null }` if none |
-| `PUT /api/data` | ✓ | body `{ state }` (object required, ≤5 MB); **strips `state.active`** (device-local); atomic write; returns `{ ok, ts }` |
+| `PUT /api/data` | ✓ | body `{ state }` (object required, ≤5 MB); **strips `state.active`** (device-local); archives the previous blob as a snapshot (keep 10, ADR-0006); atomic write; returns `{ ok, ts }` |
+| `GET /api/data/snapshots` | ✓ | `{ snapshots: [{ id, ts }] }` newest first — restore flow (ADR-0006) |
+| `GET /api/data/snapshot?id=<ts>` | ✓ | `{ state }` for one snapshot; 404 if unknown id (ids are numeric strings only) |
 
 ## Push notifications
 

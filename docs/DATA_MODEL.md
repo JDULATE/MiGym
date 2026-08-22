@@ -100,17 +100,22 @@ subs:    [ { userId, endpoint, keys:{p256dh,auth}, created } ]   // web-push sub
 invites: [ { code, note?, createdBy, created, usedBy?, usedAt?, revoked? } ]
 ```
 
-## Sync & integrity rules (current behavior)
+## Sync & integrity rules
 
 1. Client persists to localStorage immediately (debounced), pushes whole `S` to
-   `PUT /api/data` after 1.5 s idle and on tab-hide.
-2. Pull on boot: server state wins if `_ts` newer AND local not dirty; otherwise local pushes.
-   **Last-write-wins: concurrent edits on two devices can lose one side** — documented risk,
-   redesign deferred to Cloud phase.
-3. `active` never syncs (client skips; server strips) — an unfinished set cannot be clobbered.
-4. Workouts are appended to `S.workouts` on completion; there is no delete-workout flow in the
-   core UI. Corrections happen by editing future prescriptions, not history (progression is
-   re-derived from the log each time).
+   `PUT /api/data` after 1.5 s idle and on tab-hide. The server archives the previous blob
+   into a bounded snapshot list (`snapshots/<uid>/`, keep 10) before overwriting
+   (ADR-0006 Stage 1).
+2. Pull on boot **merges** instead of replacing: `lib/sync.js mergeStates()` unions
+   workouts (by id), bodyweight (by date), measurements and custom exercises from both
+   sides; configuration sections follow the newer blob as a whole (sections absent from
+   the newer side fall back to local). The merged result is pushed back so both ends
+   converge. The active workout never merges or leaves the device.
+3. Known limitation until Stage 1b (`S._mts` per-section timestamps): two devices changing
+   the SAME config section concurrently resolve by blob-level `_ts`. Snapshots make any
+   such loss reversible; the restore sheet lists server snapshots and union-merges them.
+4. Workouts are appended to `S.workouts` on completion; there is no delete-workout flow in
+   the core UI. Corrections happen by editing future prescriptions, not history.
 5. Progression targets are *derived*, never stored as counters — no drift between log and plan.
 
 ## Export/import formats

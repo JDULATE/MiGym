@@ -31,6 +31,26 @@ security copies.
 - Phase 10 continues with the cloud-backup design doc + sync redesign ADR before any
   server-side work.
 
+### Phase 10 — Cloud Architecture, Stage 1 (2026-08-22)
+
+🛟 **Sync can no longer silently destroy data** (ADR-0006 Stage 1) — on top of the
+local-first mode shipped earlier in this phase.
+
+#### Added
+
+- 🧮 **Union-first merge** (`lib/sync.js mergeStates`, +8 tests): pulling now *merges* —
+  workouts from both devices survive (union by id), bodyweight merges by date,
+  measurements and custom exercises are set-unions; configuration sections follow the
+  newer blob as a whole, with sections missing from it falling back to local. The merged
+  result is pushed back so both ends converge.
+- 🗄️ **Server snapshots**: every accepted `PUT /api/data` archives the previous blob
+  (bounded: last 10 per user, `snapshots/<uid>/`) before overwriting; new endpoints
+  `GET /api/data/snapshots` and `GET /api/data/snapshot?id=` list and fetch them.
+- ♻️ **Restore flow** in Settings → Sync & backup: pick a server snapshot → it is
+  union-merged into the device — nothing on the device can be deleted by construction.
+- Changed: `pullState()` no longer replaces local with remote on `_ts` ties — the merge
+  decides. (Stage 1b will add per-section timestamps for config conflicts.)
+
 ### Phase 9 — AI Coach (2026-08-22)
 
 🤖 **An opt-in, local-first AI coach** (ADR-0004) — it explains your training; it never

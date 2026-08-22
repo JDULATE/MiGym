@@ -38,10 +38,11 @@ See [PRODUCT.md](PRODUCT.md).
 
 ## Current phase
 
-**PHASE 10 — Cloud Architecture: design complete, implementation gated.**
-Delivered: local-first single mode (ADR-0005), CLOUD_DESIGN.md (security-copy service),
-ADR-0006 (staged sync redesign). Next: implement ADR Stage 1 (snapshots + union merge)
-after review; no further phase starts without explicit authorization.
+**PHASE 10 — Cloud Architecture: Stage 1 (sync safety) COMPLETE.**
+Shipped: local-first single mode (ADR-0005), union-first merge (`lib/sync.js`), server
+snapshots + restore flow (ADR-0006 Stage 1), CLOUD_DESIGN.md. Remaining optional:
+Stage-1b per-section timestamps, Recovery-Secret encryption, managed-hosting runbook.
+Next phase requires explicit authorization.
 
 ## Completed phases
 
