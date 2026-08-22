@@ -6,6 +6,22 @@ This repository continues openGym (© Duarte Santos, AGPL-3.0-or-later) as **MiG
 Upstream history below is preserved unchanged; MiGym phases add entries above the upstream
 log from this point on.
 
+### Phase 14 — Deployment hardening (2026-08-22)
+
+🚀 **A production guide you can actually follow** — plus the scripts it references.
+
+#### Added
+
+- 📕 `docs/DEPLOYMENT.md` rewritten as a full production guide: complete env reference,
+  HTTPS reverse-proxy examples with rate limiting (Caddy + nginx), backup/restore
+  procedures incl. a restore drill, monitoring & disk-growth alerts, log rotation via
+  compose override, update/rollback procedure, and a pre-launch security checklist.
+- 🗜️ `scripts/backup.sh` / `scripts/restore.sh`: timestamped, retention-pruned archives
+  of `./data` — now including server-side sync snapshots (`snapshots/<uid>/`) so the
+  ADR-0006 safety net survives host loss too.
+- 🌐 Website: Gym platform and managed cloud/services announced as *coming soon*
+  (phases 12–13 deferred by product decision).
+
 ### Phase 11 — Coach Platform (2026-08-22) · ADR-0007
 
 🧑‍🏫 **Consent-based coach links with server-enforced scopes** — the client always holds

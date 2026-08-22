@@ -38,58 +38,31 @@ See [PRODUCT.md](PRODUCT.md).
 
 ## Current phase
 
-**PHASE 11 — Coach Platform: COMPLETE.**
-Pairing-code links with client-chosen scopes enforced server-side; coach roster + review
-sheet + notes; first API integration suite (node --test). Routine assignment deferred to
-Phase 12 (needs its own consent protocol). Next phase requires explicit authorization.
+**PHASE 14 — Deployment hardening: COMPLETE.** All core roadmap phases done.
+Parked ("coming soon" on the website): Phase 12 Gym platform and Phase 13 Commercial
+services — each requires a design ADR before implementation. Optional leftovers in
+Phase 10: snapshot encryption at rest, managed-hosting runbook.
 
 ## Completed phases
 
 * Phase 0 — Repository audit (this document set).
-* Phase 1 — MiGym Foundation (branding/metadata; see CHANGELOG).
-* Phase 2 — Fitness Profile (`S.profile` + append-only `S.measurements`, `lib/profile.js`,
-  Settings UI, demo seed, all-pack translations). See docs/DATA_MODEL.md.
-* Phase 3 — Workout System Polish: per-exercise session notes (seeded from routines,
-  mirrored back, preserved in history); everything else on the spec checklist verified as
-  already present.
-* Phase 4 — Progression Engine Isolation: `frontend/src/lib/engine/` public API barrel
-  (progression/strength/effort/fatigue/deload/volume), new warmup-aware pure volume module,
-  multi-session trajectory tests (all four policies + determinism/immutability invariants),
-  API documented in docs/API.md. Behavior-preserving; bodies stay in lib/*.js so views and
-  MCP keep stable import paths — future code consumes the engine barrel only.
-* Phase 5 — Analytics: `lib/analytics.js` (trainingSummary + exerciseMomentum with explicit
-  thresholds) + "Progress overview" card in Stats answering the five spec questions;
-  volume math from the engine. All-pack translations complete.
-* Phase 6 — Exercise Library: `lib/exercise-taxonomy.js` derives movement groups (push/
-  pull/legs/core/cardio), equipment-class tags and a documented difficulty heuristic from
-  existing dataset fields (1,322/1,324 placed); Library gains movement-group filter chips;
-  detail sheets gain type/difficulty tags and ranked Alternatives. Compound-vs-isolation
-  intentionally NOT provided (not honestly derivable). No new dataset content authored.
-* Phase 7 — Routine Builder: Target RIR per exercise (stored + shown in-session, not yet
-  enforced by the engine), per-exercise rest override honored by the session flow, starter
-  template picker (PPL / Upper-Lower / Full Body) with tests; configs stay byte-identical
-  unless new fields are set.
-* Phase 8 — Adaptive Training: `lib/adaptive.js` deterministic suggestions (increase/ease/
-  review/adhere) each with explanation templates; rendered under *Adjustments* in the Stats
-  progress-overview card. Read-only over history; consumes rirTarget from Phase 7;
-  thresholds are named constants. Nothing stored or auto-applied.
-* Phase 9 — AI Coach: `lib/coach.js` bounded facts/computed context builder, guardrailed
-  system prompt (labelled answers, no invention, no medicine, subordinate to deterministic
-  rules), OpenAI-compatible transport via plain fetch. Settings provider card (endpoint/
-  model/key in a dedicated localStorage key OUTSIDE S — never synced or backed up);
-  "Ask" chat sheet in Stats. Opt-in + local-first per ADR-0004.
-* Phase 10 (part 1) — Local-first single mode (ADR-0005): login screen and guest concept
-  removed; boot always enters local data; optional passkey **link** to a server profile for
-  sync/backup; unlink keeps the local base (store-tested).
+* Phases 1–9 — see CHANGELOG.md for the full record: Foundation rebrand; Fitness
+  Profile; Workout System Polish (notes); Progression Engine isolation (`lib/engine`);
+  Analytics (progress overview + momentum); Exercise Library taxonomy; Routine Builder
+  (RIR targets, per-exercise rest, starter templates); Adaptive Training
+  (`lib/adaptive.js`); AI Coach (`lib/coach.js`, ADR-0004).
+* Phase 10 — Cloud Architecture (ADR-0005/0006): local-first single mode; union-first
+  sync merge with per-section timestamps; workout deletion tombstones; server snapshots +
+  restore flow; CLOUD_DESIGN.md.
+* Phase 11 — Coach Platform (ADR-0007): pairing-code links, client-chosen scopes enforced
+  server-side, coach roster/review/notes, first API integration suite.
+* Phase 14 — Deployment hardening: full production guide (HTTPS/rate limiting/backups/
+  monitoring/checklist) + backup & restore scripts.
 
 ## Planned phases
 
-1 → Foundation/branding · 2 → Fitness profile · 3 → Workout system polish ·
-4 → Progression engine isolation · 5 → Analytics · 6 → Exercise library ·
-7 → Routine builder · 8 → Adaptive training · 9 → AI Coach (deterministic rules first) ·
-10 → Cloud architecture · 11 → Coach platform · 12 → Gym platform ·
-13 → Commercial services · 14 → Deployment hardening. See [ROADMAP.md](ROADMAP.md).
-Phases are implemented strictly sequentially; never mix phases without authorization.
+Core roadmap (0–11, 14) is complete. Parked as "coming soon": 12 Gym platform,
+13 Commercial services — each needs a design ADR before implementation.
 
 ## Important architectural decisions
 
@@ -126,33 +99,32 @@ Recorded in [docs/DECISIONS/](docs/DECISIONS/). Summary:
 * 12 UI languages; exercise instructions localized in 10; locale checks run in CI.
 * Wake-lock during workouts; Android back-gesture handling.
 
-## Known limitations (as of Phase 1)
+## Known limitations (as of Phase 14)
 
 * **Deferred branding items (data-compatibility, by design):** Android appId/package
   `ch.duartesantos.opengym` (needs native regen), mobile state filename `opengym-state.json`
   (needs migration path), plan-file format marker `opengym_plan` (kept for back-compat),
   upstream repo links (`REPO`, Settings source link) still point at openGym until MiGym has a
-  published home. README/website/screenshots/banner still describe openGym (website is
-  upstream's; refresh when MiGym gets its own site).
+  published home. README banner/screenshots still show openGym visuals.
 * No prebuilt MiGym Docker images yet — Compose builds locally (`--build`).
-
-* Whole-state sync is last-write-wins: two devices editing concurrently can lose changes
-  (documented risk; acceptable for personal use, must be redesigned before Cloud phase).
-* JSON-file storage: fine for single-instance/family scale; no transactions, admin dashboard
+* Guest mode was removed in Phase 10 (ADR-0005): clients ignore `ALLOW_GUEST`; the
+  server-side flag remains only for upstream compatibility.
+* Whole-state LWW was replaced by union merge + snapshots + tombstones (ADR-0006); config
+  sections resolve per-section via `S._mts`. Residual risk: same-section concurrent edits
+  on two devices resolve by timestamp, recoverable from server snapshots.
+* JSON-file storage: fine for single-instance/family scale; no transactions; admin dashboard
   reads every user's state file per request.
 * No ESLint/Prettier/TypeScript configuration exists in the repo.
 * `exercises-data.js` (~888 KB source) makes the main bundle exceed 1500 kB (build warning).
-* No server-side rate limiting by design (reverse proxy's job); invite codes are the brute-force
-  mitigation for signup.
-* Session cookies are HMAC-signed but carry no rotation beyond the `sv` counter; expiry baked in
-  at issue time (lowering SESSION_DAYS does not shorten existing sessions).
-* Tests require Node 22 to match CI/Docker. On Node ≥26, Node's experimental global
-  `localStorage` breaks the happy-dom environment used by `Workout.remove.test.jsx`
-  (7 spurious failures). Workaround while investigating: run vitest with
-  `NODE_OPTIONS="--localstorage-file=<path>"`, or use Node 22.
-* An upstream `origin/coach` branch exists (~9.7k lines: AI-coach providers, coach screens,
-  plan validation) that is NOT merged into main. Do not merge it silently; evaluate against
-  MiGym Phases 9/11 when those start.
+* No server-side rate limiting by design (reverse proxy's job — see docs/DEPLOYMENT.md §4);
+  invite codes are the brute-force mitigation for signup.
+* Session cookies are HMAC-signed but carry no rotation beyond the `sv` counter; expiry baked
+  in at issue time (lowering SESSION_DAYS does not shorten existing sessions).
+* Tests require Node ≥22 to match CI/Docker. On Node ≥26, Node's experimental global
+  `localStorage` breaks the happy-dom environment used by `Workout.remove.test.jsx`;
+  workaround: run vitest with `NODE_OPTIONS="--localstorage-file=<path>"`, or use Node 22.
+* The upstream `origin/coach` branch (~9.7k lines) remains unmerged and is now largely
+  superseded by MiGym Phases 8–11; do not merge without re-evaluation.
 
 ## License constraints
 

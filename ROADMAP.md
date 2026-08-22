@@ -110,17 +110,21 @@ visible notes. Coach roster + client review sheet in Settings. First API integra
 suite (node --test, temp DATA_DIR, minted cookies) covering the consent lifecycle and
 authorization negatives. Routine assignment deferred to Phase 12.
 
-## Phase 12 — Gym platform
+## Phase 12 — Gym platform ⏸ deferred ("coming soon")
 
-Multi-tenant B2B. Requires strict data isolation designed first. Not started until core
-supports it.
+Multi-tenant B2B. Parked by product decision; announced on the website as coming soon.
+Requires a multi-tenant isolation design doc (ADR) before any implementation.
 
-## Phase 13 — Commercial services
+## Phase 13 — Commercial services ⏸ deferred ("coming soon")
 
-Only after open core stable; AGPL §13 obligations drive the architecture (see
-docs/LICENSING.md). Open-source edition remains genuinely useful; no feature hostage-taking.
+Managed cloud / Pro tiers parked; the security-copy service design already exists
+(docs/CLOUD_DESIGN.md). Any paid offering must resolve AGPL §13 architecture first
+(ADR required). Open-source core stays complete and free.
 
-## Phase 14 — Deployment hardening
+## Phase 14 — Deployment hardening ✅ (complete, 2026-08-22)
 
-docs/DEPLOYMENT.md finalized: backups/restore drills, HTTPS, health checks, logging,
-monitoring, update procedure, security checklist.
+docs/DEPLOYMENT.md rewritten as a full production guide (env reference, HTTPS + rate
+limiting examples for Caddy/nginx, backup/restore incl. a drill, monitoring, log rotation
+via compose override, update/rollback procedure, pre-launch security checklist);
+scripts/backup.sh + scripts/restore.sh added (archives ./data including sync snapshots);
+website announces phases 12–13 as coming soon.

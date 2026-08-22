@@ -26,13 +26,14 @@ no telemetry.
 
 | Edition | Status | Scope |
 |---|---|---|
-| **Community** | exists today (inherited) | self-hosted, workout tracking, routines, exercise library (1,324 exercises + custom), progression, analytics, PWA + Android app, import/export, 12 languages |
-| **Cloud** | future | managed hosting, multi-device sync done properly, backups, automatic updates |
-| **Pro** | future | advanced analytics, long-term progression analysis, AI Coach |
-| **Coach** | future | client management, routine assignment, progress review, notes, adherence |
-| **Gyms** | future | B2B: members/coaches/plans/attendance/analytics, white-label, strict tenant isolation |
+| **Community** | live (core) | self-hosted or local-only, workout tracking, routines, exercise library (1,324 + custom), progression, analytics, adaptive suggestions, AI coach (BYO provider), PWA + Android app, import/export, 12 languages |
+| **Cloud** | 📅 coming soon | hosted security copies for device changes; design in docs/CLOUD_DESIGN.md |
+| **Pro** | 📅 coming soon | advanced analytics & AI coaching tiers on top of the deterministic engine |
+| **Coach** | ✅ core (phase 11) | pairing-code links, consented scopes enforced server-side, roster/review/notes; routine assignment in a later phase |
+| **Gyms** | 📅 coming soon | B2B: members/coaches/plans/attendance/analytics, white-label, strict tenant isolation |
 
-No payments/billing code is written until Phase 13, and only after the open core is stable.
+No payments/billing code exists. Phases 12–13 are announced as "coming soon"; each
+requires a design ADR before implementation.
 
 ## Non-goals
 
