@@ -73,5 +73,28 @@ Unhandled handler exceptions → logged + 500. Bodies must be JSON ≤5 MB.
 
 ## MiGym additions
 
-None yet. Future endpoints (profile, analytics exports, coach authorization, cloud sync)
-will be specified here before implementation, each tied to its roadmap phase.
+### Progression engine API (Phase 4)
+
+The deterministic training-mathematics layer lives at `frontend/src/lib/engine/index.js`.
+Future code (analytics, adaptive training, AI coach) must consume this boundary instead of
+deep-importing `lib/` internals. All functions are pure; prescriptions always carry an
+explanation (`why`); nothing here is probabilistic or medical.
+
+| Module | Exports |
+|---|---|
+| `engine` (progression) | `POLICIES`, `POLICIES_FOR`, `POLICY_NAME`, `POLICY_DESC`, `DELOAD_AFTER`, `MAX_BW_SETS`, `defaultIncrement`, `DEFAULT_SEC_INCREMENT`, `policyFor`, `readSession`, `sessionsFor`, `stallCount`, `nextPrescription(S,cfg,routine)` → `{weight?,reps?,sec?,sets?,kind,why}`, `applyPrescription(sets,p)` |
+| `engine` (deload) | `DELOAD_FACTOR`, `deloadTo(cur,step)` |
+| `engine` (strength) | `estimate1RM(w,r,formula?)`, `bestSetOf(entry)`, `e1rmSeries(S,exId)`, `best1RM(S,exId)`, `is1RMRecord(S,exId,entry)`, `REP_CAP=12`, `FORMULAS`, `DEFAULT_FORMULA` |
+| `engine` (effort/rir/rpe) | `rirOf(set)`, `toScale(kind,rir)`, `displayScale(S)`, `avgRir`, `effortSummary(S,days)`, `effortWeeks(S,days)`, `effortHistogram(S,days)`, `isHardSet`, constants |
+| `engine` (fatigue) | fatigue model constants from `lib/recovery.js` (functions remain there until a phase needs them through the boundary) |
+| `engine` (volume) — new in Phase 4 | `setTonnage(set)`, `entryVolume(entry)`, `workoutVol(w)`, `workoutTonnage(S)` → `[{d,start,vol}]`, `weeklyVolume(S)` → `[{week,vol}]` (Monday buckets), `volumeByExercise(S,exId)` |
+
+Volume semantics: completed work sets only (warm-ups excluded by design, matching every
+other statistic); tonnage = load × reps; timed/cardio sets contribute 0 tonnage (their
+stimulus is duration-based and weighted in the fatigue model, never faked as kilograms).
+
+Implementation note: current function bodies remain in `lib/progression.js`, `lib/onerm.js`,
+`lib/effort.js`, `lib/recovery.js` (views + MCP server import those stable paths); the engine
+barrel defines the boundary and can absorb physical relocations later without changing
+consumers. Engine-level multi-session trajectory scenarios live in
+`frontend/src/lib/engine/tests/`.

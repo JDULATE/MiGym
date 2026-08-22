@@ -6,6 +6,35 @@ This repository continues openGym (© Duarte Santos, AGPL-3.0-or-later) as **MiG
 Upstream history below is preserved unchanged; MiGym phases add entries above the upstream
 log from this point on.
 
+### Phase 4 — Progression Engine Isolation (2026-08-22)
+
+⚙️ **A documented, tested boundary around the training mathematics** — behavior-preserving;
+no policy changed.
+
+#### Added
+
+- 🧱 `frontend/src/lib/engine/` — the progression engine's public API barrel: progression/
+  policies, strength/ (estimated 1RM), effort/ (RIR/RPE scale unification), fatigue/,
+  deload/, volume/ and tests/. Future features consume this instead of deep-importing lib
+  internals; existing views and the MCP server keep their stable import paths (physical
+  relocation deliberately deferred).
+- 📊 **New pure volume module** (`engine/volume.js`): warmup-aware tonnage per set / entry /
+  workout / ISO-week / exercise. Timed and cardio sets contribute zero tonnage by design —
+  duration-based stimulus belongs to the fatigue model, never faked as kilograms.
+  (`lib/history.js`'s legacy `workoutVolume`, which counts warm-ups, stays for the admin view.)
+- 🧪 **Engine trajectory tests**: multi-session scenarios driving prescribe→train→log→repeat
+  through all four policies (linear advance/hold/deload math, double-progression range walk,
+  bodyweight rep→set ceiling, time increments) plus determinism and history-immutability
+  invariants.
+- 🔓 Two previously private helpers (`DELOAD_FACTOR`, `deloadTo`) are now exported from
+  `lib/progression.js`; one constant (`ZERO_LOAD_SET_STIMULUS`) exported from
+  `lib/recovery.js` — required so the engine boundary can expose the complete rule set in
+  plain Node ESM.
+
+#### Notes
+
+- Engine API documented in docs/API.md ("Progression engine API").
+
 ### Phase 3 — Workout System Polish (2026-08-22)
 
 🏋️ **Audit first, then fill the one gap.** The inherited workout screen already covers nearly

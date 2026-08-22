@@ -46,12 +46,12 @@ fallback, warm-up handling, supersets, PR detection at completion, finish flow. 
 finish). Target-RIR prescription is deferred to Phase 4/8: recording effort exists;
 prescribing it belongs to the progression engine.
 
-## Phase 4 — Progression engine isolation
+## Phase 4 — Progression engine isolation ✅ (complete, 2026-08-22)
 
-Formalize `progression-engine/`: extract/pure-reexport from `lib/progression.js`,
-`recovery.js`, `onerm.js` into progression/, volume/, strength/, rir/, rpe/, fatigue/, deload/,
-tests/. Deterministic, dependency-free, 100%-tested. Public API documented in docs/API.md.
-UI keeps working through thin adapters. No behavior change without a test first.
+`frontend/src/lib/engine/` public API barrel (progression / strength / effort / fatigue /
+deload / volume) with new warmup-aware pure volume module and multi-session trajectory
+tests. Behavior-preserving: bodies remain in `lib/*.js` so views and the MCP server keep
+stable paths; future code consumes only the engine barrel. Public API in docs/API.md.
 
 ## Phase 5 — Analytics
 

@@ -38,8 +38,8 @@ See [PRODUCT.md](PRODUCT.md).
 
 ## Current phase
 
-**PHASE 3 — Workout System Polish: COMPLETE.**
-Next phase requires explicit authorization: **PHASE 4 — Progression Engine Isolation**.
+**PHASE 4 — Progression Engine Isolation: COMPLETE.**
+Next phase requires explicit authorization: **PHASE 5 — Analytics**.
 
 ## Completed phases
 
@@ -47,12 +47,14 @@ Next phase requires explicit authorization: **PHASE 4 — Progression Engine Iso
 * Phase 1 — MiGym Foundation (branding/metadata; see CHANGELOG).
 * Phase 2 — Fitness Profile (`S.profile` + append-only `S.measurements`, `lib/profile.js`,
   Settings UI, demo seed, all-pack translations). See docs/DATA_MODEL.md.
-* Phase 3 — Workout System Polish: audit confirmed the spec checklist almost fully covered
-  by inherited functionality (previous performance line, RIR/RPE recording, rest timer,
-  PR detection, completion flow); added per-exercise session notes — seeded from routine
-  entries (`cfg.note`), mirrored back to the routine on save, carried into finished workouts
-  (`entry.note`, passthrough tested in finish-workout boundary). Target-RIR prescription
-  deliberately deferred to Phase 4/8.
+* Phase 3 — Workout System Polish: per-exercise session notes (seeded from routines,
+  mirrored back, preserved in history); everything else on the spec checklist verified as
+  already present.
+* Phase 4 — Progression Engine Isolation: `frontend/src/lib/engine/` public API barrel
+  (progression/strength/effort/fatigue/deload/volume), new warmup-aware pure volume module,
+  multi-session trajectory tests (all four policies + determinism/immutability invariants),
+  API documented in docs/API.md. Behavior-preserving; bodies stay in lib/*.js so views and
+  MCP keep stable import paths — future code consumes the engine barrel only.
 
 ## Planned phases
 
