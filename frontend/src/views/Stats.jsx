@@ -15,6 +15,7 @@ import { fatigueOf, strengthOf, STRENGTH_FLOOR, LB_TO_KG } from '../lib/recovery
 import { strengthExerciseRowsForMuscle } from '../lib/strength-exercises.js'
 import { fatigueStateOf } from '../lib/recovery-view.js'
 import { e1rmSeries, best1RM } from '../lib/onerm.js'
+import { exerciseMomentum, trainingSummary } from '../lib/analytics.js'
 import {
   hasEffort, displayScale, scaleName, toScale, avgRir, effortSummary, effortWeeks,
   effortHistogram, isHardSet, HARD_RIR
@@ -272,6 +273,51 @@ function EffortCard({ S }) {
   </div>
 }
 
+// Progress overview (MiGym phase 5): the five training questions the rest of the hub
+// answers one exercise at a time, aggregated. Numbers over decoration — every figure
+// here exists to answer "am I progressing, and where am I stuck".
+function ProgressOverview({ S }) {
+  const sum = useMemo(() => trainingSummary(S), [S])
+  const mom = useMemo(() => exerciseMomentum(S), [S])
+  const unit = S.unit
+  const vol = v => fmtVol(v) + ' ' + unit
+  return <div className="card">
+    <h2>{t('Progress overview')}</h2>
+    <div className="tiles" style={{ marginBottom: 4 }}>
+      <div className="tile"><div className="l"><Icon name="plate" />{t('Volume · 7 days')}</div><div className="v">{vol(sum.weekVolume)}</div></div>
+      <div className="tile"><div className="l"><Icon name="chartLine" />{t('Ø volume · 8 wks')}</div><div className="v">{sum.avgWeekVolume == null ? '—' : vol(sum.avgWeekVolume)}</div></div>
+      <div className="tile"><div className="l"><Icon name="clock" />{t('Ø session')}</div><div className="v">{sum.avgDurationMin == null ? '—' : t('{0} min', sum.avgDurationMin)}</div></div>
+      <div className="tile"><div className="l"><Icon name="trophy" />{t('PRs · 30 d')}</div><div className="v">{sum.prs30}</div></div>
+    </div>
+    {mom.improving.length === 0 && mom.stalled.length === 0 && mom.stable.length > 0 &&
+      <div className="muted small" style={{ marginTop: 6 }}>{t('Steady — no clear movers yet.')}</div>}
+    {mom.improving.length > 0 && <>
+      <h4 className="sec" style={{ marginTop: 10 }}>{t('Improving')}</h4>
+      {mom.improving.slice(0, 3).map(x => (
+        <div key={x.id} className="row between" style={{ padding: '5px 0' }}>
+          <span>{x.name}</span>
+          <span className="tag acc nocap">+{fmtNum(x.deltaPct)}% · {t('{0} est. 1RM', fmtNum(x.recentEst))}</span>
+        </div>
+      ))}
+    </>}
+    {mom.stalled.length > 0 && <>
+      <h4 className="sec" style={{ marginTop: 10 }}>{t('Stalled')}</h4>
+      {mom.stalled.slice(0, 4).map(x => (
+        <div key={x.id} className="row between" style={{ padding: '5px 0' }}>
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{x.name}</span>
+          <span className="dim small nocap">{x.deltaPct <= -1
+            ? fmtNum(x.deltaPct) + '%'
+            : x.daysSince >= 21
+              ? t('last trained {0} days ago', x.daysSince)
+              : t('no change')}</span>
+        </div>
+      ))}
+    </>}
+    {mom.improving.length === 0 && mom.stalled.length === 0 && mom.stable.length === 0 &&
+      <div className="muted small" style={{ marginTop: 6 }}>{t('A few more sessions and this section fills in.')}</div>}
+  </div>
+}
+
 // Stats = the analytics hub: all charts, progress and history live here.
 export default function Stats() {
   const nav = useNavigate()
@@ -379,6 +425,7 @@ export default function Stats() {
       <Heatmap S={S} onDay={iso => { const ws = workouts.filter(w => w.d === iso); if (ws.length === 1) workoutDetailSheet(ws[0]); else if (ws.length) calendarSheet(iso) }} />
     </div>
 
+    {workouts.length > 0 && <ProgressOverview S={S} />}
     {workouts.length > 0 && <MuscleBalance S={S} />}
     {hasEffort(S) && <EffortCard S={S} />}
 
