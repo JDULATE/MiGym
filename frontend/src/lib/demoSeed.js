@@ -148,6 +148,13 @@ export function buildDemoState() {
     dayPlan[tIso] = order[(order.findIndex(r => r.name === lastName) + 1) % order.length].id
   }
 
+  // A filled-in fitness profile (MiGym phase 2) plus a waist log that tracks the same
+  // cut as the body-weight trend — so the profile section and the measurement sheet have
+  // something honest to show instead of an empty shell.
+  const measurements = bodyweight
+    .filter((_, i) => i % 4 === 0)
+    .map((b, i) => ({ d: b.d, k: 'waist', v: round(92 - i * 0.6 - rnd() * 0.4, 0.5) }))
+
   return {
     routines: [push, pull, legs],
     week: { 1: push.id, 3: pull.id, 5: legs.id },
@@ -156,6 +163,12 @@ export function buildDemoState() {
     targetW: TARGET_W,
     // The history is rated, so the demo turns the column on and the stats get a scale to
     // label their aggregates with instead of guessing one (see displayScale).
-    effort: 'rir'
+    effort: 'rir',
+    profile: {
+      goal: 'hypertrophy', experience: 'intermediate', daysPerWeek: 3,
+      sessionMinutes: 60, heightCm: 178,
+      equipment: ['barbell', 'dumbbell', 'body weight', 'cable']
+    },
+    measurements
   }
 }

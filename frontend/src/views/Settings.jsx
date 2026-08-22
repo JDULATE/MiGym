@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore, DEF, hasData } from '../store/useStore.js'
 import { useUI } from '../store/useUI.js'
-import { ACCENTS, todayISO, localTZ } from '../lib/format.js'
+import { ACCENTS, todayISO, localTZ, fmtNum } from '../lib/format.js'
 import { effortOf } from '../lib/history.js'
+import { EQUIPMENT, EXPERIENCE, GOALS, MEASUREMENT_KEYS, latestMeasurement, normalizeMeasurements, normalizeProfile, profileSummary } from '../lib/profile.js'
 import { api, webauthnOK, passkeyLogin, passkeyRegister, IS_ANDROID } from '../lib/api.js'
 import { pushSupported, enablePush, disablePush, sendTestPush } from '../lib/push.js'
 import { wakeLockSupported } from '../lib/wakelock.js'
@@ -12,12 +13,14 @@ import { DEMO, REPO } from '../lib/demo.js'
 import { MOBILE, shareExport, syncReminder } from '../lib/mobile.js'
 import { loadStarterPlan, confirmSheet, importFromApp } from '../sheets.jsx'
 import Icon from '../components/Icon.jsx'
-import { Section, Row, SelectRow, Switch, Segmented, Button, TextField } from '../components/ui.jsx'
+import { Section, Row, SelectRow, Switch, Segmented, Button, TextField, TextArea, NumberField } from '../components/ui.jsx'
 
 export default function Settings() {
   const nav = useNavigate()
-  const S = useStore(s => s.S)
   const user = useStore(s => s.user)
+  const S = useStore(s => s.S)
+  const profile = normalizeProfile(S.profile)
+  const measurements = normalizeMeasurements(S.measurements)
   const { update, replaceState, setUser, pullState, pushState, signOut, signOutAll, resetDemo } = useStore()
   const toast = useUI(s => s.toast)
   const fileRef = useRef(null)
@@ -97,6 +100,52 @@ export default function Settings() {
       )}
     </Section>
     {!user && !DEMO && !MOBILE && <p className="sect-f" style={{ marginTop: -18, marginBottom: 22 }}>{t('Guest mode — data lives only in this browser.')}</p>}
+
+    {/* ---------- fitness profile (MiGym phase 2) ----------
+        Structured facts about the person training — consumed by nothing yet beyond
+        this screen, but shaped so progression/analytics/coaching features can read
+        them without re-asking. Purely descriptive: no medical interpretation. */}
+    <Section title={t('Fitness profile')}>
+      <Row icon="personCircle" iconTint="var(--blue)"
+        title={profile.name || t('Set up your fitness profile')}
+        subtitle={profileSummary(profile) || t('Goal, experience, equipment — what later features build on.')}
+        accessory="chevron" onClick={() => openIdentitySheet(profile)} />
+      <SelectRow icon="target" iconTint="var(--purple)" title={t('Training goal')}
+        value={profile.goal || ''}
+        onChange={v => update(s => { s.profile = normalizeProfile({ ...s.profile, goal: v || null }) })}
+        options={[{ value: '', label: t('Not set') }, ...GOALS.map(g => ({ value: g, label: t(GOAL_LABEL[g]) }))]} />
+      <SelectRow icon="chart" iconTint="var(--mint)" title={t('Experience level')}
+        value={profile.experience || ''}
+        onChange={v => update(s => { s.profile = normalizeProfile({ ...s.profile, experience: v || null }) })}
+        options={[{ value: '', label: t('Not set') }, ...EXPERIENCE.map(x => ({ value: x, label: t(EXPERIENCE_LABEL[x]) }))]} />
+      <SelectRow icon="calendar" iconTint="var(--orange)" title={t('Days per week')}
+        value={profile.daysPerWeek || ''}
+        onChange={v => update(s => { s.profile = normalizeProfile({ ...s.profile, daysPerWeek: v || null }) })}
+        options={[{ value: '', label: t('Not set') }, ...[1, 2, 3, 4, 5, 6, 7].map(n => ({ value: n, label: t('{0} days/week', n) }))]} />
+      <SelectRow icon="timer" iconTint="var(--teal)" title={t('Session length')}
+        value={profile.sessionMinutes || ''}
+        onChange={v => update(s => { s.profile = normalizeProfile({ ...s.profile, sessionMinutes: v || null }) })}
+        options={[{ value: '', label: t('Not set') }, ...[15, 30, 45, 60, 75, 90, 120].map(n => ({ value: n, label: t('{0} min', n) }))]} />
+      <Row icon="dumbbell" iconTint="var(--yellow)" title={t('Available equipment')}
+        subtitle={t('Used to match exercises to what you can train with.')}
+        value={profile.equipment.length ? t('{0} selected', profile.equipment.length) : null}
+        accessory="chevron" onClick={() => openEquipmentSheet(profile)} />
+    </Section>
+
+    {/* ---------- body: height + append-only tape measurements ---------- */}
+    <Section title={t('Body')}>
+      <Row icon="figureStrength" iconTint="var(--teal)" title={t('Height')}>
+        <span className="stp"><span className="val">
+          <NumberField value={profile.heightCm} nullable decimal={false}
+            onChange={v => update(s => { s.profile = normalizeProfile({ ...s.profile, heightCm: v }) })} />
+          <i>cm</i>
+        </span></span>
+      </Row>
+      <Row icon="clipboard" iconTint="var(--pink)" title={t('Measurements')}
+        subtitle={measurements.length ? null : t('Neck, waist, arms — logged over time, never overwritten.')}
+        value={measurements.length ? t('{0} readings', measurements.length) : null}
+        accessory="chevron" onClick={() => openMeasurementsSheet(measurements)} />
+    </Section>
 
     {/* ---------- general ---------- */}
     <Section title={t('General')} footer={t('Note: switching units only changes the label — logged numbers are not converted.')}>
@@ -235,6 +284,144 @@ function effortHelpSheet() {
     </div>
     <div style={{ height: 8 }} />
   </>)
+}
+
+/* ============================ fitness profile (MiGym phase 2) ============================ */
+
+const GOAL_LABEL = {
+  hypertrophy: 'Hypertrophy', strength: 'Strength', weight_loss: 'Weight loss',
+  general: 'General fitness', performance: 'Performance'
+}
+const EXPERIENCE_LABEL = { beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced' }
+const MEASUREMENT_LABEL = {
+  neck: 'Neck', shoulders: 'Shoulders', chest: 'Chest', waist: 'Waist',
+  hips: 'Hips', upper_arm: 'Upper arm', thigh: 'Thigh', calf: 'Calf'
+}
+const MEASUREMENT_MAX_CM = 250
+
+// Square-crop to ≤256 px JPEG — an avatar must never bloat the synced state blob
+// (the server caps bodies at 5 MB; a full-size photo would eat a tenth of it).
+async function fileToAvatar(file) {
+  const bmp = await createImageBitmap(file)
+  const side = Math.min(256, bmp.width, bmp.height)
+  const sx = (bmp.width - side) / 2, sy = (bmp.height - side) / 2
+  const cv = document.createElement('canvas')
+  cv.width = side; cv.height = side
+  cv.getContext('2d').drawImage(bmp, sx, sy, side, side, 0, 0, side, side)
+  bmp.close?.()
+  return cv.toDataURL('image/jpeg', 0.85)
+}
+
+// Name & photo & free-text preferences in one sheet — the identity half of the
+// profile. Structured fields (goal/experience/…) live on the Settings rows.
+function IdentitySheet({ close }) {
+  const S = useStore.getState().S
+  const profile = normalizeProfile(S.profile)
+  const update = useStore.getState().update
+  const toast = useUI(s => s.toast)
+  const nameRef = useRef(null)
+  const prefsRef = useRef(null)
+  const photoRef = useRef(null)
+
+  const savePhoto = async file => {
+    try {
+      const dataUrl = await fileToAvatar(file)
+      update(s => { s.profile = normalizeProfile({ ...s.profile, image: dataUrl }) })
+    } catch { toast(t('Could not read that image')) }
+  }
+
+  return <>
+    <h3>{t('Name & photo')}</h3>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 14, margin: '6px 0 12px' }}>
+      <span className="avatar" style={{ width: 64, height: 64 }}>
+        {profile.image ? <img src={profile.image} alt="" /> : <Icon name="person" />}
+      </span>
+      <div style={{ display: 'grid', gap: 8 }}>
+        <Button size="sm" icon="upload" onClick={() => photoRef.current.click()}>{t('Change photo')}</Button>
+        {profile.image && <Button size="sm" icon="trash" onClick={() => { update(s => { s.profile = normalizeProfile({ ...s.profile, image: null }) }); toast(t('Photo removed')) }}>{t('Remove photo')}</Button>}
+      </div>
+      <input ref={photoRef} type="file" accept="image/*" style={{ display: 'none' }}
+        onChange={e => { const f = e.target.files[0]; if (f) savePhoto(f); e.target.value = '' }} />
+    </div>
+    <TextField ref={nameRef} placeholder={t('Your name')} maxLength={60} defaultValue={profile.name} />
+    <div className="dim small" style={{ margin: '10px 2px 0' }}>{t('Preferences')}</div>
+    <TextArea ref={prefsRef} maxLength={500} rows={3}
+      placeholder={t('Anything worth remembering — schedule, likes and dislikes. Free text for now; future features may read it.')}
+      defaultValue={profile.preferences} />
+    <div style={{ height: 12 }} />
+    <Button variant="primary" onClick={() => {
+      update(s => { s.profile = normalizeProfile({ ...s.profile, name: nameRef.current.value, preferences: prefsRef.current.value }) })
+      close()
+    }}>{t('Save')}</Button>
+    <div style={{ height: 8 }} />
+  </>
+}
+
+function openIdentitySheet() {
+  useUI.getState().openSheet(close => <IdentitySheet close={close} />)
+}
+
+// Multi-select over the dataset's own equipment vocabulary (see EQUIPMENT) —
+// toggles apply immediately, the sheet stays open for browsing.
+function openEquipmentSheet(profile) {
+  const selected = new Set(profile.equipment)
+  useUI.getState().openSheet(close => <>
+    <h3>{t('Available equipment')}</h3>
+    <div className="muted small" style={{ marginBottom: 10 }}>{t('Used to match exercises to what you can train with.')}</div>
+    <div className="sect-b">
+      {EQUIPMENT.map(eq => (
+        <button key={eq} className="lrow tap" onClick={() => {
+          selected.has(eq) ? selected.delete(eq) : selected.add(eq)
+          useStore.getState().update(s => { s.profile = normalizeProfile({ ...s.profile, equipment: [...selected] }) })
+        }}>
+          <span className="lrow-m"><span className="lrow-t">{eq}</span></span>
+          {selected.has(eq) && <Icon name="check" className="lrow-k" />}
+        </button>
+      ))}
+    </div>
+    <div style={{ height: 8 }} />
+    <Button variant="primary" onClick={close}>{t('Done')}</Button>
+    <div style={{ height: 8 }} />
+  </>)
+}
+
+// One row per measurement site with its latest reading; typing a value into a row
+// logs a NEW record for today (append-only — older readings are never rewritten).
+// The input commits on blur so partial typing ("8", then "82") never lands as junk.
+function MeasurementsSheet() {
+  const measurements = normalizeMeasurements(useStore.getState().S.measurements)
+  return <>
+    <h3>{t('Measurements')}</h3>
+    <div className="muted small" style={{ marginBottom: 10 }}>
+      {t('Centimetres. A new reading is added to the log — nothing already recorded is overwritten.')}
+    </div>
+    <div className="sect-b">
+      {MEASUREMENT_KEYS.map(k => {
+        const latest = latestMeasurement(measurements, k)
+        return (
+          <Row key={k} title={t(MEASUREMENT_LABEL[k])}
+            subtitle={latest ? t('{0}', todayISO()) : null}
+            value={latest ? fmtNum(latest.v) + ' cm' : null}>
+            <NumberField nullable decimal value={null}
+              placeholder={latest ? String(latest.v) : '—'}
+              onBlur={e => {
+                const v = parseFloat((e.target.value || '').replace(',', '.'))
+                if (!Number.isFinite(v) || v <= 0 || v > MEASUREMENT_MAX_CM) return
+                useStore.getState().update(s => {
+                  s.measurements = normalizeMeasurements([...(s.measurements || []), { d: todayISO(), k, v }])
+                })
+              }} />
+            <span className="dim small">cm</span>
+          </Row>
+        )
+      })}
+    </div>
+    <div style={{ height: 8 }} />
+  </>
+}
+
+function openMeasurementsSheet() {
+  useUI.getState().openSheet(close => <MeasurementsSheet close={close} />)
 }
 
 function NotificationsCard({ S, update, toast }) {

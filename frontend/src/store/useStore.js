@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { api } from '../lib/api.js'
 import { localTZ } from '../lib/format.js'
 import { registerCustom } from '../lib/exercises.js'
+import { EMPTY_PROFILE } from '../lib/profile.js'
 import { DEMO, DEMO_SEEDED } from '../lib/demo.js'
 import { guestAllowed } from '../lib/guest.js'
 import { MOBILE, nativeLoad, nativeSave, syncReminder } from '../lib/mobile.js'
@@ -16,7 +17,11 @@ export const DEF = {
   // that a profile which never chose (loaded state is overlaid on DEF, on every path: local,
   // server pull, backup import) still falls back to the `showRir` boolean this replaced and
   // keeps the column it had. See effortOf.
-  reminder: { on: false, time: '08:00', tz: null }, effort: null
+  reminder: { on: false, time: '08:00', tz: null }, effort: null,
+  // MiGym phase 2 — fitness profile (structured facts for later phases to consume; see
+  // lib/profile.js) and the append-only body-measurement log. Both ride the normal sync/backup
+  // paths; a state saved without them overlays onto these defaults unchanged.
+  profile: { ...EMPTY_PROFILE }, measurements: []
 }
 const clone = o => JSON.parse(JSON.stringify(o))
 
