@@ -635,4 +635,9 @@ export default {
   'no change': 'aucun changement',
   'Steady — no clear movers yet.': 'Stable — rien ne bouge encore clairement.',
   'A few more sessions and this section fills in.': 'Encore quelques séances et cette section se remplit.',
+  'push': 'Poussée',
+  'pull': 'Tirage',
+  'legs': 'Jambes',
+  'Alternatives': 'Alternatives',
+  'Difficulty': 'Difficulté',
 }

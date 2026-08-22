@@ -635,4 +635,9 @@ export default {
   'no change': 'без изменений',
   'Steady — no clear movers yet.': 'Стабильно — явных изменений пока нет.',
   'A few more sessions and this section fills in.': 'Ещё несколько тренировок, и раздел заполнится.',
+  'push': 'Жим',
+  'pull': 'Тяга',
+  'legs': 'Ноги',
+  'Alternatives': 'Альтернативы',
+  'Difficulty': 'Сложность',
 }

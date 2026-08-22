@@ -635,4 +635,9 @@ export default {
   'no change': '변화 없음',
   'Steady — no clear movers yet.': '꾸준함 — 아래로 뚜렷한 변화는 없습니다.',
   'A few more sessions and this section fills in.': '조금 더 운동하면 이 섹션이 채워집니다.',
+  'push': '밀기',
+  'pull': '당기기',
+  'legs': '다리',
+  'Alternatives': '대체 운동',
+  'Difficulty': '난이도',
 }

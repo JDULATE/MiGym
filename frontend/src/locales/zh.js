@@ -635,4 +635,9 @@ export default {
   'no change': '没有变化',
   'Steady — no clear movers yet.': '平稳——暂无明显变化。',
   'A few more sessions and this section fills in.': '再练几次，这里就会有内容了。',
+  'push': '推',
+  'pull': '拉',
+  'legs': '腿',
+  'Alternatives': '替代动作',
+  'Difficulty': '难度',
 }

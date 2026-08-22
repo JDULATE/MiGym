@@ -635,4 +635,9 @@ export default {
   'no change': 'कोई बदलाव नहीं',
   'Steady — no clear movers yet.': 'स्थिर — अभी कोई स्पष्ट बदलाव नहीं।',
   'A few more sessions and this section fills in.': 'कुछ और सत्रों के बाद यह खंड भर जाएगा।',
+  'push': 'धक्का',
+  'pull': 'खींचना',
+  'legs': 'पैर',
+  'Alternatives': 'विकल्प',
+  'Difficulty': 'कठिनाई',
 }

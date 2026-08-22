@@ -635,4 +635,9 @@ export default {
   'no change': 'değişim yok',
   'Steady — no clear movers yet.': 'İstikrarlı — henüz net bir gelişme yok.',
   'A few more sessions and this section fills in.': 'Birkaç antrenman daha, bu bölüm dolacak.',
+  'push': 'İtiş',
+  'pull': 'Çekiş',
+  'legs': 'Bacak',
+  'Alternatives': 'Alternatifler',
+  'Difficulty': 'Zorluk',
 }
