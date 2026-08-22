@@ -38,9 +38,10 @@ See [PRODUCT.md](PRODUCT.md).
 
 ## Current phase
 
-**PHASE 10 — Cloud Architecture: IN PROGRESS.** Local-first single mode shipped (ADR-0005);
-cloud-backup design doc + sync redesign ADR come next, before any server-side work.
-No further phase starts without explicit authorization.
+**PHASE 10 — Cloud Architecture: design complete, implementation gated.**
+Delivered: local-first single mode (ADR-0005), CLOUD_DESIGN.md (security-copy service),
+ADR-0006 (staged sync redesign). Next: implement ADR Stage 1 (snapshots + union merge)
+after review; no further phase starts without explicit authorization.
 
 ## Completed phases
 
