@@ -1,5 +1,57 @@
 # Changelog
 
+## MiGym
+
+This repository continues openGym (© Duarte Santos, AGPL-3.0-or-later) as **MiGym**.
+Upstream history below is preserved unchanged; MiGym phases add entries above the upstream
+log from this point on.
+
+### Phase 1 — MiGym Foundation (2026-08-22)
+
+🎨 **The app is now MiGym.** Branding only — no workout, sync or auth behaviour changed.
+
+#### Changed
+
+- 📱 **App name/metadata:** HTML title & Apple web-app title, PWA manifest name/short_name,
+  service-worker notification fallback (`MiGym`) and cache bucket (`migym-rt-v1`),
+  Capacitor `appName`, Android `app_name`/`title_activity_main`, passkey prompt default
+  (`RP_NAME=MiGym`), push test-notification title, compose project name (`migym`).
+- ✨ **UI strings:** login heading, guest home greeting ("MiGym"), Settings footer (now
+  credits openGym by Duarte Santos), self-host rows, PWA tip, push subtitle, error-backup
+  message, plan-share texts + printed-PDF header/footer, "Reload MiGym" error screen.
+  Translation keys updated in lockstep across all 11 locale packs (654 keys each, parity
+  checker green); backup/plan export filenames are now `migym-backup-*` / `migym-plan-*`.
+- 🖼️ **Icons & splashes regenerated** for every density (web 180/512, Android launchers,
+  adaptive foreground/background, all splash orientations incl. night variants) from one
+  geometric dumbbell mark — accent `#30d158` on `#0c0e12`. Regenerable:
+  `frontend/scripts/make-icons.ps1` (.NET drawing; no new dependencies).
+- 🐳 **Compose builds local images** `migym-api` / `migym-web`; upstream ghcr.io openGym
+  images are no longer referenced. Use `docker compose up -d --build`.
+- 🔧 Node pinned: `"engines": { "node": ">=22" }` + `frontend/.nvmrc` (CI/Docker already on
+  Node 22; Node ≥26 has the happy-dom/localStorage caveat noted in Phase 0).
+
+#### Deliberately unchanged (data-compatibility)
+
+- localStorage/session identifiers (`gym_state_v1`, `gymsid`, …) — renaming would sign users
+  out and orphan local data.
+- Plan-file format marker `opengym_plan` — existing shared plan files keep importing.
+- Mobile state filename `opengym-state.json` — needs a migration path (deferred).
+- Android `appId` / package id `ch.duartesantos.opengym` — requires native project
+  regeneration (deferred).
+- Upstream repo links (`REPO`, source-code link) still point at openGym — that is where the
+  inherited source lives; revisit when MiGym has its own published home.
+
+### Phase 0 — Repository audit (2026-08-21)
+
+- 📋 **Audit only — no product code changed.** Inspected architecture, data model,
+  authentication, workout/progression logic, tests, Docker/PWA/mobile setup and licensing.
+  Verified baseline: frontend 326/326 tests, MCP 36/36 tests, production build OK
+  (Node 22 semantics; Node ≥26 breaks one happy-dom test file — see context.md).
+- 📚 Added project documentation: `context.md`, `PRODUCT.md`, `ROADMAP.md`,
+  `ARCHITECTURE.md`, `docs/LICENSING.md`, `docs/DATA_MODEL.md`, `docs/API.md`,
+  `docs/SECURITY.md`, `docs/TESTING.md`, `docs/DEPLOYMENT.md`,
+  `docs/DECISIONS/ADR-0001..0003`.
+
 ## Unreleased
 
 ### Fixes

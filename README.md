@@ -1,8 +1,12 @@
 <div align="center">
 
-<img src="assets/banner.png" alt="openGym" width="720">
+<img src="assets/banner.png" alt="MiGym" width="720">
 
 <br>
+
+> **Note:** this repository continues openGym as **MiGym** (Phase 1 rebrand in progress).
+> Everything below describes the inherited openGym feature set, which MiGym preserves.
+> Upstream: [openGym](https://github.com/DuarteSantos8/openGym) by Duarte Santos (AGPL-3.0).
 
 **A self-hosted gym & body-weight tracker you actually own.**
 
