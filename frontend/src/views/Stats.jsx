@@ -16,6 +16,7 @@ import { strengthExerciseRowsForMuscle } from '../lib/strength-exercises.js'
 import { fatigueStateOf } from '../lib/recovery-view.js'
 import { e1rmSeries, best1RM } from '../lib/onerm.js'
 import { exerciseMomentum, trainingSummary } from '../lib/analytics.js'
+import { adaptiveSuggestions } from '../lib/adaptive.js'
 import {
   hasEffort, displayScale, scaleName, toScale, avgRir, effortSummary, effortWeeks,
   effortHistogram, isHardSet, HARD_RIR
@@ -279,8 +280,10 @@ function EffortCard({ S }) {
 function ProgressOverview({ S }) {
   const sum = useMemo(() => trainingSummary(S), [S])
   const mom = useMemo(() => exerciseMomentum(S), [S])
+  const sug = useMemo(() => adaptiveSuggestions(S), [S])
   const unit = S.unit
   const vol = v => fmtVol(v) + ' ' + unit
+  const iconFor = k => k === 'increase' ? 'arrowUp' : k === 'ease' ? 'arrowDown' : k === 'review' ? 'lightbulb' : 'calendar'
   return <div className="card">
     <h2>{t('Progress overview')}</h2>
     <div className="tiles" style={{ marginBottom: 4 }}>
@@ -289,6 +292,21 @@ function ProgressOverview({ S }) {
       <div className="tile"><div className="l"><Icon name="clock" />{t('Ø session')}</div><div className="v">{sum.avgDurationMin == null ? '—' : t('{0} min', sum.avgDurationMin)}</div></div>
       <div className="tile"><div className="l"><Icon name="trophy" />{t('PRs · 30 d')}</div><div className="v">{sum.prs30}</div></div>
     </div>
+    {sug.items.length > 0 && <>
+      <h4 className="sec" style={{ marginTop: 10 }}>{t('Adjustments')}</h4>
+      {sug.items.slice(0, 5).map((s, i) => (
+        <div key={i} className="row" style={{ gap: 8, alignItems: 'flex-start', padding: '5px 0' }}>
+          <Icon name={iconFor(s.key)} style={{
+            color: s.severity === 'good' ? 'var(--acc)' : s.severity === 'watch' ? 'var(--yellow)' : 'var(--label-2)',
+            flex: 'none', marginTop: 2
+          }} />
+          <span className="small" style={{ lineHeight: 1.45 }}>
+            {t(...s.title)}
+            <span className="dim"> {t(...s.why)}</span>
+          </span>
+        </div>
+      ))}
+    </>}
     {mom.improving.length === 0 && mom.stalled.length === 0 && mom.stable.length > 0 &&
       <div className="muted small" style={{ marginTop: 6 }}>{t('Steady — no clear movers yet.')}</div>}
     {mom.improving.length > 0 && <>
