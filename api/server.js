@@ -58,6 +58,27 @@ function readState(uid) {
   try { return JSON.parse(fs.readFileSync(stateFile(uid), 'utf8')); } catch { return null; }
 }
 
+/* ---------- snapshots (ADR-0006 stage 1) ----------
+   Before a PUT overwrites a user's blob, the previous one is archived here. Any
+   last-write-wins accident is then reversible with one click. Bounded per user. */
+const SNAPSHOT_KEEP = 10;
+const snapDir = uid => path.join(DATA, 'snapshots', uid.replace(/[^a-zA-Z0-9_-]/g, ''));
+function takeSnapshot(uid) {
+  const src = stateFile(uid);
+  if (!fs.existsSync(src)) return;
+  const dir = snapDir(uid);
+  fs.mkdirSync(dir, { recursive: true });
+  const name = Date.now() + '.json';
+  fs.copyFileSync(src, path.join(dir, name));
+  const snaps = fs.readdirSync(dir).filter(f => f.endsWith('.json')).sort();
+  while (snaps.length > SNAPSHOT_KEEP) fs.unlinkSync(path.join(dir, snaps.shift()));
+}
+function readSnapshot(uid, id) {
+  // ids are plain numbers generated above; anything else is refused before it reaches the FS
+  if (!/^\d+\.json$/.test(id)) return null;
+  try { return JSON.parse(fs.readFileSync(path.join(snapDir(uid), id), 'utf8')); } catch { return null; }
+}
+
 /* ---------- push notifications (Web Push / VAPID) ---------- */
 const vapidFile = path.join(DATA, 'vapid.json');
 let vapid;
@@ -387,12 +408,35 @@ const routes = {
     } catch { json(res, 200, { state: null }); }
   },
 
+  // Snapshot list + fetch for the restore flow (ADR-0006 stage 1). Newest first.
+  'GET /api/data/snapshots': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    let snaps = [];
+    try {
+      snaps = fs.readdirSync(snapDir(user.id)).filter(f => f.endsWith('.json'))
+        .map(f => ({ id: f.replace(/\.json$/, ''), ts: Number(f.replace(/\.json$/, '')) }))
+        .sort((a, b) => b.ts - a.ts);
+    } catch { /* no snapshots yet */ }
+    json(res, 200, { snapshots: snaps });
+  },
+
+  'GET /api/data/snapshot': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    const id = new URL(req.url, 'http://x').searchParams.get('id') || '';
+    const snap = readSnapshot(user.id, id);
+    if (!snap) return json(res, 404, { error: 'no such snapshot' });
+    json(res, 200, { state: snap });
+  },
+
   'PUT /api/data': async (req, res) => {
     const user = readSession(req);
     if (!user) return json(res, 401, { error: 'not signed in' });
     const body = await readBody(req);
     if (!body.state || typeof body.state !== 'object') return json(res, 400, { error: 'state required' });
     delete body.state.active;              // in-progress workouts stay device-local
+    takeSnapshot(user.id);                 // archive the previous copy before overwriting
     atomicWrite(stateFile(user.id), JSON.stringify(body.state));
     json(res, 200, { ok: true, ts: body.state._ts || null });
   },
