@@ -12,6 +12,7 @@ import { t, LANGS, INSTR_LANGS } from '../lib/i18n.js'
 import { DEMO, REPO } from '../lib/demo.js'
 import { MOBILE, shareExport, syncReminder } from '../lib/mobile.js'
 import { loadStarterPlan, confirmSheet, importFromApp } from '../sheets.jsx'
+import { coachConfigured, loadCoachCfg, saveCoachCfg } from '../lib/coach.js'
 import Icon from '../components/Icon.jsx'
 import { Section, Row, SelectRow, Switch, Segmented, Button, TextField, TextArea, NumberField } from '../components/ui.jsx'
 
@@ -190,6 +191,7 @@ export default function Settings() {
     </Section>
 
     {(user || MOBILE) && <NotificationsCard S={S} update={update} toast={toast} />}
+    <CoachCard />
 
     {/* ---------- appearance ---------- */}
     <Section title={t('Appearance')} footer={DEMO || MOBILE ? undefined : t('synced with your profile')}>
@@ -422,6 +424,40 @@ function MeasurementsSheet() {
 
 function openMeasurementsSheet() {
   useUI.getState().openSheet(close => <MeasurementsSheet close={close} />)
+}
+
+// AI coach provider (phase 9). Opt-in and local-first: the config lives in its OWN
+// localStorage key — deliberately outside S, so it never syncs and never lands in a
+// backup or export. Without a configured endpoint the coach UI simply doesn't exist.
+function CoachCard() {
+  const [cfg, setCfg] = useState(() => loadCoachCfg())
+  const toast = useUI(s => s.toast)
+  const set = patch => setCfg(c => { const n = { ...c, ...patch }; saveCoachCfg(n); return n })
+  return <Section title={t('AI coach')}
+    footer={t('Answers come from the endpoint you configure below, built only from your logged data. Nothing is sent anywhere until you ask a question.')}>
+    <Row icon="sparkles" iconTint={coachConfigured(cfg) ? 'var(--acc)' : 'var(--grey)'}
+      title={t('Ask the coach about your training')}
+      subtitle={coachConfigured(cfg)
+        ? t('Ready — questions live in Stats → Progress overview.')
+        : t('Off. Configure an OpenAI-compatible endpoint to enable it.')}>
+      <Switch checked={coachConfigured(cfg)} onChange={v => {
+        if (!v) { set({ model: '' }); toast(t('Coach disabled')) }
+        else if (!cfg.model) toast(t('Pick a model below first'))
+      }} />
+    </Row>
+    <div style={{ padding: '2px 0 10px' }}>
+      <input className="input" placeholder="http://localhost:11434/v1" value={cfg.baseUrl}
+        onChange={e => set({ baseUrl: e.target.value })} autoCapitalize="off" autoCorrect="off" />
+      <div className="dim small" style={{ marginTop: 6 }}>{t('OpenAI-compatible endpoint — Ollama, LM Studio, OpenAI, Groq…')}</div>
+      <div style={{ height: 8 }} />
+      <input className="input" placeholder={t('Model')} value={cfg.model} onChange={e => set({ model: e.target.value })}
+        autoCapitalize="off" autoCorrect="off" />
+      <div style={{ height: 8 }} />
+      <input className="input" type="password" placeholder={t('API key (if needed)')} value={cfg.key}
+        onChange={e => set({ key: e.target.value })} autoCapitalize="off" autoCorrect="off" />
+      <div className="dim small" style={{ marginTop: 6 }}>{t('Stored only on this device — never synced, never in backups.')}</div>
+    </div>
+  </Section>
 }
 
 function NotificationsCard({ S, update, toast }) {

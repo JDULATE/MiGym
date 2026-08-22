@@ -4,7 +4,7 @@ import { useStore } from '../store/useStore.js'
 import { EXIDX } from '../lib/exercises.js'
 import { lastBW, streakWeeks, setLabel, modeOf, effortOf, metricModeForEntry, metricRowsForEntry, bestWeightForEntry } from '../lib/history.js'
 import { fmtNum, fmtDate, fmtVol, todayISO, weekKey } from '../lib/format.js'
-import { t } from '../lib/i18n.js'
+import { t, LANGS, getLang } from '../lib/i18n.js'
 import { bwSheet, goalSheet, calendarSheet, workoutDetailSheet, WorkoutRow, bwDeltaColor } from '../sheets.jsx'
 import LineChart from '../components/LineChart.jsx'
 import Heatmap from '../components/Heatmap.jsx'
@@ -17,11 +17,12 @@ import { fatigueStateOf } from '../lib/recovery-view.js'
 import { e1rmSeries, best1RM } from '../lib/onerm.js'
 import { exerciseMomentum, trainingSummary } from '../lib/analytics.js'
 import { adaptiveSuggestions } from '../lib/adaptive.js'
+import { askCoach, buildCoachContext, coachConfigured, loadCoachCfg } from '../lib/coach.js'
 import {
   hasEffort, displayScale, scaleName, toScale, avgRir, effortSummary, effortWeeks,
   effortHistogram, isHardSet, HARD_RIR
 } from '../lib/effort.js'
-import { Button, Segmented, SelectRow } from '../components/ui.jsx'
+import { Button, Segmented, SelectRow, TextField } from '../components/ui.jsx'
 import { isWarmupRow } from '../lib/workout-model.js'
 
 // Which muscles the training in a window actually hit — and, the point of the card,
@@ -285,7 +286,11 @@ function ProgressOverview({ S }) {
   const vol = v => fmtVol(v) + ' ' + unit
   const iconFor = k => k === 'increase' ? 'arrowUp' : k === 'ease' ? 'arrowDown' : k === 'review' ? 'lightbulb' : 'calendar'
   return <div className="card">
-    <h2>{t('Progress overview')}</h2>
+    <div className="row between">
+      <h2 style={{ margin: 0 }}>{t('Progress overview')}</h2>
+      {coachConfigured(loadCoachCfg()) &&
+        <Button size="sm" icon="sparkles" onClick={() => useUI.getState().openSheet(close => <CoachSheet close={close} />)}>{t('Ask')}</Button>}
+    </div>
     <div className="tiles" style={{ marginBottom: 4 }}>
       <div className="tile"><div className="l"><Icon name="plate" />{t('Volume · 7 days')}</div><div className="v">{vol(sum.weekVolume)}</div></div>
       <div className="tile"><div className="l"><Icon name="chartLine" />{t('Ø volume · 8 wks')}</div><div className="v">{sum.avgWeekVolume == null ? '—' : vol(sum.avgWeekVolume)}</div></div>
@@ -334,6 +339,47 @@ function ProgressOverview({ S }) {
     {mom.improving.length === 0 && mom.stalled.length === 0 && mom.stable.length === 0 &&
       <div className="muted small" style={{ marginTop: 6 }}>{t('A few more sessions and this section fills in.')}</div>}
   </div>
+}
+
+// AI coach sheet (phase 9). One bounded context per question: recorded facts + computed
+// metrics from lib/coach.js, guardrailed system prompt, OpenAI-compatible transport the
+// user configured in Settings. The answer is model output and is labelled as such.
+function CoachSheet({ close }) {
+  const S = useStore(s => s.S)
+  const [q, setQ] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [thread, setThread] = useState([])
+  const ask = async () => {
+    const question = q.trim()
+    if (!question || busy) return
+    setBusy(true); setQ('')
+    try {
+      const cfg = loadCoachCfg()
+      const langName = LANGS[getLang()] || 'English'
+      const text = await askCoach(cfg, buildMessages(buildCoachContext(S), question, langName))
+      setThread(t => [...t, { q: question, a: text }])
+    } catch (e) {
+      setThread(t => [...t, { q: question, error: e.message }])
+    }
+    setBusy(false)
+  }
+  return <>
+    <h3>{t('Ask the coach')}</h3>
+    <div className="muted small" style={{ marginBottom: 10 }}>{t('Answers are built only from your logged data — double-check anything important.')}</div>
+    <TextField value={q} onChange={e => setQ(e.target.value)} placeholder={t('Ask about your training…')}
+      onKeyDown={e => { if (e.key === 'Enter') ask() }} />
+    <div style={{ height: 10 }} />
+    <Button variant="primary" icon="sparkles" disabled={busy || !q.trim()} onClick={ask}>{busy ? t('Thinking…') : t('Ask')}</Button>
+    <div style={{ height: 8 }} />
+    {thread.map((x, i) => (
+      <div key={i} className="card small" style={{ marginTop: 8, textAlign: 'left' }}>
+        <div style={{ fontWeight: 600, marginBottom: 4 }}>{x.q}</div>
+        {x.error ? <span style={{ color: 'var(--red)' }}>{x.error}</span>
+          : <div style={{ whiteSpace: 'pre-wrap' }}>{x.a}</div>}
+      </div>
+    ))}
+    <div style={{ height: 8 }} />
+  </>
 }
 
 // Stats = the analytics hub: all charts, progress and history live here.
