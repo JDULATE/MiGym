@@ -47,7 +47,8 @@ export const EMPTY_PROFILE = {
   sessionMinutes: null,// preferred session length, 5..300 | null
   equipment: [],       // subset of EQUIPMENT
   preferences: '',     // free text, e.g. "mornings, hates leg press" — consumed by nothing yet
-  heightCm: null       // 50..280 | null
+  heightCm: null,      // 50..280 | null
+  ageYears: null       // 10..100 | null (Giwi onboarding; optional everywhere else)
 }
 
 // Field bounds — generous, they catch typos and corrupt backups rather than police humans.
@@ -78,6 +79,7 @@ export function normalizeProfile(raw) {
   p.daysPerWeek = clampOpt(src.daysPerWeek, 1, 7)
   p.sessionMinutes = clampOpt(src.sessionMinutes, 5, 300)
   p.heightCm = clampOpt(src.heightCm, 50, 280)
+  p.ageYears = clampOpt(src.ageYears, 10, 100)
   if (Array.isArray(src.equipment)) {
     p.equipment = [...new Set(src.equipment)].filter(eq => EQUIPMENT.includes(eq))
   }

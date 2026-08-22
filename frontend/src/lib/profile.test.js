@@ -53,6 +53,14 @@ describe('normalizeProfile', () => {
     expect(q.image).toBeNull()
   })
 
+  it('normalises age within a sensible range and rejects the rest', () => {
+    expect(normalizeProfile({ ageYears: 30 }).ageYears).toBe(30)
+    expect(normalizeProfile({ ageYears: '17' }).ageYears).toBe(17)
+    expect(normalizeProfile({ ageYears: 5 }).ageYears).toBeNull()
+    expect(normalizeProfile({ ageYears: 150 }).ageYears).toBeNull()
+    expect(normalizeProfile({}).ageYears).toBeNull()
+  })
+
   it('truncates over-long name and preferences instead of storing them', () => {
     const p = normalizeProfile({ name: 'x'.repeat(500), preferences: 'y'.repeat(2000) })
     expect(p.name.length).toBeLessThanOrEqual(60)
