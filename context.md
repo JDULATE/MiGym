@@ -38,10 +38,11 @@ See [PRODUCT.md](PRODUCT.md).
 
 ## Current phase
 
-**PHASE 14 — Deployment hardening: COMPLETE.** All core roadmap phases done.
-Parked ("coming soon" on the website): Phase 12 Gym platform and Phase 13 Commercial
-services — each requires a design ADR before implementation. Optional leftovers in
-Phase 10: snapshot encryption at rest, managed-hosting runbook.
+**UI/UX REDESIGN: AUDIT + PLAN COMPLETE — implementation not started.**
+`docs/UI-UX-AUDIT.md` (scores, P0–P3 matrix, evidence), `docs/UI-UX-REDESIGN.md`
+(workstreams W1–W15), `docs/DESIGN-SYSTEM.md` (tokens incl. new Ember accent direction).
+Implementation begins only after review/authorization; workstreams run token-first and
+each ends with tests+build+inspection gates.
 
 ## Completed phases
 
