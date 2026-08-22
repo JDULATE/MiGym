@@ -38,8 +38,8 @@ See [PRODUCT.md](PRODUCT.md).
 
 ## Current phase
 
-**PHASE 8 — Adaptive Training: COMPLETE.**
-Next phase requires explicit authorization: **PHASE 9 — AI Coach**.
+**PHASE 9 — AI Coach: COMPLETE.**
+Next phase requires explicit authorization: **PHASE 10 — Cloud Architecture**.
 
 ## Completed phases
 
@@ -71,6 +71,12 @@ Next phase requires explicit authorization: **PHASE 9 — AI Coach**.
   review/adhere) each with explanation templates; rendered under *Adjustments* in the Stats
   progress-overview card. Read-only over history; consumes rirTarget from Phase 7;
   thresholds are named constants. Nothing stored or auto-applied.
+* Phase 9 — AI Coach: `lib/coach.js` bounded facts/computed context builder, guardrailed
+  system prompt (labelled answers, no invention, no medicine, subordinate to deterministic
+  rules), OpenAI-compatible transport via plain fetch. Settings provider card (endpoint/
+  model/key in a dedicated localStorage key OUTSIDE S — never synced or backed up);
+  "Ask" chat sheet in Stats. Opt-in + local-first per ADR-0004: works in guest mode and
+  the mobile build; without a configured endpoint the coach does not exist.
 
 ## Planned phases
 

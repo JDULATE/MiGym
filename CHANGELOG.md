@@ -6,6 +6,36 @@ This repository continues openGym (© Duarte Santos, AGPL-3.0-or-later) as **MiG
 Upstream history below is preserved unchanged; MiGym phases add entries above the upstream
 log from this point on.
 
+### Phase 9 — AI Coach (2026-08-22)
+
+🤖 **An opt-in, local-first AI coach** (ADR-0004) — it explains your training; it never
+invents it, and it can never override the deterministic rules.
+
+#### Added
+
+- 🧠 `lib/coach.js`: a bounded, two-layer context builder (**facts** = what you recorded;
+  **computed** = what our deterministic code derived), a guardrailed system prompt that
+  forces answers to be labelled *Recorded facts / Calculated / Recommendation /
+  Uncertainty*, forbids invention and medical claims, subordinates the model to
+  `suggestionsFromRules`, and answers in your UI language.
+- 🔌 OpenAI-compatible transport (`/chat/completions`) via plain fetch — works with fully
+  local Ollama/LM Studio as well as hosted providers. No new dependencies.
+- ⚙️ Settings → **AI coach**: endpoint URL, model, optional API key. Off by default; with
+  nothing configured, the coach UI does not exist at all.
+- 💬 **"Ask"** in Stats → Progress overview: chat sheet over your bounded training digest.
+- 🧪 6 unit tests: config round-trip/cleanup, honest configured-state, URL normalization,
+  facts/computed separation, history bounding, prompt guardrails.
+
+#### Privacy & safety
+
+- Works with **no account**: guest mode and the mobile build included.
+- Provider credentials live in their own localStorage key — outside `S`, so they **never
+  sync and never appear in backups or exports** (see docs/SECURITY.md).
+- Nothing leaves the device until you ask a question; then only the digest + your question
+  go to the endpoint YOU chose. The MCP server remains the zero-network alternative.
+- The deterministic adaptive rules stay authoritative: the model may explain them, never
+  contradict them.
+
 ### Phase 8 — Adaptive Training (2026-08-22)
 
 🎯 **Deterministic coaching suggestions with their reasoning attached** — layered on the

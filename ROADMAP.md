@@ -84,13 +84,13 @@ in the Stats progress-overview card. Read-only over history, nothing auto-applie
 thresholds are named constants. AI remains excluded from these rules (Phase 9 builds on
 top of them).
 
-## Phase 9 — AI Coach
+## Phase 9 — AI Coach ✅ (complete, 2026-08-22)
 
-Only after deterministic systems are stable. Pipeline User Data → Analytics → Deterministic
-Rules → AI → Explanation. AI explains/summarizes/interprets recorded facts only; must label
-facts vs calculations vs recommendations vs uncertainty. Evaluate the upstream `origin/coach`
-branch here (documented in context.md) instead of building blind. AI cannot override
-progression safety rules.
+Opt-in, local-first, bring-your-own-provider (ADR-0004): bounded facts/computed context +
+guardrailed system prompt + OpenAI-compatible transport via plain fetch. Settings provider
+card (credentials outside S — never synced/backed up), "Ask" chat sheet in Stats. Works in
+guest and mobile builds; without a configured endpoint the coach does not exist. The
+deterministic adaptive rules stay authoritative; the model explains, never overrides.
 
 ## Phase 10 — Cloud architecture
 

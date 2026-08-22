@@ -68,6 +68,15 @@ Status: Phase 0 audit of inherited openGym security posture + MiGym obligations.
    `./data/secret`).
 5. No audit logging of admin actions beyond console logs.
 
+## AI coach credentials (MiGym phase 9, ADR-0004)
+
+* Provider endpoint/model/API key live in a dedicated localStorage key
+  (`migym_coach_cfg`) **outside** the synced state blob `S` — they never reach the server,
+  backups or exports.
+* The key is only placed in the Authorization header of the user's own request to the
+  endpoint they configured; it is never logged and never embedded in prompts.
+* The feature is opt-in: with no configured endpoint no request can originate from the UI.
+
 ## Secrets handling rules for contributors
 
 * Never commit `.env`, `./data/`, keys or VAPID material (already gitignored).
