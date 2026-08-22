@@ -6,6 +6,26 @@ This repository continues openGym (© Duarte Santos, AGPL-3.0-or-later) as **MiG
 Upstream history below is preserved unchanged; MiGym phases add entries above the upstream
 log from this point on.
 
+### Phase 3 — Workout System Polish (2026-08-22)
+
+🏋️ **Audit first, then fill the one gap.** The inherited workout screen already covers nearly
+everything on the MiGym spec checklist: guided sessions with today's plan detection, weight
+prefill, a "Last time" line showing your previous performance per exercise, optional RIR/RPE
+per set, rest timer with push fallback, warm-up rows excluded from stats, supersets,
+timed/cardio modes, PR detection at completion and a full finish flow. Target-RIR
+*prescription* is deliberately deferred to Phase 4/8 — recording effort exists, prescribing
+it is progression-engine work.
+
+#### Added
+
+- 📝 **Per-exercise notes in a session.** An "Add note" affordance under each exercise opens
+  a small editor; the note shows next to your previous performance while you train.
+  Notes are seeded into the session from matching routine entries, mirrored back to the
+  routine when saved (so the cue returns next time), and preserved in the finished workout's
+  history record. Clearing a note clears it everywhere it was mirrored.
+  (This was also openGym roadmap's outstanding "per-exercise notes" item.)
+- 🧪 Tests: note passthrough at the finish boundary + in-session display coverage.
+
 ### Phase 2 — Fitness Profile (2026-08-22)
 
 👤 **A fitness-oriented profile** — structured facts about the person training, ready for

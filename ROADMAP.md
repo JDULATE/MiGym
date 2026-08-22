@@ -36,12 +36,15 @@ preferences, heightCm }` plus append-only `S.measurements[]` — implemented in
 translated in all packs. No medical claims anywhere; data shaped for future consumers.
 See docs/DATA_MODEL.md.
 
-## Phase 3 — Workout system polish
+## Phase 3 — Workout system polish ✅ (complete, 2026-08-22)
 
-Audit the existing guided-workout screen against the MiGym spec (previous performance display,
-target RIR per exercise, per-exercise notes, PR callouts, completion flow). Most features
-already exist — fill gaps, improve ergonomics, keep every behavior covered by
-Workout.test.jsx / Workout.remove.test.jsx green. Large-touch-target pass.
+Audit vs the MiGym spec found nearly everything already present in inherited functionality:
+previous-performance line ("Last time"), per-set RIR/RPE recording, rest timer + push
+fallback, warm-up handling, supersets, PR detection at completion, finish flow. The one gap
+— **per-exercise notes** — is now implemented: `entry.note` on session entries (seeded from
+`cfg.note` on routine entries, mirrored back to the routine on save, preserved through
+finish). Target-RIR prescription is deferred to Phase 4/8: recording effort exists;
+prescribing it belongs to the progression engine.
 
 ## Phase 4 — Progression engine isolation
 

@@ -61,6 +61,8 @@ MiGym extends this incrementally; every extension gets documented here.
   name, bw: <weighIn|null>,
   entries: [
     { id, topW,                 // confirmed working weight
+      note,                     // per-exercise note (MiGym phase 3: seeded from routine cfg.note,
+                                // mirrored back to the routine on save, kept in history)
       target: {…prescription},  // what was planned (recorded since v1.2.2; may be absent)
       muscleSnapshot: {…},      // per-muscle volume captured at finish
       sets: [ Set ] } ],

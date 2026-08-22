@@ -1,7 +1,7 @@
 # MiGym — Agent Context
 
 > **Every coding agent MUST read this file before modifying any code.**
-> Last updated: Phase 2 (Fitness Profile), 2026-08-22.
+> Last updated: Phase 3 (Workout System Polish), 2026-08-22.
 
 ## Project identity
 
@@ -38,22 +38,21 @@ See [PRODUCT.md](PRODUCT.md).
 
 ## Current phase
 
-**PHASE 2 — Fitness Profile: COMPLETE.**
-Next phase requires explicit authorization: **PHASE 3 — Workout System Polish**.
+**PHASE 3 — Workout System Polish: COMPLETE.**
+Next phase requires explicit authorization: **PHASE 4 — Progression Engine Isolation**.
 
 ## Completed phases
 
 * Phase 0 — Repository audit (this document set).
-* Phase 1 — MiGym Foundation: app renamed/branded to MiGym (HTML/PWA/Capacitor/Android
-  metadata, API RP_NAME + push strings, UI strings + all 11 locale packs in lockstep,
-  regenerated icons/splashes via `frontend/scripts/make-icons.ps1`, compose now builds local
-  `migym-api`/`migym-web` images, Node >=22 pinned). Design system documented in
-  ARCHITECTURE.md, not redesigned. Verified: tests green, build OK, locale parity OK.
-* Phase 2 — Fitness Profile: `S.profile` (goal/experience/days/session/equipment/name/photo/
-  preferences/height) + append-only `S.measurements` log; new pure module `lib/profile.js`
-  with normalisation + tests; Profile & Body sections in Settings (sheets for identity,
-  equipment multi-select, measurements); demo seed extended; strings translated in all packs.
-  No medical interpretation; data shaped for future consumers. See docs/DATA_MODEL.md.
+* Phase 1 — MiGym Foundation (branding/metadata; see CHANGELOG).
+* Phase 2 — Fitness Profile (`S.profile` + append-only `S.measurements`, `lib/profile.js`,
+  Settings UI, demo seed, all-pack translations). See docs/DATA_MODEL.md.
+* Phase 3 — Workout System Polish: audit confirmed the spec checklist almost fully covered
+  by inherited functionality (previous performance line, RIR/RPE recording, rest timer,
+  PR detection, completion flow); added per-exercise session notes — seeded from routine
+  entries (`cfg.note`), mirrored back to the routine on save, carried into finished workouts
+  (`entry.note`, passthrough tested in finish-workout boundary). Target-RIR prescription
+  deliberately deferred to Phase 4/8.
 
 ## Planned phases
 
