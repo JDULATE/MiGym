@@ -23,6 +23,9 @@ export default function Settings() {
   const S = useStore(s => s.S)
   const profile = normalizeProfile(S.profile)
   const measurements = normalizeMeasurements(S.measurements)
+  // Heuristic "visibility of system status": when a linked device has offline pushes
+  // queued, say so here instead of leaving the user guessing whether data was saved.
+  const [syncPending] = useState(() => !!user && localStorage.getItem('gym_dirty') === '1')
   const { update, replaceState, setUser, pullState, pushState, signOut, signOutAll, resetDemo } = useStore()
   const toast = useUI(s => s.toast)
   const fileRef = useRef(null)
@@ -77,37 +80,6 @@ export default function Settings() {
       <div style={{ flex: 1, marginLeft: 10 }}><h1>{t('Settings')}</h1></div>
     </div>
 
-    {/* ---------- sync & backup (MiGym phase 10) ----------
-        Local-first: the base always lives on this device. Linking a server profile is
-        optional — it only adds sync and a security copy for device changes. Unlinking
-        never touches the local data. */}
-    <Section title={t('Sync & backup')} footer={user ? t('Your base lives on this device; the linked profile keeps a synced copy.') : t('Everything already works without an account. Link one only to keep a synced copy for new devices.')}>
-      {MOBILE ? <>
-        <Row icon="lock" iconTint="var(--acc)" title={t('All data stays on this phone')} subtitle={t('No account, no cloud — back it up anytime with Export below.')} />
-      </> : DEMO ? <>
-        <Row icon="sparkles" iconTint="var(--acc)" title={t('You’re in the demo')} subtitle={t('Example data, stored only in this browser — change anything you like.')} />
-        <Row icon="reset" iconTint="var(--blue)" title={t('Reset demo data')} accessory="chevron"
-          onClick={() => confirmSheet({ title: t('Reset demo data?'), message: t('Puts the example plan, workouts and weigh-ins back the way they started.'), confirmText: t('Reset'), onConfirm: () => { resetDemo(); nav('/home'); toast(t('Demo data reset')) } })} />
-      </> : user ? <>
-        <Row icon="personCircle" iconTint="var(--grey)" title={user.name} subtitle={t('Linked with passkey — every change syncs to this profile.')} />
-        {user.admin && <Row icon="wrench" iconTint="var(--indigo)" title={t('Admin dashboard')} accessory="chevron" onClick={() => nav('/admin')} />}
-        <Row icon="history" iconTint="var(--blue)" title={t('Restore from snapshot')} accessory="chevron" onClick={restoreSnapshotSheet} />
-        <Row icon="signOut" iconTint="var(--red)" title={t('Unlink from server')} danger onClick={() => confirmSheet({
-          title: t('Unlink from server?'),
-          message: t('A final backup is pushed first. Your plan, workouts and history stay on this device.'),
-          confirmText: t('Unlink'), danger: true,
-          onConfirm: () => { signOut(); toast(t('Device unlinked — your data stayed here')) },
-        })} />
-        <Row icon="shield" iconTint="var(--red)" title={t('End all sessions')} subtitle={t('Signs this profile out on all your other devices too.')} danger onClick={signOutEverywhere} />
-      </> : webauthnOK() ? <>
-        <Row icon="personCircle" iconTint="var(--acc)" title={t('Create a server backup profile')} subtitle={t('Keeps a synced copy for new devices — with passkeys, no passwords.')} accessory="chevron" onClick={registerHere} />
-        <Row icon="person" iconTint="var(--blue)" title={t('Link to an existing profile')} accessory="chevron" onClick={signInHere} />
-      </> : (
-        <Row icon="lock" iconTint="var(--grey)" title={t('Passkeys not supported in this browser.')} />
-      )}
-    </Section>
-    {!user && !DEMO && !MOBILE && webauthnOK() && <p className="sect-f" style={{ marginTop: -18, marginBottom: 22 }}>{t('Local-first: nothing leaves this device unless you link a server above.')}</p>}
-
     {/* ---------- fitness profile (MiGym phase 2) ----------
         Structured facts about the person training — consumed by nothing yet beyond
         this screen, but shaped so progression/analytics/coaching features can read
@@ -153,6 +125,39 @@ export default function Settings() {
         value={measurements.length ? t('{0} readings', measurements.length) : null}
         accessory="chevron" onClick={() => openMeasurementsSheet(measurements)} />
     </Section>
+
+    {/* ---------- sync & backup (MiGym phase 10) ----------
+        Local-first: the base always lives on this device. Linking a server profile is
+        optional — it only adds sync and a security copy for device changes. Unlinking
+        never touches the local data. */}
+    <Section title={t('Sync & backup')} footer={user ? t('Your base lives on this device; the linked profile keeps a synced copy.') : t('Everything already works without an account. Link one only to keep a synced copy for new devices.')}>
+      {MOBILE ? <>
+        <Row icon="lock" iconTint="var(--acc)" title={t('All data stays on this phone')} subtitle={t('No account, no cloud — back it up anytime with Export below.')} />
+      </> : DEMO ? <>
+        <Row icon="sparkles" iconTint="var(--acc)" title={t('You’re in the demo')} subtitle={t('Example data, stored only in this browser — change anything you like.')} />
+        <Row icon="reset" iconTint="var(--blue)" title={t('Reset demo data')} accessory="chevron"
+          onClick={() => confirmSheet({ title: t('Reset demo data?'), message: t('Puts the example plan, workouts and weigh-ins back the way they started.'), confirmText: t('Reset'), onConfirm: () => { resetDemo(); nav('/home'); toast(t('Demo data reset')) } })} />
+      </> : user ? <>
+        <Row icon="personCircle" iconTint="var(--grey)" title={user.name} subtitle={t('Linked with passkey — every change syncs to this profile.')} />
+        {user.admin && <Row icon="wrench" iconTint="var(--indigo)" title={t('Admin dashboard')} accessory="chevron" onClick={() => nav('/admin')} />}
+        {syncPending && <Row icon="bolt" iconTint="var(--orange)" title={t('Offline — changes saved locally')}
+          subtitle={t('They will sync automatically the next time the server is reachable.')} />}
+        <Row icon="history" iconTint="var(--blue)" title={t('Restore from snapshot')} accessory="chevron" onClick={restoreSnapshotSheet} />
+        <Row icon="signOut" iconTint="var(--red)" title={t('Unlink from server')} danger onClick={() => confirmSheet({
+          title: t('Unlink from server?'),
+          message: t('A final backup is pushed first. Your plan, workouts and history stay on this device.'),
+          confirmText: t('Unlink'), danger: true,
+          onConfirm: () => { signOut(); toast(t('Device unlinked — your data stayed here')) },
+        })} />
+        <Row icon="shield" iconTint="var(--red)" title={t('End all sessions')} subtitle={t('Signs this profile out on all your other devices too.')} danger onClick={signOutEverywhere} />
+      </> : webauthnOK() ? <>
+        <Row icon="personCircle" iconTint="var(--acc)" title={t('Create a server backup profile')} subtitle={t('Keeps a synced copy for new devices — with passkeys, no passwords.')} accessory="chevron" onClick={registerHere} />
+        <Row icon="person" iconTint="var(--blue)" title={t('Link to an existing profile')} accessory="chevron" onClick={signInHere} />
+      </> : (
+        <Row icon="lock" iconTint="var(--grey)" title={t('Passkeys not supported in this browser.')} />
+      )}
+    </Section>
+    {!user && !DEMO && !MOBILE && webauthnOK() && <p className="sect-f" style={{ marginTop: -18, marginBottom: 22 }}>{t('Local-first: nothing leaves this device unless you link a server above.')}</p>}
 
     {/* ---------- general ---------- */}
     <Section title={t('General')} footer={t('Note: switching units only changes the label — logged numbers are not converted.')}>
@@ -454,14 +459,17 @@ function CoachCard() {
       }} />
     </Row>
     <div style={{ padding: '2px 0 10px' }}>
-      <input className="input" placeholder="http://localhost:11434/v1" value={cfg.baseUrl}
+      <div className="dim small" style={{ marginBottom: 4 }}>{t('Endpoint URL')}</div>
+      <input className="input" aria-label={t('Endpoint URL')} placeholder="http://localhost:11434/v1" value={cfg.baseUrl}
         onChange={e => set({ baseUrl: e.target.value })} autoCapitalize="off" autoCorrect="off" />
       <div className="dim small" style={{ marginTop: 6 }}>{t('OpenAI-compatible endpoint — Ollama, LM Studio, OpenAI, Groq…')}</div>
       <div style={{ height: 8 }} />
-      <input className="input" placeholder={t('Model')} value={cfg.model} onChange={e => set({ model: e.target.value })}
+      <div className="dim small" style={{ marginBottom: 4 }}>{t('Model')}</div>
+      <input className="input" aria-label={t('Model')} placeholder="llama3.1" value={cfg.model} onChange={e => set({ model: e.target.value })}
         autoCapitalize="off" autoCorrect="off" />
       <div style={{ height: 8 }} />
-      <input className="input" type="password" placeholder={t('API key (if needed)')} value={cfg.key}
+      <div className="dim small" style={{ marginBottom: 4 }}>{t('API key (if needed)')}</div>
+      <input className="input" type="password" aria-label={t('API key (if needed)')} value={cfg.key}
         onChange={e => set({ key: e.target.value })} autoCapitalize="off" autoCorrect="off" />
       <div className="dim small" style={{ marginTop: 6 }}>{t('Stored only on this device — never synced, never in backups.')}</div>
     </div>

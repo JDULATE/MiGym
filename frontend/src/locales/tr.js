@@ -731,4 +731,10 @@ export default {
   'No workouts yet — finish your first session and it will appear here.': 'Henüz antrenman yok — ilk seansını bitir, burada görünecek.',
   'Move up': 'Yukarı taşı',
   'Move down': 'Aşağı taşı',
+  'Endpoint URL': 'Uç nokta URL',
+  'Offline — changes saved locally': 'Çevrimdışı — değişiklikler yerel olarak kaydedildi',
+  'They will sync automatically the next time the server is reachable.': 'Sunucuya bir sonraki erişimde otomatik olarak eşitlenir.',
+  'Effort week by week': 'Hafta hafta efor',
+  'Body weight trend': 'Kilo trendü',
+  'Effort on this exercise, session by session': 'Bu egzersizde seans seans efor',
 }

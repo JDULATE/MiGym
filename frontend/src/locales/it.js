@@ -731,4 +731,10 @@ export default {
   'No workouts yet — finish your first session and it will appear here.': 'Ancora nessun allenamento: completa la prima sessione e comparirà qui.',
   'Move up': 'Sposta su',
   'Move down': 'Sposta giù',
+  'Endpoint URL': 'URL dell’endpoint',
+  'Offline — changes saved locally': 'Offline — modifiche salvate localmente',
+  'They will sync automatically the next time the server is reachable.': 'Si sincronizzeranno automaticamente al prossimo accesso al server.',
+  'Effort week by week': 'Sforzo settimana per settimana',
+  'Body weight trend': 'Andamento del peso',
+  'Effort on this exercise, session by session': 'Sforzo su questo esercizio, sessione dopo sessione',
 }

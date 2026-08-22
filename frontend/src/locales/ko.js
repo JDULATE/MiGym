@@ -731,4 +731,10 @@ export default {
   'No workouts yet — finish your first session and it will appear here.': '아직 운동이 없습니다 — 첫 세션을 끝내면 여기에 표시됩니다।',
   'Move up': '위로',
   'Move down': '아래로',
+  'Endpoint URL': '엔드포인트 URL',
+  'Offline — changes saved locally': '오프라인 — 변경 사항이 로컬에 저장됨',
+  'They will sync automatically the next time the server is reachable.': '서버에 다시 연결되면 자동으로 동기화됩니다.',
+  'Effort week by week': '주별 노력도',
+  'Body weight trend': '체중 추이',
+  'Effort on this exercise, session by session': '이 운동의 세션별 노력도',
 }

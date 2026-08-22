@@ -731,4 +731,10 @@ export default {
   'No workouts yet — finish your first session and it will appear here.': 'Пока нет тренировок — заверши первую, и она появится здесь.',
   'Move up': 'Вверх',
   'Move down': 'Вниз',
+  'Endpoint URL': 'URL эндпоинта',
+  'Offline — changes saved locally': 'Офлайн — изменения сохранены локально',
+  'They will sync automatically the next time the server is reachable.': 'Синхронизируются автоматически, когда сервер снова станет доступен.',
+  'Effort week by week': 'Усилие неделя за неделей',
+  'Body weight trend': 'Динамика веса',
+  'Effort on this exercise, session by session': 'Усилие в этом упражнении, от тренировки к тренировке',
 }

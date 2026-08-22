@@ -731,4 +731,10 @@ export default {
   'No workouts yet — finish your first session and it will appear here.': '还没有训练记录——完成第一次训练后就会显示在这里。',
   'Move up': '上移',
   'Move down': '下移',
+  'Endpoint URL': '端点地址',
+  'Offline — changes saved locally': '离线——更改已保存在本地',
+  'They will sync automatically the next time the server is reachable.': '服务器恢复连接后会自动同步。',
+  'Effort week by week': '每周努力度',
+  'Body weight trend': '体重趋势',
+  'Effort on this exercise, session by session': '这个动作的逐次努力度',
 }

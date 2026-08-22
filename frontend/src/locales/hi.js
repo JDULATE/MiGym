@@ -731,4 +731,10 @@ export default {
   'No workouts yet — finish your first session and it will appear here.': 'अभी कोई वर्कआउट नहीं — पहला सत्र पूरा करें, यह यहाँ दिखेगा।',
   'Move up': 'ऊपर ले जाएँ',
   'Move down': 'नीचे ले जाएँ',
+  'Endpoint URL': 'एंडपॉइंट URL',
+  'Offline — changes saved locally': 'ऑफ़लाइन — बदलाव स्थानीय रूप से सहेजे गए',
+  'They will sync automatically the next time the server is reachable.': 'सर्वर के फिर से उपलब्ध होने पर ये स्वतः सिंक हो जाएँगे।',
+  'Effort week by week': 'सप्ताह दर सप्ताह प्रयास',
+  'Body weight trend': 'वज़न रुझान',
+  'Effort on this exercise, session by session': 'इस व्यायाम में प्रयास, सत्र दर सत्र',
 }
