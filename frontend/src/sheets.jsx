@@ -18,6 +18,7 @@ import { exerciseMuscleSnapshot, loadOfWorkouts } from './lib/muscles.js'
 import { parseImport, mergeImport } from './lib/import-csv.js'
 import { buildPlanBundle, parsePlan, mergePlan, printPlan } from './lib/plan-share.js'
 import { estimate1RM, best1RM, is1RMRecord, REP_CAP } from './lib/onerm.js'
+import { alternativesOf, difficultyOf, movementGroup } from './lib/exercise-taxonomy.js'
 import { nextPrescription, applyPrescription, policyFor, defaultIncrement, POLICIES_FOR, POLICY_NAME, POLICY_DESC, MAX_BW_SETS } from './lib/progression.js'
 import { MOBILE, shareExport } from './lib/mobile.js'
 import { buildCompletedWorkout } from './lib/finish-workout.js'
@@ -286,6 +287,9 @@ function ExerciseDetail({ ex, close }) {
   const st = useStore(s => s.S)
   const last = lastEntryFor(st, ex.id)
   const best = bestWeightFor(st, ex.id)
+  const diff = difficultyOf(ex)
+  const group = movementGroup(ex)
+  const alternatives = alternativesOf(ex, EXDB)
   return <>
     <h3 className="capitalize">{ex.n}</h3>
     <Media ex={ex} />
@@ -295,6 +299,10 @@ function ExerciseDetail({ ex, close }) {
       <span className="tag"><Icon name="dumbbell" />{t(ex.eq)}</span>
       {smOf(ex).slice(0, 3).map((s, i) => <span key={i} className="tag">{t(s)}</span>)}
     </div>
+    {(diff || group) && <div className="row small dim nocap" style={{ gap: 10, marginBottom: 8 }}>
+      {diff && <span>{t('Difficulty')}: <b style={{ color: 'var(--label)' }}>{t(diff)}</b></span>}
+      {group && <span><b style={{ color: 'var(--label)' }}>{t(group)}</b></span>}
+    </div>}
     {ex.desc && <div className="exnote">{ex.desc}</div>}
     {best > 0 && <div className="small row" style={{ marginBottom: 6, gap: 5 }}><Icon name="trophy" style={{ fontSize: 14, color: 'var(--yellow)' }} />{t('Best:')} <b className="accent">{fmtNum(best)} {st.unit}</b>{last ? ` · ${t('last')} ${fmtDate(last.d)}: ${last.sets.map(s => setLabel(ex.id, s, last.target)).join(', ')}` : ''}</div>}
     <Button variant="primary" icon="plus" style={{ margin: '10px 0 4px' }} onClick={() => addToRoutineSheet(ex)}>{t('Add to my plan')}</Button>
@@ -304,6 +312,16 @@ function ExerciseDetail({ ex, close }) {
     </div>}
     {!isCardio(ex) && <OneRM ex={ex} />}
     {instrFor(ex).length > 0 &&<><h4 className="sec">{t('How to')}{!INSTR_LANGS.includes(getLang()) && <span className="dim" style={{ textTransform: 'none', letterSpacing: 0 }}> · {t('instructions in English')}</span>}</h4><ol className="steps-list">{instrFor(ex).map((s, i) => <li key={i}>{s}</li>)}</ol></>}
+    {alternatives.length > 0 && <>
+      <h4 className="sec">{t('Alternatives')}</h4>
+      <div className="list">
+        {alternatives.map(a => <div key={a.id} className="item" onClick={() => exerciseDetailSheet(a)}>
+          <Thumb ex={a} />
+          <div className="grow"><div className="tt capitalize">{a.n}</div><div className="ss capitalize">{t(a.tg || a.bp)} · {t(a.eq)}</div></div>
+          <Icon name="chevronRight" className="chev" />
+        </div>)}
+      </div>
+    </>}
   </>
 }
 export const exerciseDetailSheet = ex => ui().openSheet(close => <ExerciseDetail ex={ex} close={close} />)

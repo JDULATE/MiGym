@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useStore } from '../store/useStore.js'
 import { EXDB, BODYPARTS, allExercises, equipmentOf } from '../lib/exercises.js'
+import { MOVEMENT_GROUPS, movementGroup } from '../lib/exercise-taxonomy.js'
 import { bestWeightFor } from '../lib/history.js'
 import { fmtNum } from '../lib/format.js'
 import { t } from '../lib/i18n.js'
@@ -14,18 +15,26 @@ export default function Library() {
   const [q, setQ] = useState('')
   const [bp, setBp] = useState('')
   const [eq, setEq] = useState('')
+  const [mg, setMg] = useState('')
   const [shown, setShown] = useState(40)
   const ql = q.toLowerCase().trim()
   const base = allExercises(S).filter(e => (!bp || e.bp === bp) && (!ql || e.n.toLowerCase().includes(ql) || e.tg.includes(ql) || e.eq.includes(ql) || (e.desc || '').toLowerCase().includes(ql)))
-  const eqOpts = equipmentOf(base)
+  // Movement group narrows like the body-part chips; exercises the taxonomy cannot place
+  // (rare custom cases) only survive while no group is selected.
+  const mgBase = mg ? base.filter(e => movementGroup(e) === mg) : base
+  const eqOpts = equipmentOf(mgBase)
   // Drop the equipment filter if the search narrowed it away, so you never hit a dead end.
   const eqOn = eqOpts.includes(eq) ? eq : ''
-  const f = eqOn ? base.filter(e => e.eq === eqOn) : base
+  const f = (eqOn ? mgBase.filter(e => e.eq === eqOn) : mgBase)
 
   return <>
     <div className="hdr"><div><h1>{t('Exercises')}</h1><div className="sub">{t('{0} exercises with animations', EXDB.length)}</div></div></div>
     <div className="search" style={{ marginBottom: 10 }}><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
       <input className="input" placeholder={t('Search…')} value={q} onChange={e => { setQ(e.target.value); setShown(40) }} /></div>
+    <div className="chips" style={{ marginBottom: 8 }}>
+      <button className={'chip nocap' + (!mg ? ' on' : '')} onClick={() => { setMg(''); setShown(40) }}>{t('All')}</button>
+      {MOVEMENT_GROUPS.map(g => <button key={g} className={'chip nocap' + (mg === g ? ' on' : '')} onClick={() => { setMg(g); setEq(''); setShown(40) }}>{t(g)}</button>)}
+    </div>
     <div className="chips" style={{ marginBottom: eqOpts.length > 1 ? 8 : 12 }}>
       <button className={'chip nocap' + (!bp ? ' on' : '')} onClick={() => { setBp(''); setEq(''); setShown(40) }}>{t('All')}</button>
       {BODYPARTS.map(b => <button key={b} className={'chip' + (bp === b ? ' on' : '')} onClick={() => { setBp(b); setEq(''); setShown(40) }}>{t(b)}</button>)}
