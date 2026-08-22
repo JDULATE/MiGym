@@ -98,8 +98,8 @@ export default function RoutineEdit() {
       let dragStyle
       if (drag) {
         if (i === drag.i) dragStyle = { transform: `translateY(${drag.dy}px)`, zIndex: 10, position: 'relative', boxShadow: '0 10px 28px rgba(0,0,0,.4)', opacity: .92, touchAction: 'none' }
-        else if (drag.i < drag.over && i > drag.i && i <= drag.over) dragStyle = { transform: `translateY(-${rowH()}px)` }
-        else if (drag.i > drag.over && i >= drag.over && i < drag.i) dragStyle = { transform: `translateY(${rowH()}px)` }
+        else if (drag.i < drag.over && i > drag.i && i <= drag.over) dragStyle = { transform: `translateY(-${rowStep}px)` }
+        else if (drag.i > drag.over && i >= drag.over && i < drag.i) dragStyle = { transform: `translateY(${rowStep}px)` }
       }
       return <div key={i}>
         {unitFirst.has(i) && <div className="ss-label"><Icon name="link" />{t('Superset')}</div>}
