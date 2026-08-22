@@ -183,3 +183,17 @@ describe('superset flow survives an exercise being removed mid-session', () => {
     expect(mocks.startRest).toHaveBeenCalledWith(90)
   })
 })
+
+describe('per-exercise note (MiGym phase 3)', () => {
+  it('shows the note text with its edit control when one is seeded', async () => {
+    await mount([exercise('bench-with-note', [false, false], { note: 'pause 2 s at the bottom' })])
+    expect(container.textContent.includes('pause 2 s at the bottom')).toBe(true)
+    expect(container.querySelector('[aria-label="Edit note"]')).toBeTruthy()
+    expect(container.textContent.includes('Add note')).toBe(false)
+  })
+
+  it('offers an add-note affordance on entries without a note', async () => {
+    await mount([exercise('plain-bench', [false])])
+    expect(container.textContent.includes('Add note')).toBe(true)
+  })
+})
