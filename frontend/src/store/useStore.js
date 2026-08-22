@@ -3,6 +3,7 @@ import { api } from '../lib/api.js'
 import { localTZ } from '../lib/format.js'
 import { registerCustom } from '../lib/exercises.js'
 import { EMPTY_PROFILE } from '../lib/profile.js'
+import { mergeStates } from '../lib/sync.js'
 import { DEMO, DEMO_SEEDED } from '../lib/demo.js'
 import { MOBILE, nativeLoad, nativeSave, syncReminder } from '../lib/mobile.js'
 
@@ -115,13 +116,17 @@ export const useStore = create((set, get) => {
       try {
         const { state } = await api('/api/data')
         const S = get().S
-        const dirty = localStorage.getItem('gym_dirty') === '1'
-        if (state && (!hasData(S) || ((state._ts || 0) >= (S._ts || 0) && !dirty))) {
+        if (state && hasData(S)) {
+          // ADR-0006 stage 1: union-first merge — history from both sides survives,
+          // config sections follow the newer blob, the running workout stays device-local.
+          const merged = Object.assign(clone(DEF), mergeStates(S, state))
           const active = S.active
-          const next = Object.assign(clone(DEF), state)
-          if (active) next.active = active
-          persist(next, false)
-        } else if (hasData(S)) { await get().pushState() }
+          if (active) merged.active = active
+          persist(merged, false)
+          await get().pushState()   // publish the union so both ends converge
+        } else if (state && !hasData(S)) {
+          persist(Object.assign(clone(DEF), state), false)
+        }
       } catch (e) { /* offline — keep local */ }
     },
 
