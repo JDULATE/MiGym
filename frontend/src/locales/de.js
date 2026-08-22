@@ -636,4 +636,8 @@ export default {
   'Thigh': 'Oberschenkel',
   'Calf': 'Wade',
   'Days per week': 'Tage pro Woche',
+  'Exercise note': 'Notiz zur Übung',
+  'Add note': 'Notiz hinzufügen',
+  'Edit note': 'Notiz bearbeiten',
+  'Form cues and setup reminders — “pause 2 s at the bottom”, “elbows tucked”…': 'Technik-Hinweise und Einrichtungserinnerungen — „2 s unten pausieren“, „Ellbogen anlegen“…',
 }

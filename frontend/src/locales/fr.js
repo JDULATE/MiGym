@@ -619,4 +619,8 @@ export default {
   'Thigh': 'Cuisse',
   'Calf': 'Mollet',
   'Days per week': 'Jours par semaine',
+  'Exercise note': 'Note sur l’exercice',
+  'Add note': 'Ajouter une note',
+  'Edit note': 'Modifier la note',
+  'Form cues and setup reminders — “pause 2 s at the bottom”, “elbows tucked”…': 'Repères techniques et rappels de préparation — « pause 2 s en bas », « coudes rentrés »…',
 }

@@ -619,4 +619,8 @@ export default {
   'Thigh': '허벅지',
   'Calf': '종아리',
   'Days per week': '주당 일수',
+  'Exercise note': '운동 메모',
+  'Add note': '메모 추가',
+  'Edit note': '메모 편집',
+  'Form cues and setup reminders — “pause 2 s at the bottom”, “elbows tucked”…': '폼 팁과 세팅 알림 — “하단에서 2초 정지”, “팔꿈치 붙이기”…',
 }

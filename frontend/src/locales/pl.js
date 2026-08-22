@@ -619,4 +619,8 @@ export default {
   'Thigh': 'Udo',
   'Calf': 'Łydka',
   'Days per week': 'Dni w tygodniu',
+  'Exercise note': 'Notatka do ćwiczenia',
+  'Add note': 'Dodaj notatkę',
+  'Edit note': 'Edytuj notatkę',
+  'Form cues and setup reminders — “pause 2 s at the bottom”, “elbows tucked”…': 'Wskazówki techniczne i przypomnienia — „pauza 2 s na dole”, „łokcie blisko tułowia”…',
 }

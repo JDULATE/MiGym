@@ -619,4 +619,8 @@ export default {
   'Thigh': 'जाँघ',
   'Calf': 'पिंडली',
   'Days per week': 'सप्ताह में दिन',
+  'Exercise note': 'व्यायाम नोट',
+  'Add note': 'नोट जोड़ें',
+  'Edit note': 'नोट संपादित करें',
+  'Form cues and setup reminders — “pause 2 s at the bottom”, “elbows tucked”…': 'फ़ॉर्म संकेत और सेटअप अनुस्मारक — "नीचे 2 सेकंड रुकें", "कोहनियाँ पास"…',
 }

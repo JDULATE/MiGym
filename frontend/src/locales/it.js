@@ -619,4 +619,8 @@ export default {
   'Thigh': 'Coscia',
   'Calf': 'Polpaccio',
   'Days per week': 'Giorni a settimana',
+  'Exercise note': 'Nota dell’esercizio',
+  'Add note': 'Aggiungi nota',
+  'Edit note': 'Modifica nota',
+  'Form cues and setup reminders — “pause 2 s at the bottom”, “elbows tucked”…': 'Suggerimenti tecnici e promemoria di impostazione — «pausa di 2 s in basso», «gomiti vicini»…',
 }

@@ -619,4 +619,8 @@ export default {
   'Thigh': 'Muslo',
   'Calf': 'Pantorrilla',
   'Days per week': 'Días por semana',
+  'Exercise note': 'Nota del ejercicio',
+  'Add note': 'Añadir nota',
+  'Edit note': 'Editar nota',
+  'Form cues and setup reminders — “pause 2 s at the bottom”, “elbows tucked”…': 'Claves de técnica y recordatorios de preparación — «pausa 2 s abajo», «codos pegados»…',
 }

@@ -619,4 +619,8 @@ export default {
   'Thigh': 'Coxa',
   'Calf': 'Panturrilha',
   'Days per week': 'Dias por semana',
+  'Exercise note': 'Nota do exercício',
+  'Add note': 'Adicionar nota',
+  'Edit note': 'Editar nota',
+  'Form cues and setup reminders — “pause 2 s at the bottom”, “elbows tucked”…': 'Dicas de técnica e lembretes de configuração — «pausa 2 s em baixo», «cotovelos junto ao corpo»…',
 }

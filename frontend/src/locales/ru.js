@@ -619,4 +619,8 @@ export default {
   'Thigh': 'Бедро',
   'Calf': 'Голень',
   'Days per week': 'Дней в неделю',
+  'Exercise note': 'Заметка к упражнению',
+  'Add note': 'Добавить заметку',
+  'Edit note': 'Изменить заметку',
+  'Form cues and setup reminders — “pause 2 s at the bottom”, “elbows tucked”…': 'Подсказки по технике и подготовке — «пауза 2 с внизу», «локти прижаты»…',
 }

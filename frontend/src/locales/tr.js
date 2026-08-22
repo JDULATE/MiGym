@@ -619,4 +619,8 @@ export default {
   'Thigh': 'Uyluk',
   'Calf': 'Baldır',
   'Days per week': 'Haftada kaç gün',
+  'Exercise note': 'Egzersiz notu',
+  'Add note': 'Not ekle',
+  'Edit note': 'Notu düzenle',
+  'Form cues and setup reminders — “pause 2 s at the bottom”, “elbows tucked”…': 'Teknik ipuçları ve hazırlık hatırlatmaları — «aşağıda 2 sn dur», «dirsekler yapışık»…',
 }

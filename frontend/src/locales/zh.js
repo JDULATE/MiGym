@@ -619,4 +619,8 @@ export default {
   'Thigh': '大腿',
   'Calf': '小腿',
   'Days per week': '每周天数',
+  'Exercise note': '动作备注',
+  'Add note': '添加备注',
+  'Edit note': '编辑备注',
+  'Form cues and setup reminders — “pause 2 s at the bottom”, “elbows tucked”…': '技术要点和准备提醒——如“底部停顿2秒”“夹紧手肘”……',
 }
