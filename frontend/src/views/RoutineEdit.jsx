@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom'
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useStore } from '../store/useStore.js'
 import { exOr } from '../lib/exercises.js'
 import { uid } from '../lib/format.js'
@@ -20,6 +20,12 @@ export default function RoutineEdit() {
   const S = useStore(s => s.S)
   const update = useStore(s => s.update)
   const r = S.routines.find(x => x.id === id)
+
+  // ---- drag-to-reorder state (must live above any early return) ----
+  const rowRefs = useRef({})
+  const [rowStep, setRowStep] = useState(80)   // row height + list gap, measured
+  const [drag, setDrag] = useState(null)       // { i, start, dy }
+
   useEffect(() => { if (!r) nav('/plan') }, [!!r])
   if (!r) return null
 
@@ -36,6 +42,32 @@ export default function RoutineEdit() {
   const units = supersetUnits(r.ex)
   const unitFirst = new Set(units.filter(u => u.length > 1).map(u => u[0]))
   const inSS = new Set(units.filter(u => u.length > 1).flat())
+
+  // ---- drag-to-reorder (direct manipulation, spec §18) ----
+  // The grip handle captures the pointer and the row follows the finger 1:1; siblings
+  // between origin and hover shift by one row height. The reorder commits on release —
+  // until then nothing is written to state, so a cancelled drag costs nothing.
+  const onDragStart = (e, i) => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return
+    e.currentTarget.setPointerCapture?.(e.pointerId)
+    setDrag({ i, start: e.clientY, dy: 0 })
+  }
+  const onDragMove = e => {
+    if (!drag) return
+    const dy = e.clientY - drag.start
+    const over = Math.max(0, Math.min(r.ex.length - 1, drag.i + Math.round(dy / rowStep)))
+    setDrag({ ...drag, dy, over })
+  }
+  const onDragEnd = () => {
+    setDrag(d => {
+      if (d) edit(ex => {
+        const [row] = ex.splice(d.i, 1)
+        ex.splice(d.over, 0, row)
+        cleanupSg(ex)
+      })
+      return null
+    })
+  }
 
   return <div className="narrow">
     <div className="hdr">
@@ -61,14 +93,30 @@ export default function RoutineEdit() {
       // could neither see nor delete, but that still turned up in the workout.
       const ex = exOr(e.id)
       const linkedPrev = i > 0 && e.sg && r.ex[i - 1].sg === e.sg
+      // drag visuals: the grabbed row follows the finger 1:1; siblings between origin
+      // and hover shift one slot so the landing place is always obvious.
+      let dragStyle
+      if (drag) {
+        if (i === drag.i) dragStyle = { transform: `translateY(${drag.dy}px)`, zIndex: 10, position: 'relative', boxShadow: '0 10px 28px rgba(0,0,0,.4)', opacity: .92, touchAction: 'none' }
+        else if (drag.i < drag.over && i > drag.i && i <= drag.over) dragStyle = { transform: `translateY(-${rowH()}px)` }
+        else if (drag.i > drag.over && i >= drag.over && i < drag.i) dragStyle = { transform: `translateY(${rowH()}px)` }
+      }
       return <div key={i}>
         {unitFirst.has(i) && <div className="ss-label"><Icon name="link" />{t('Superset')}</div>}
-        <ListItem className={'item' + (inSS.has(i) ? ' in-ss' : '')} onClick={() => {
-          exConfigSheet(ex, e, cfg => edit(x => { x[i] = { id: x[i].id, sg: x[i].sg, ...cfg } }), () => edit(x => { x.splice(i, 1); cleanupSg(x) }), r)
-        }}>
+        <ListItem className={'item' + (inSS.has(i) ? ' in-ss' : '')} ref={el => { rowRefs.current[i] = el }}
+          style={dragStyle}
+          onClick={() => {
+            exConfigSheet(ex, e, cfg => edit(x => { x[i] = { id: x[i].id, sg: x[i].sg, ...cfg } }), () => edit(x => { x.splice(i, 1); cleanupSg(x) }), r)
+          }}>
           <Thumb ex={ex} />
           <div className="grow"><div className="tt capitalize">{ex.n}</div><div className="ss">{exLine(e, S.unit)}</div></div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 'none', alignItems: 'center' }}>
+            <button className="iconbtn" aria-label={t('Drag to reorder')} style={{ width: 40, height: 28, borderRadius: 8, cursor: drag?.i === i ? 'grabbing' : 'grab', touchAction: 'none' }}
+              onPointerDown={ev => onDragStart(ev, i)}
+              onPointerMove={ev => drag && drag.i === i && onDragMove(ev)}
+              onPointerUp={onDragEnd} onPointerCancel={onDragEnd}>
+              <Icon name="list" />
+            </button>
             {i > 0 && <button className={'iconbtn' + (linkedPrev ? ' on-ss' : '')} title={t('Superset with exercise above')} aria-label={t('Superset with exercise above')} style={{ width: 40, height: 32, borderRadius: 8, fontSize: 15 }} onClick={ev => { ev.stopPropagation(); toggleLink(i) }}><Icon name="link" /></button>}
             <div style={{ display: 'flex', gap: 4 }}>
               <button className="iconbtn" aria-label={t('Move up')} style={{ width: 40, height: 30, borderRadius: 7, fontSize: 14 }} onClick={ev => { ev.stopPropagation(); move(i, -1) }}><Icon name="chevronUp" /></button>
