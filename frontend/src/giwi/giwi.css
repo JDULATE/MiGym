@@ -1,63 +1,14 @@
-/* Giwi mascot — motion and expression. All animation collapses under
-   prefers-reduced-motion (the global reduced-motion block shortens durations;
-   these rules also drop the looping idle/celebrate keyframes entirely). */
+/* Giwi mascot — the animated expressions live in self-contained SVGs; this file only
+   hosts layout helpers shared by Giwi surfaces (onboarding, bubbles). */
 
-.giwi { display: block; overflow: visible; }
-.giwi-shape { fill: var(--color-surface-2); }
-.giwi-eye { fill: var(--text-1); transform-box: fill-box; transform-origin: center; }
-.giwi-cheek { fill: var(--acc); opacity: 0; }
-.giwi-mouth { stroke: var(--text-1); }
+.giwi { display: block; user-select: none; -webkit-user-drag: none; }
 
-/* ---- states ---- */
-.giwi--idle .giwi-body,
-.giwi--welcome .giwi-body { animation: giwi-breathe 3.2s ease-in-out infinite; transform-origin: 60px 118px; }
-
-.giwi--thinking .giwi-body { transform: rotate(-4deg); transform-origin: 60px 118px; }
-.giwi--thinking .giwi-eye { transform: translateY(-4px); }
-
-.giwi--point .giwi-body { transform: rotate(5deg) translateX(3px); transform-origin: 60px 118px; }
-
-.giwi--happy .giwi-eye,
-.giwi--celebrate .giwi-eye { transform: scaleY(.18); }
-.giwi--happy .giwi-mouth,
-.giwi--celebrate .giwi-mouth { d: path('M46 80 Q60 94 74 80'); }
-.giwi--happy .giwi-cheek,
-.giwi--celebrate .giwi-cheek { opacity: .55; }
-
-.giwi--wave .giwi-body { animation: giwi-wave 1.6s ease-in-out 2; transform-origin: 60px 118px; }
-.giwi--encourage .giwi-body { animation: giwi-nod 1.8s ease-in-out 2; transform-origin: 60px 118px; }
-.giwi--welcome .giwi-cheek { opacity: .45; }
-.giwi--celebrate .giwi-body { animation: giwi-jump .9s cubic-bezier(.32,.72,0,1) 2; transform-origin: 60px 118px; }
-
-@keyframes giwi-breathe {
-  0%, 100% { transform: scaleY(1) scaleX(1); }
-  50% { transform: scaleY(1.03) scaleX(.985); }
+.giwi-bubble {
+  background: var(--surface); border-radius: var(--r-lg); padding: 14px 16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.35); max-width: min(420px, 86vw);
+  position: relative;
 }
-@keyframes giwi-wave {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-5deg); }
-  75% { transform: rotate(5deg); }
-}
-@keyframes giwi-nod {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: translateY(3px) rotate(1.5deg); }
-}
-@keyframes giwi-jump {
-  0%, 100% { transform: translateY(0) scale(1, 1); }
-  30% { transform: translateY(-14px) scale(.96, 1.05); }
-  60% { transform: translateY(0) scale(1.04, .95); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .giwi-body { animation: none !important; }
-}
-
-/* speech bubble */
-.giwi-bubble{
-  background:var(--surface);border-radius:var(--r-lg);padding:14px 16px;
-  box-shadow:0 12px 40px rgba(0,0,0,.35);max-width:min(420px,86vw);
-}
-.giwi-bubble::before{
-  content:'';position:absolute;top:-10px;left:28px;width:18px;height:18px;
-  background:inherit;border-radius:4px;transform:rotate(45deg);
+.giwi-bubble::before {
+  content: ''; position: absolute; top: -10px; left: 28px; width: 18px; height: 18px;
+  background: inherit; border-radius: 4px; transform: rotate(45deg);
 }
