@@ -6,6 +6,33 @@ This repository continues openGym (© Duarte Santos, AGPL-3.0-or-later) as **MiG
 Upstream history below is preserved unchanged; MiGym phases add entries above the upstream
 log from this point on.
 
+### Phase 5 — Analytics (2026-08-22)
+
+📈 **A progress overview that answers the five training questions in one look** — built on
+the engine boundary from Phase 4, numbers over decoration.
+
+#### Added
+
+- 🧮 New pure module `lib/analytics.js` (+ unit tests):
+  - `trainingSummary(S)` — sessions & weekly frequency over a trailing window, average
+    session duration, 7-day volume, 8-week average weekly volume, calendar-month volume,
+    PR count in the last 30 days.
+  - `exerciseMomentum(S)` — per exercise with enough estimated-1RM history: recent average
+    vs earlier best, classified **improving / stable / stalled** with explicit, documented
+    thresholds (±2 % noise band, ≥21 idle days = stalled).
+- 📊 **"Progress overview" card in Stats**: four headline tiles (7-day volume, Ø 8-week
+  volume, Ø session length, PRs · 30 d), an *Improving* list sorted by biggest mover and a
+  *Stalled* list sorted by longest untouched — each row showing why (delta % or days since).
+- Questions already answered by inherited views are not duplicated: muscle balance → muscle
+  map; consistency → heatmap/streak; per-exercise curves → existing charts. The overview
+  aggregates what those could only answer one exercise at a time.
+
+#### Notes
+
+- Volume math comes from `engine/volume.js` (warm-ups excluded); classification thresholds
+  live as named constants in `lib/analytics.js` — deterministic, explainable, no AI.
+- All new strings translated across all 11 locale packs (709 keys each).
+
 ### Phase 4 — Progression Engine Isolation (2026-08-22)
 
 ⚙️ **A documented, tested boundary around the training mathematics** — behavior-preserving;

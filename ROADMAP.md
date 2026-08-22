@@ -53,12 +53,12 @@ deload / volume) with new warmup-aware pure volume module and multi-session traj
 tests. Behavior-preserving: bodies remain in `lib/*.js` so views and the MCP server keep
 stable paths; future code consumes only the engine barrel. Public API in docs/API.md.
 
-## Phase 5 — Analytics
+## Phase 5 — Analytics ✅ (complete, 2026-08-22)
 
-Dedicated analytics module answering five questions (progressing? which exercises improved?
-muscle balance? consistency? where stagnating?). Reuse e1rmSeries, effortWeeks, muscles,
-heatmap helpers; add weekly/monthly volume, frequency, duration, bodyweight trend. Every chart
-must answer one training question.
+`lib/analytics.js` (trainingSummary + exerciseMomentum, explicit thresholds) and a
+"Progress overview" card in Stats: 7-day / 8-week-average volume, Ø session length,
+PRs · 30 d, plus Improving/Stalled lists with reasons. Questions already covered by
+inherited views (muscle map, heatmap/streak, per-exercise charts) are not duplicated.
 
 ## Phase 6 — Exercise library
 

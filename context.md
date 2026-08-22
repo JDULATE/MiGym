@@ -38,8 +38,8 @@ See [PRODUCT.md](PRODUCT.md).
 
 ## Current phase
 
-**PHASE 4 — Progression Engine Isolation: COMPLETE.**
-Next phase requires explicit authorization: **PHASE 5 — Analytics**.
+**PHASE 5 — Analytics: COMPLETE.**
+Next phase requires explicit authorization: **PHASE 6 — Exercise Library**.
 
 ## Completed phases
 
@@ -55,6 +55,9 @@ Next phase requires explicit authorization: **PHASE 5 — Analytics**.
   multi-session trajectory tests (all four policies + determinism/immutability invariants),
   API documented in docs/API.md. Behavior-preserving; bodies stay in lib/*.js so views and
   MCP keep stable import paths — future code consumes the engine barrel only.
+* Phase 5 — Analytics: `lib/analytics.js` (trainingSummary + exerciseMomentum with explicit
+  thresholds) + "Progress overview" card in Stats answering the five spec questions;
+  volume math from the engine. All-pack translations complete.
 
 ## Planned phases
 
