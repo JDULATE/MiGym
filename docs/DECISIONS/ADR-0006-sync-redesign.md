@@ -1,7 +1,7 @@
 # ADR-0006 — Sync redesign: snapshot-protected, union-first merge (staged)
 
-Date: 2026-08-22 · Status: Accepted (Stage 1 scoped; implementation gated on review)
-Supersedes the whole-state last-write-wins behaviour described in the Phase 0 audit.
+Date: 2026-08-22 · Status: **Stages 1, 1b and 2 implemented** (Stage 2 scoped to workout
+tombstones; per-record ops journal beyond that remains deferred)
 
 ## Context
 
@@ -33,10 +33,18 @@ require new infrastructure.
    the other device.
 4. `active` continues to never sync.
 
-### Stage 2 — only if Stage 1 proves insufficient
-Per-record ops journal (create/update/delete with tombstones) replacing section blobs for
-`workouts`. Explicitly deferred: CRDTs. Nothing in MiGym's data model needs them once
-history is immutable-by-construction.
+### Stage 1b — per-section timestamps (implemented)
+Every write stamps `S._mts[section] = ts` for the sections that actually changed
+(routines / week / dayPlan / exWeights / profile / settings, diff-based). The merge picks
+each section from whichever side edited it most recently; blob `_ts` remains the fallback
+for pre-1b clients. A routine edit no longer clobbers a weigh-in made on the other device.
+
+### Stage 2 — workout deletion tombstones (implemented)
+Wholesale state replacement (backup import, reset) records removed workout ids in
+`S._tomb.workouts` (`id → deletion ts`). Merges suppress tombstoned copies whose session
+predates the deletion; a workout logged again later survives; entries expire after 180
+days. Tombstone maps union with max-ts semantics. A full per-record ops journal beyond
+deletions stays deferred — nothing else in the data model deletes.
 
 ## Migration
 

@@ -6,6 +6,21 @@ This repository continues openGym (© Duarte Santos, AGPL-3.0-or-later) as **MiG
 Upstream history below is preserved unchanged; MiGym phases add entries above the upstream
 log from this point on.
 
+### Phase 10 — Cloud Architecture, Stage 1b + 2 (2026-08-22)
+
+🧬 **Conflict resolution gets precise, and deletions propagate** (ADR-0006).
+
+#### Added
+
+- 🏷️ **Per-section timestamps (`S._mts`, Stage 1b)**: every write stamps the config
+  sections that actually changed; the sync merge now resolves a routine edit and a
+  weigh-in made on two different devices *independently* instead of by blob age.
+- 🪦 **Workout deletion tombstones (`S._tomb.workouts`, Stage 2)**: backup imports and
+  resets record removed workout ids; merges suppress tombstoned copies everywhere, while
+  a lift logged again later survives. Tombstones expire after 180 days.
+- 🧪 9 new tests: section-stamp precedence, split-tie scenarios, tombstone
+  create/suppress/revive/expire semantics, max-ts union.
+
 ### Phase 10 — Local-first single mode (2026-08-22) · ADR-0005
 
 🏠 **The login screen is gone. Local is the only mode** — cloud later exists solely for

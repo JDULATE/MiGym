@@ -108,15 +108,19 @@ invites: [ { code, note?, createdBy, created, usedBy?, usedAt?, revoked? } ]
    (ADR-0006 Stage 1).
 2. Pull on boot **merges** instead of replacing: `lib/sync.js mergeStates()` unions
    workouts (by id), bodyweight (by date), measurements and custom exercises from both
-   sides; configuration sections follow the newer blob as a whole (sections absent from
-   the newer side fall back to local). The merged result is pushed back so both ends
-   converge. The active workout never merges or leaves the device.
-3. Known limitation until Stage 1b (`S._mts` per-section timestamps): two devices changing
-   the SAME config section concurrently resolve by blob-level `_ts`. Snapshots make any
-   such loss reversible; the restore sheet lists server snapshots and union-merges them.
-4. Workouts are appended to `S.workouts` on completion; there is no delete-workout flow in
+   sides. The merged result is pushed back so both ends converge. The active workout
+   never merges or leaves the device.
+3. **Config conflicts resolve per section** (Stage 1b): every write stamps `S._mts`
+   entries for routines / week / dayPlan / exWeights / profile / settings that changed;
+   the merge picks each section from whichever side edited it most recently, falling back
+   to blob `_ts` for pre-1b clients.
+4. **Deletions propagate via tombstones** (Stage 2): replacing state (backup import,
+   reset) records removed workout ids in `S._tomb.workouts` (`id → ts`). Merges suppress
+   tombstoned copies whose session predates the deletion; a workout logged again later
+   survives; tombstones expire after 180 days.
+5. Workouts are appended to `S.workouts` on completion; there is no delete-workout flow in
    the core UI. Corrections happen by editing future prescriptions, not history.
-5. Progression targets are *derived*, never stored as counters — no drift between log and plan.
+6. Progression targets are *derived*, never stored as counters — no drift between log and plan.
 
 ## Export/import formats
 
