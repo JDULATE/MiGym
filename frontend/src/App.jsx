@@ -64,7 +64,12 @@ function Shell() {
     return () => window.removeEventListener('migym:start-tutorial', open)
   }, [])
   if (!onboardingDone) {
-    return <GiwiOnboarding onDone={() => { completeOnboarding(); setOnboardingDone(true); setTutorialOpen(!getTutorial().completed) }} />
+    return <GiwiOnboarding onDone={() => {
+      completeOnboarding()
+      resetTutorial()          // fresh tutorial every time onboarding completes
+      setOnboardingDone(true)
+      setTutorialOpen(true)    // always start the walkthrough after onboarding
+    }} />
   }
 
   return (

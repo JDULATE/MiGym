@@ -156,7 +156,7 @@ export default function GiwiOnboarding({ onDone }) {
           {bubble('tourLine')}
           <div className="dim small" style={{ marginTop: 4 }}>{t('You can redo this tour anytime from Settings.')}</div>
           <div style={{ height: 10 }} />
-          <Button variant="primary" icon="check" onClick={() => onDone?.()}>{t(DIALOGUE.confirmProfile)}</Button>
+          <Button variant="primary" icon="check" onClick={() => onDone?.()}>{t(DIALOGUE.letsGo)}</Button>
         </>}
       </div>
 

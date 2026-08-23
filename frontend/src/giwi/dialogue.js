@@ -17,6 +17,7 @@ export const DIALOGUE = {
   askGoal: 'What’s your main goal?',
   yourProfile: 'Your profile',
   confirmProfile: 'Confirm',
+  letsGo: 'Let’s go!',
   editProfile: 'Edit',
   perfectLine: 'Perfect! I know a little about you now.',
   tourLine: 'Now I’ll show you how MiGym works.',
