@@ -1,7 +1,20 @@
-import { EXDB } from './exercises-data.js'
+// The generated dataset is loaded LAZILY: it is ~888 KB of source, so it ships as its own
+// chunk and is injected at boot via initExercises() before the app renders (main.jsx).
+// Everything below is a registry that reads runtime-populated state — consumers keep using
+// the same imports, they just can't rely on data being present before boot completes.
 import { t } from './i18n-core.js'
 
-export { EXDB }
+export let EXDB = []
+export const EXIDX = {}
+export let BODYPARTS = []
+
+/** Inject the dataset (called exactly once at boot, from main.jsx). */
+export function initExercises(db) {
+  EXDB = db || []
+  for (const k of Object.keys(EXIDX)) delete EXIDX[k]
+  for (const e of EXDB) EXIDX[e.id] = e
+  BODYPARTS = [...new Set(EXDB.map(e => e.bp))].sort()
+}
 
 // The generated dataset already supplies secondary muscles for most exercises. Keep the
 // handful of conservative catalogue additions that are useful to the muscle map here so a
@@ -21,10 +34,6 @@ export const smOf = ex => {
   const base = Array.isArray(ex?.sm) ? ex.sm : (ex?.sm ? [ex.sm] : [])
   return [...new Set([...base, ...(SECONDARY_ADDITIONS[ex?.id] || [])])]
 }
-
-export const EXIDX = {}
-EXDB.forEach(e => { EXIDX[e.id] = e })
-export const BODYPARTS = [...new Set(EXDB.map(e => e.bp))].sort()
 
 // Equipment options present in a given list of exercises, most common first (issue #6).
 // Deriving them from the *already filtered* list keeps the chip row short and means

@@ -11,6 +11,8 @@ import { initBackButton } from './lib/back.js'
 import { useWakeLock } from './lib/wakelock.js'
 import { needsOnboarding, completeOnboarding } from './giwi/flags.js'
 import GiwiOnboarding from './giwi/GiwiOnboarding.jsx'
+import GiwiTutorial from './giwi/tutorial/Tutorial.jsx'
+import { getTutorial, resetTutorial } from './giwi/flags.js'
 import { startFlow } from './sheets.jsx'
 import TabBar from './components/TabBar.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
@@ -54,8 +56,15 @@ function Shell() {
   // Giwi onboarding gate (docs/ONBOARDING.md). Existing users with data are grandfathered:
   // a missing flag + existing history means "seen it", so the tour never ambushes an upgrade.
   const [onboardingDone, setOnboardingDone] = useState(() => !needsOnboarding() || hasData(S))
+  // tutorial runs right after onboarding, and can be re-launched from Settings
+  const [tutorialOpen, setTutorialOpen] = useState(() => onboardingDone && !getTutorial().completed)
+  useEffect(() => {
+    const open = () => { resetTutorial(); setTutorialOpen(true) }
+    window.addEventListener('migym:start-tutorial', open)
+    return () => window.removeEventListener('migym:start-tutorial', open)
+  }, [])
   if (!onboardingDone) {
-    return <GiwiOnboarding onDone={() => { completeOnboarding(); setOnboardingDone(true) }} />
+    return <GiwiOnboarding onDone={() => { completeOnboarding(); setOnboardingDone(false); setTutorialOpen(!getTutorial().completed) }} />
   }
 
   return (
@@ -82,6 +91,7 @@ function Shell() {
       <RestTimer />
       <Modals />
       <Toast />
+      {tutorialOpen && <GiwiTutorial onDone={() => setTutorialOpen(false)} />}
     </>
   )
 }
