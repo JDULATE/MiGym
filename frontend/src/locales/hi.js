@@ -765,4 +765,6 @@ export default {
   'Weight, reps and optional effort per set — tick a row once you’re done.': 'प्रत्येक सेट के लिए वज़न, पुनरावृत्तियाँ और वैकल्पिक प्रयास — पूरा होने पर पंक्ति चेक करें।',
   'It starts after each set so you can keep the pace without watching the clock.': 'हर सेट के बाद शुरू होता है — घड़ी देखे बिना गति बनाए रखें।',
   'PRs, volume and consistency build up here over time.': 'समय के साथ रिकॉर्ड, वॉल्यूम और निरंतरता यहाँ जमा होती है।',
+  'Tutorial': 'ट्यूटोरियल',
+  'Giwi walks you through the app step by step. Your data is untouched.': 'Giwi आपको चरण दर चरण ऐप में मार्गदर्शन करता है। आपका डेटा सुरक्षित रहता है।',
 }

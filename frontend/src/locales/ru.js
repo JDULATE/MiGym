@@ -765,4 +765,6 @@ export default {
   'Weight, reps and optional effort per set — tick a row once you’re done.': 'Вес, повторения и (по желанию) усилие для каждого подхода — отметь строку после выполнения.',
   'It starts after each set so you can keep the pace without watching the clock.': 'Запускается после каждого подхода — темп держится без часов.',
   'PRs, volume and consistency build up here over time.': 'Рекорды, объём и регулярность накапливаются здесь со временем.',
+  'Tutorial': 'Обучение',
+  'Giwi walks you through the app step by step. Your data is untouched.': 'Дживи проведёт вас по приложению шаг за шагом. Ваши данные не затрагиваются.',
 }

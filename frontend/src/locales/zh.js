@@ -765,4 +765,6 @@ export default {
   'Weight, reps and optional effort per set — tick a row once you’re done.': '每组的重量、次数和可选的努力度——完成后勾选该行。',
   'It starts after each set so you can keep the pace without watching the clock.': '每组结束后自动开始，无需盯表即可保持节奏。',
   'PRs, volume and consistency build up here over time.': '个人纪录、容量和坚持都会随着时间在这里积累。',
+  'Tutorial': '新手教程',
+  'Giwi walks you through the app step by step. Your data is untouched.': 'Giwi 会一步步引导你使用应用。你的数据不会被改动。',
 }

@@ -158,6 +158,16 @@ export default function Settings() {
 
 
 
+    {/* ---------- tutorial (Giwi walkthrough) ---------- */}
+    <Section title={t('Tutorial')} footer={t('Giwi te guía por la app paso a paso. Tus datos no se tocan.')}>
+      <Row icon="sparkles" iconTint="var(--acc)" title={t('Redo the walkthrough')}
+        subtitle={t('Replays the Giwi tour — your data is untouched.')}
+        accessory="chevron" onClick={() => {
+          resetTutorial()
+          window.dispatchEvent(new Event('migym:start-tutorial'))
+        }} />
+    </Section>
+
     <Section title={t('General')} footer={t('Note: switching units only changes the label — logged numbers are not converted.')}>
       <SelectRow
         icon="globe" iconTint="var(--blue)" title={t('Language')}

@@ -765,4 +765,6 @@ export default {
   'Weight, reps and optional effort per set — tick a row once you’re done.': 'Set başına ağırlık, tekrar ve isteğe bağlı efor — bitince satırı işaretle.',
   'It starts after each set so you can keep the pace without watching the clock.': 'Her setten sonra başlar; saate bakmadan temponu korursun.',
   'PRs, volume and consistency build up here over time.': 'Rekorlar, hacim ve düzenlilik zamanla burada birikir.',
+  'Tutorial': 'Öğretici',
+  'Giwi walks you through the app step by step. Your data is untouched.': 'Giwi sizi adım adım uygulama içinde gezdirir. Verilerinize dokunulmaz.',
 }

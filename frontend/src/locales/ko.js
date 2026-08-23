@@ -765,4 +765,6 @@ export default {
   'Weight, reps and optional effort per set — tick a row once you’re done.': '세트당 무게, 횟수 및 (선택적) 노력 — 끝나면 행을 체크하세요।',
   'It starts after each set so you can keep the pace without watching the clock.': '각 세트 후 시작되어 시계를 보지 않고도 페이스를 유지합니다।',
   'PRs, volume and consistency build up here over time.': '시간이 지남에 따라 신기록, 볼륨, 꾸준함이 여기에 쌓입니다。',
+  'Tutorial': '튜토리얼',
+  'Giwi walks you through the app step by step. Your data is untouched.': 'Giwi가 앱을 단계별로 안내합니다. 데이터는 변경되지 않습니다.',
 }

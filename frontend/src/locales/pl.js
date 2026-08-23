@@ -765,4 +765,6 @@ export default {
   'Weight, reps and optional effort per set — tick a row once you’re done.': 'Ciężar, powtórzenia i opcjonalny wysiłek na serię — odhacz wiersz po skończeniu.',
   'It starts after each set so you can keep the pace without watching the clock.': 'Startuje po każdej serii — tempo trzymasz bez patrzenia na zegarek.',
   'PRs, volume and consistency build up here over time.': 'Rekordy, objętość i systematyczność odkładają się tu z czasem.',
+  'Tutorial': 'Samouczek',
+  'Giwi walks you through the app step by step. Your data is untouched.': 'Giwi przeprowadzi cię krok po kroku przez aplikację. Twoje dane pozostają nietknięte.',
 }
