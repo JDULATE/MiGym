@@ -64,7 +64,7 @@ function Shell() {
     return () => window.removeEventListener('migym:start-tutorial', open)
   }, [])
   if (!onboardingDone) {
-    return <GiwiOnboarding onDone={() => { completeOnboarding(); setOnboardingDone(false); setTutorialOpen(!getTutorial().completed) }} />
+    return <GiwiOnboarding onDone={() => { completeOnboarding(); setOnboardingDone(true); setTutorialOpen(!getTutorial().completed) }} />
   }
 
   return (
