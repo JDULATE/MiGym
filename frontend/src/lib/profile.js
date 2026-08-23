@@ -14,6 +14,12 @@
 /** Structured training goals. Values are stable ids — never translated. */
 export const GOALS = ['hypertrophy', 'strength', 'weight_loss', 'general', 'performance']
 
+/** Display keys for goals (translated via i18n like every other label). */
+export const GOAL_LABEL = {
+  hypertrophy: 'Hypertrophy', strength: 'Strength', weight_loss: 'Weight loss',
+  general: 'General fitness', performance: 'Performance'
+}
+
 /** Self-assessed experience. A declaration, not a measurement. */
 export const EXPERIENCE = ['beginner', 'intermediate', 'advanced']
 

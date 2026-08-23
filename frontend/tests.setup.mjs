@@ -27,3 +27,11 @@ if (!usable()) {
     },
   })
 }
+
+// Populate the exercise registry so tests that resolve ids (starter templates,
+// progression increments, taxonomy grouping) see the real catalogue.
+const [{ EXDB }, { initExercises }] = await Promise.all([
+  import('./src/lib/exercises-data.js'),
+  import('./src/lib/exercises.js'),
+])
+initExercises(EXDB)

@@ -24,7 +24,7 @@ export default function RestTimer() {
   const pct = (on.left / on.total) * 100
 
   if (work) return (
-    <div id="timer" className="working">
+    <div id="timer" className="working" data-giwi="rest-timer">
       <div className="t">{clock(work.left)}</div>
       <div className="grow">
         {work.label && <div className="lbl">{work.label}</div>}
@@ -39,7 +39,7 @@ export default function RestTimer() {
   // read at a glance, controls get their own row. −15 and +15 sit together in number-line
   // order; Skip is pushed to the far edge, away from the button you tap to buy more time.
   return (
-    <div id="timer" className="rest">
+    <div id="timer" className="rest" data-giwi="rest-timer">
       <div className="head">
         <div className="t">{clock(timer.left)}</div>
         <div className="bar"><i style={{ width: pct + '%' }} /></div>

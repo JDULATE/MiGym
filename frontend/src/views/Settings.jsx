@@ -14,6 +14,7 @@ import { DEMO } from '../lib/demo.js'
 import { MOBILE, shareExport, syncReminder } from '../lib/mobile.js'
 import { loadStarterPlan, confirmSheet, importFromApp } from '../sheets.jsx'
 import { coachConfigured, loadCoachCfg, saveCoachCfg } from '../lib/coach.js'
+import { resetTutorial } from '../giwi/flags.js'
 import Icon from '../components/Icon.jsx'
 import { Section, Row, SelectRow, Switch, Segmented, Button, TextField, TextArea, NumberField , ListItem} from '../components/ui.jsx'
 
@@ -126,10 +127,7 @@ export default function Settings() {
         accessory="chevron" onClick={() => openMeasurementsSheet(measurements)} />
     </Section>
 
-    {/* ---------- sync & backup (MiGym phase 10) ----------
-        Local-first: the base always lives on this device. Linking a server profile is
-        optional — it only adds sync and a security copy for device changes. Unlinking
-        never touches the local data. */}
+    {/* sync & backup */}
     <Section title={t('Sync & backup')} footer={user ? t('Your base lives on this device; the linked profile keeps a synced copy.') : t('Everything already works without an account. Link one only to keep a synced copy for new devices.')}>
       {MOBILE ? <>
         <Row icon="lock" iconTint="var(--acc)" title={t('All data stays on this phone')} subtitle={t('No account, no cloud — back it up anytime with Export below.')} />
@@ -140,8 +138,7 @@ export default function Settings() {
       </> : user ? <>
         <Row icon="personCircle" iconTint="var(--grey)" title={user.name} subtitle={t('Linked with passkey — every change syncs to this profile.')} />
         {user.admin && <Row icon="wrench" iconTint="var(--indigo)" title={t('Admin dashboard')} accessory="chevron" onClick={() => nav('/admin')} />}
-        {syncPending && <Row icon="bolt" iconTint="var(--orange)" title={t('Offline — changes saved locally')}
-          subtitle={t('They will sync automatically the next time the server is reachable.')} />}
+        {syncPending && <Row icon="bolt" iconTint="var(--orange)" title={t('Offline sync pending')} subtitle={t('Changes saved locally — they sync when the server is reachable.')} />}
         <Row icon="history" iconTint="var(--blue)" title={t('Restore from snapshot')} accessory="chevron" onClick={restoreSnapshotSheet} />
         <Row icon="signOut" iconTint="var(--red)" title={t('Unlink from server')} danger onClick={() => confirmSheet({
           title: t('Unlink from server?'),
@@ -159,7 +156,8 @@ export default function Settings() {
     </Section>
     {!user && !DEMO && !MOBILE && webauthnOK() && <p className="sect-f" style={{ marginTop: -18, marginBottom: 22 }}>{t('Local-first: nothing leaves this device unless you link a server above.')}</p>}
 
-    {/* ---------- general ---------- */}
+
+
     <Section title={t('General')} footer={t('Note: switching units only changes the label — logged numbers are not converted.')}>
       <SelectRow
         icon="globe" iconTint="var(--blue)" title={t('Language')}
