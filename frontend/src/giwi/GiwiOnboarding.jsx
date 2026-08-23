@@ -13,6 +13,18 @@ import { Button, TextField } from './../components/ui.jsx'
 
 const STEPS = ['welcome', 'name', 'age', 'weight', 'height', 'goal', 'confirm']
 
+/** Per-step validation: can the user advance from this step? */
+function canAdvance(step, draft) {
+  switch (STEPS[step]) {
+    case 'name': return !!draft.name.trim()
+    case 'age': return Number(draft.ageYears) >= 10 && Number(draft.ageYears) <= 100
+    case 'weight': return Number(draft.weight) > 0
+    case 'height': return Number(draft.heightCm) >= 50
+    case 'goal': return !!draft.goal
+    default: return true
+  }
+}
+
 export default function GiwiOnboarding({ onDone }) {
   const S = useStore(s => s.S)
   const update = useStore(s => s.update)
@@ -114,20 +126,16 @@ export default function GiwiOnboarding({ onDone }) {
         </>}
       </div>
 
-      {/* step controls */}
+      {/* step controls — every step gets Back (when possible) + Skip + Continue/Next */}
       {step > 0 && step < STEPS.length && (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
           <span className="dim small">{step} / {STEPS.length - 1}</span>
           <div style={{ display: 'flex', gap: 8 }}>
             {step > 1 && <Button onClick={() => setStep(i => i - 1)}>{t('Back')}</Button>}
             <button className="btn ghost dim" onClick={() => { completeOnboarding(); onDone?.() }}>{t('Skip')}</button>
-            {(step === 2 || step === 3 || step === 4 || step === 5) &&
-              <Button variant="primary" onClick={next} disabled={
-                (step === 2 && !(Number(draft.ageYears) >= 10 && Number(draft.ageYears) <= 100)) ||
-                (step === 3 && !(Number(draft.weight) > 0)) ||
-                (step === 4 && !(Number(draft.heightCm) >= 50)) ||
-                (step === 5 && !draft.goal)
-              }>{t(DIALOGUE.start)}</Button>}
+            <Button variant="primary" onClick={next} disabled={!canAdvance(step, draft)}>
+              {step === STEPS.length - 1 ? t(DIALOGUE.confirmProfile) : t('Continue')}
+            </Button>
           </div>
         </div>
       )}
