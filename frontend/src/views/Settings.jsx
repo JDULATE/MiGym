@@ -210,7 +210,6 @@ export default function Settings() {
     </Section>
 
     {(user || MOBILE) && <NotificationsCard S={S} update={update} toast={toast} />}
-    <CoachCard />
     {!MOBILE && !DEMO && <CoachSection />}
     {user?.role === 'coach' && <ClientsSection />}
 
@@ -281,6 +280,8 @@ export default function Settings() {
 
     {/* ---------- coming soon ---------- */}
     <Section title={t('Coming soon')}>
+      <Row icon="sparkles" iconTint="var(--grey)" title={t('AI coach')}
+        subtitle={t('Training analysis and recommendations powered by AI.')} />
       <Row icon="heart" iconTint="var(--pink)" title={t('Adaptive training')}
         subtitle={t('Adapted programs for conditions like diabetes, heart problems or back pain.')} />
       <Row icon="medal" iconTint="var(--gold)" title={t('Strength ranking')}
@@ -484,17 +485,6 @@ function MeasurementsSheet() {
 
 function openMeasurementsSheet() {
   useUI.getState().openSheet(close => <MeasurementsSheet close={close} />)
-}
-
-// AI coach provider (phase 9). Opt-in and local-first: the config lives in its OWN
-// localStorage key — deliberately outside S, so it never syncs and never lands in a
-// backup or export. Without a configured endpoint the coach UI simply doesn't exist.
-function CoachCard() {
-  return <Section title={t('AI coach')} footer={t('Training analysis and recommendations powered by AI. Coming soon.')}>
-    <Row icon="sparkles" iconTint="var(--grey)"
-      title={t('Coming soon')}
-      subtitle={t('We\'re working on an AI coach that answers questions about your training.')} />
-  </Section>
 }
 
 // Restore flow (ADR-0006 stage 1): list the server's snapshots, fetch the picked one,
