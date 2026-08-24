@@ -72,3 +72,7 @@ Everything stays on the device — no server needed.
 [openGym](https://github.com/DuarteSantos8/openGym) by Duarte Santos.
 Exercise data from [hasaneyldrm/exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset)
 (separate terms — see [NOTICE.md](NOTICE.md)).
+
+## Support
+
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-JDULATE-yellow?style=flat-square&logo=buy-me-a-coffee)](https://buymeacoffee.com/JDULATE)
