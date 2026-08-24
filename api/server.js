@@ -11,6 +11,29 @@ import {
 } from '@simplewebauthn/server';
 import webpush from 'web-push';
 
+/* ---------- rate limiting (ADR: security audit M-1) ----------
+   In-memory sliding window per IP. No dependencies. Two tiers:
+   - auth endpoints (register/login): 10 req/min — brute-force surface
+   - all other API endpoints: 60 req/min — generous for a single user */
+const rateBuckets = new Map();   // ip -> { count, resetAt }
+const RATE_AUTH = 10, RATE_API = 60, RATE_WINDOW = 60000;
+
+function rateLimit(req, isAuth) {
+  const ip = req.socket?.remoteAddress || 'unknown';
+  const key = ip + (isAuth ? ':auth' : '');
+  const now = Date.now();
+  let b = rateBuckets.get(key);
+  if (!b || now > b.resetAt) { b = { count: 0, resetAt: now + RATE_WINDOW }; rateBuckets.set(key, b); }
+  b.count++;
+  // prune stale buckets every ~1000 requests
+  if (rateBuckets.size > 500) {
+    for (const [k, v] of rateBuckets) if (now > v.resetAt) rateBuckets.delete(k);
+  }
+  return b.count <= (isAuth ? RATE_AUTH : RATE_API);
+}
+
+const AUTH_PATHS = ['/api/register', '/api/login'];
+
 const PORT = +(process.env.PORT || 3000);
 const DATA = process.env.DATA_DIR || '/data';
 const RP_ID = process.env.RP_ID || 'localhost';
@@ -752,6 +775,27 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
   const key = req.method + ' ' + url.pathname;
   const handler = routes[key];
+
+  // CORS: only allow same-origin requests (the nginx proxy adds no Origin header for
+  // same-origin, so a missing Origin is fine — a mismatched Origin is rejected)
+  const origin = req.headers.origin;
+  if (origin && origin !== ORIGIN) {
+    res.writeHead(403, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ error: 'origin not allowed' }));
+  }
+
+  // rate limiting per IP
+  const isAuth = AUTH_PATHS.some(p => url.pathname.startsWith(p));
+  if (!rateLimit(req, isAuth)) {
+    res.writeHead(429, { 'Content-Type': 'application/json', 'Retry-After': '60' });
+    return res.end(JSON.stringify({ error: 'too many requests — try again in a minute' }));
+  }
+
+  // security headers
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'same-origin');
+
   if (!handler) return json(res, 404, { error: 'not found' });
   try { await handler(req, res); }
   catch (e) {
