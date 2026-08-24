@@ -11,8 +11,6 @@ import { t } from '../../lib/i18n.js'
 import { useStore } from '../../store/useStore.js'
 import { useUI } from '../../store/useUI.js'
 import { uid } from '../../lib/format.js'
-import { buildSets } from '../../lib/history.js'
-import { uid } from '../../lib/format.js'
 
 export default function GiwiTutorial({ onDone }) {
   const nav = useNavigate()
