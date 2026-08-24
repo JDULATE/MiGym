@@ -127,6 +127,7 @@
 /* accents — Apple's system colours, so a recolour never looks off-system.
    "ember" is the MiGym factory default: warm, fitness-forward, and clearly distinct
    from success-green (actions no longer compete with status colours). */
+:root[data-accent="giwi"]  { --acc:#3b93f0;       --acc-2:#1a6fc4; --on-acc:#000 }
 :root[data-accent="ember"]  { --acc:#ff7a1a;       --acc-2:#c2410c; --on-acc:#000 }
 :root[data-accent="lime"]  { --acc:var(--green);  --acc-2:#248a3d; --on-acc:#000 }
 :root[data-accent="sky"]   { --acc:var(--blue);   --acc-2:#0060df; --on-acc:#fff }
@@ -144,6 +145,7 @@
    passes and matches the platform convention. */
 :root[data-theme="light"][data-accent="lime"],
 :root[data-theme="light"][data-accent="teal"],
+:root[data-theme="light"][data-accent="giwi"],
 :root[data-theme="light"][data-accent="ember"] { --on-acc:#000 }
 :root[data-theme="light"][data-accent="sky"],
 :root[data-theme="light"][data-accent="violet"],

@@ -43,20 +43,22 @@ export default function Library() {
       <button className={'chip nocap' + (!eqOn ? ' on' : '')} onClick={() => { setEq(''); setShown(40) }}>{t('Any equipment')}</button>
       {eqOpts.map(x => <button key={x} className={'chip' + (eqOn === x ? ' on' : '')} onClick={() => { setEq(x); setShown(40) }}>{t(x)}</button>)}
     </div>}
-    <div className="list">
-      <ListItem onClick={() => customExSheet(null, ex => exerciseDetailSheet(ex), q.trim())}>
-        <div className="thumb thumb-x"><Icon name="sparkles" /></div>
-        <div className="grow"><div className="tt">{t('Create your own exercise')}</div><div className="ss">{t('name + body part, no animation')}</div></div><Icon name="plus" className="chev" />
-      </ListItem>
-      {f.slice(0, shown).map(e => {
-        const best = bestWeightFor(S, e.id)
-        return <ListItem key={e.id} onClick={() => exerciseDetailSheet(e)}>
-          <Thumb ex={e} />
-          <div className="grow"><div className="tt capitalize">{e.n}</div><div className="ss capitalize">{t(e.tg || e.bp)} · {t(e.eq)}</div></div>
-          {best > 0 && <span className="tag acc">{fmtNum(best)}</span>}
-          <Button size="sm" variant="tinted" icon="plus" onClick={ev => { ev.stopPropagation(); addToRoutineSheet(e) }}>{t('Plan')}</Button>
+    <div className="card">
+      <div className="list">
+        <ListItem onClick={() => customExSheet(null, ex => exerciseDetailSheet(ex), q.trim())}>
+          <div className="thumb thumb-x"><Icon name="sparkles" /></div>
+          <div className="grow"><div className="tt">{t('Create your own exercise')}</div><div className="ss">{t('name + body part, no animation')}</div></div><Icon name="plus" className="chev" />
         </ListItem>
-      })}
+        {f.slice(0, shown).map(e => {
+          const best = bestWeightFor(S, e.id)
+          return <ListItem key={e.id} onClick={() => exerciseDetailSheet(e)}>
+            <Thumb ex={e} />
+            <div className="grow"><div className="tt capitalize">{e.n}</div><div className="ss capitalize">{t(e.tg || e.bp)} · {t(e.eq)}</div></div>
+            {best > 0 && <span className="tag acc">{fmtNum(best)}</span>}
+            <Button size="sm" variant="tinted" icon="plus" onClick={ev => { ev.stopPropagation(); addToRoutineSheet(e) }}>{t('Plan')}</Button>
+          </ListItem>
+        })}
+      </div>
       {f.length === 0 && <div className="empty"><div className="ico"><Icon name="magnifier" /></div>{t('No match')}</div>}
     </div>
     {f.length > shown && <><div style={{ height: 10 }} /><Button onClick={() => setShown(s => s + 40)}>{t('Show more')}</Button></>}
