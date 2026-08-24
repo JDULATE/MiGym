@@ -1,0 +1,26 @@
+# Render.com blueprint — free tier, auto-deploy from GitHub
+# Render gives you: free web service, free HTTPS, auto-deploy on push
+services:
+  - type: web
+    name: migym
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/health
+    disk:
+      name: migym-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: RP_ID
+        sync: false      # set to your domain, e.g. migym.us.kg
+      - key: ORIGIN
+        sync: false      # set to https://migym.us.kg
+      - key: RP_NAME
+        value: MiGym
+      - key: SESSION_DAYS
+        value: "90"
+      - key: ADMIN_UIDS
+        sync: false
+      - key: COACH_UIDS
+        sync: false

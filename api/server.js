@@ -5,6 +5,7 @@ import http from 'node:http';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import url from 'node:url';
 import {
   generateRegistrationOptions, verifyRegistrationResponse,
   generateAuthenticationOptions, verifyAuthenticationResponse
@@ -772,6 +773,19 @@ const routes = {
   }
 };
 
+/* ---------- static frontend serving (single-service deployment) ---------- */
+const PUBLIC_DIR = path.join(path.dirname(url.fileURLToPath(import.meta.url)), 'public');
+const MIME = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css',
+  '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml',
+  '.gif': 'image/gif', '.ico': 'image/x-icon', '.woff2': 'font/woff2' };
+function serveStatic(res, filePath) {
+  const abs = path.join(PUBLIC_DIR, filePath);
+  if (!abs.startsWith(PUBLIC_DIR) || !fs.existsSync(abs) || !fs.statSync(abs).isFile()) return false;
+  res.writeHead(200, { 'Content-Type': MIME[path.extname(abs)] || 'application/octet-stream' });
+  fs.createReadStream(abs).pipe(res);
+  return true;
+}
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
   const key = req.method + ' ' + url.pathname;
@@ -798,7 +812,12 @@ const server = http.createServer(async (req, res) => {
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('Referrer-Policy', 'same-origin');
 
-  if (!handler) return json(res, 404, { error: 'not found' });
+  if (!handler) {
+    // serve static frontend for non-API GET requests (single-service deployment)
+    if (req.method === 'GET' && serveStatic(res, url.pathname)) return;
+    if (req.method === 'GET' && serveStatic(res, 'index.html')) return;
+    return json(res, 404, { error: 'not found' });
+  }
   try { await handler(req, res); }
   catch (e) {
     console.error(key, e);
