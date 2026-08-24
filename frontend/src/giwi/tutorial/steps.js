@@ -10,7 +10,7 @@ export const TUTORIAL_STEPS = [
   { id: 'progress', target: 'stats', route: '/stats' },
 ]
 
-export const copyFor = id => ({
+const COPY = {
   dashboard: {
     title: 'Your home',
     body: 'Today’s workout and a quick look at your progress live here.',
@@ -39,4 +39,7 @@ export const copyFor = id => ({
     title: 'Progress',
     body: 'PRs, volume and consistency build up here over time.',
   },
-})
+}
+
+/** Copy for one step id. Returns { title, body } or undefined for unknown ids. */
+export const copyFor = id => COPY[id]
