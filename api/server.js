@@ -33,6 +33,7 @@ function rateLimit(req, isAuth) {
 }
 
 const AUTH_PATHS = ['/api/register', '/api/login'];
+const RATE_EXEMPT = ['/api/health', '/api/config'];   // monitoring/public: never rate-limited
 
 const PORT = +(process.env.PORT || 3000);
 const DATA = process.env.DATA_DIR || '/data';
@@ -786,7 +787,8 @@ const server = http.createServer(async (req, res) => {
 
   // rate limiting per IP
   const isAuth = AUTH_PATHS.some(p => url.pathname.startsWith(p));
-  if (!rateLimit(req, isAuth)) {
+  const isExempt = RATE_EXEMPT.some(p => url.pathname === p);
+  if (!isExempt && !rateLimit(req, isAuth)) {
     res.writeHead(429, { 'Content-Type': 'application/json', 'Retry-After': '60' });
     return res.end(JSON.stringify({ error: 'too many requests — try again in a minute' }));
   }
