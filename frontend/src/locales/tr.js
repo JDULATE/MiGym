@@ -767,4 +767,6 @@ export default {
   'PRs, volume and consistency build up here over time.': 'Rekorlar, hacim ve düzenlilik zamanla burada birikir.',
   'Tutorial': 'Öğretici',
   'Giwi walks you through the app step by step. Your data is untouched.': 'Giwi sizi adım adım uygulama içinde gezdirir. Verilerinize dokunulmaz.',
+  'What’s your experience level?': 'Deneyim seviyen nedir?',
+  'How many days per week can you train?': 'Haftada kaç gün antrenman yapabilirsin?',
 }

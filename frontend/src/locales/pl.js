@@ -767,4 +767,6 @@ export default {
   'PRs, volume and consistency build up here over time.': 'Rekordy, objętość i systematyczność odkładają się tu z czasem.',
   'Tutorial': 'Samouczek',
   'Giwi walks you through the app step by step. Your data is untouched.': 'Giwi przeprowadzi cię krok po kroku przez aplikację. Twoje dane pozostają nietknięte.',
+  'What’s your experience level?': 'Jaki jest Twój poziom doświadczenia?',
+  'How many days per week can you train?': 'Ile dni w tygodniu możesz trenować?',
 }

@@ -767,4 +767,6 @@ export default {
   'PRs, volume and consistency build up here over time.': 'Рекорды, объём и регулярность накапливаются здесь со временем.',
   'Tutorial': 'Обучение',
   'Giwi walks you through the app step by step. Your data is untouched.': 'Дживи проведёт вас по приложению шаг за шагом. Ваши данные не затрагиваются.',
+  'What’s your experience level?': 'Каков твой уровень подготовки?',
+  'How many days per week can you train?': 'Сколько дней в неделю ты можешь тренироваться?',
 }

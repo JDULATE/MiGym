@@ -767,4 +767,6 @@ export default {
   'PRs, volume and consistency build up here over time.': '个人纪录、容量和坚持都会随着时间在这里积累。',
   'Tutorial': '新手教程',
   'Giwi walks you through the app step by step. Your data is untouched.': 'Giwi 会一步步引导你使用应用。你的数据不会被改动。',
+  'What’s your experience level?': '你的经验水平如何？',
+  'How many days per week can you train?': '你每周能训练几天？',
 }

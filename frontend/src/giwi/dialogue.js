@@ -15,6 +15,8 @@ export const DIALOGUE = {
   askHeight: 'What’s your height?',
   height: 'Height',
   askGoal: 'What’s your main goal?',
+  askExperience: 'What’s your experience level?',
+  askDays: 'How many days per week can you train?',
   yourProfile: 'Your profile',
   confirmProfile: 'Confirm',
   letsGo: 'Let’s go!',

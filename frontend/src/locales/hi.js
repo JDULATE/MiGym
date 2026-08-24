@@ -767,4 +767,6 @@ export default {
   'PRs, volume and consistency build up here over time.': 'समय के साथ रिकॉर्ड, वॉल्यूम और निरंतरता यहाँ जमा होती है।',
   'Tutorial': 'ट्यूटोरियल',
   'Giwi walks you through the app step by step. Your data is untouched.': 'Giwi आपको चरण दर चरण ऐप में मार्गदर्शन करता है। आपका डेटा सुरक्षित रहता है।',
+  'What’s your experience level?': 'आपका अनुभव स्तर क्या है?',
+  'How many days per week can you train?': 'आप सप्ताह में कितने दिन प्रशिक्षण ले सकते हैं?',
 }

@@ -767,4 +767,6 @@ export default {
   'PRs, volume and consistency build up here over time.': '시간이 지남에 따라 신기록, 볼륨, 꾸준함이 여기에 쌓입니다。',
   'Tutorial': '튜토리얼',
   'Giwi walks you through the app step by step. Your data is untouched.': 'Giwi가 앱을 단계별로 안내합니다. 데이터는 변경되지 않습니다.',
+  'What’s your experience level?': '경험 수준은 어떻게 되나요?',
+  'How many days per week can you train?': '일주일에 며칠 훈련할 수 있나요?',
 }
