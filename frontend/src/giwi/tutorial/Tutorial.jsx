@@ -9,7 +9,9 @@ import { TUTORIAL_STEPS, copyFor } from './steps.js'
 import { setTutorial } from '../flags.js'
 import { t } from '../../lib/i18n.js'
 import { useStore } from '../../store/useStore.js'
-import { buildSets, defaultConfig } from '../../lib/history.js'
+import { useUI } from '../../store/useUI.js'
+import { uid } from '../../lib/format.js'
+import { buildSets } from '../../lib/history.js'
 import { uid } from '../../lib/format.js'
 
 export default function GiwiTutorial({ onDone }) {
@@ -56,6 +58,8 @@ export default function GiwiTutorial({ onDone }) {
     setTutorial({ currentStep: step.id })
     // start a real workout before the exercise/setlog/rest steps so the UI exists
     if (['exercise', 'setlog', 'rest'].includes(step.id)) ensureWorkout()
+    // start the rest timer so the timer UI is visible for the rest step
+    if (step.id === 'rest') useUI.getState().startRest(useStore.getState().S.restSec || 90)
     if (step.route) nav(step.route)
     let raf2, raf3, alive = true
     const raf1 = requestAnimationFrame(() => {
