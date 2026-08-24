@@ -791,4 +791,5 @@ export default {
   'Strength ranking': '근력 랭킹',
   'Rank your lifts from Bronze to Hero and see how you compare.': '당신의 리프트를 브론즈부터 히어로까지 랭킹을 매겨 비교해 보세요.',
   'What language do you prefer?': '어떤 언어를 선호하시나요?',
+  'What are your goals? Pick as many as you like.': '당신의 목표는 무엇인가요? 원하는 만큼 선택하세요.',
 }

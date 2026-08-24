@@ -162,10 +162,10 @@ export default function GiwiOnboarding({ onDone }) {
           <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>
             {GOALS.map(g => (
               <Button key={g} variant={draft.goals.includes(g) ? 'primary' : 'plain'}
-                onClick={() => set(d => {
-                  const goals = d.goals.includes(g) ? d.goals.filter(x => x !== g) : [...d.goals, g]
-                  return { ...d, goals }
-                })}>{t(GOAL_LABEL[g])}</Button>
+                onClick={() => {
+                  const goals = draft.goals.includes(g) ? draft.goals.filter(x => x !== g) : [...draft.goals, g]
+                  set({ goals })
+                }}>{t(GOAL_LABEL[g])}</Button>
             ))}
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 12, alignItems: 'center' }}>

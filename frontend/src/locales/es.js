@@ -791,4 +791,5 @@ export default {
   'Strength ranking': 'Ranking de fuerza',
   'Rank your lifts from Bronze to Hero and see how you compare.': 'Clasifica tus levantamientos de Bronce a Hero y compárate.',
   'What language do you prefer?': '¿Qué idioma prefieres?',
+  'What are your goals? Pick as many as you like.': '¿Cuáles son tus objetivos? Elige tantos como quieras.',
 }

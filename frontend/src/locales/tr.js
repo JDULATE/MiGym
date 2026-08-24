@@ -791,4 +791,5 @@ export default {
   'Strength ranking': 'Güç sıralaması',
   'Rank your lifts from Bronze to Hero and see how you compare.': 'Kaldırmalarınızı Bronz ile Hero arasında sıralayın ve karşılaştırın.',
   'What language do you prefer?': 'Hangi dili tercih edersin?',
+  'What are your goals? Pick as many as you like.': 'Hedeflerin neler? İstediğin kadar seç.',
 }

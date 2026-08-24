@@ -791,4 +791,5 @@ export default {
   'Strength ranking': '力量排名',
   'Rank your lifts from Bronze to Hero and see how you compare.': '将你的举重从青铜排到英雄，看看你的水平。',
   'What language do you prefer?': '你偏好什么语言？',
+  'What are your goals? Pick as many as you like.': '你的目标是什么？想选几个就选几个。',
 }

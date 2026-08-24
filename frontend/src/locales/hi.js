@@ -791,4 +791,5 @@ export default {
   'Strength ranking': 'ताकत रैंकिंग',
   'Rank your lifts from Bronze to Hero and see how you compare.': 'अपने लिफ्ट को कांसे से हीरो तक रैंक करें और तुलना देखें।',
   'What language do you prefer?': 'आप कौन सी भाषा पसंद करते हैं?',
+  'What are your goals? Pick as many as you like.': '¿Cuáles son tus metas? Elige tantas como quieras.',
 }

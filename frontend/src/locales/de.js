@@ -808,4 +808,5 @@ export default {
   'Strength ranking': 'Kraftrangliste',
   'Rank your lifts from Bronze to Hero and see how you compare.': 'Ordne deine Lifts von Bronze bis Hero ein und vergleiche dich mit anderen.',
   'What language do you prefer?': 'Welche Sprache bevorzugst du?',
+  'What are your goals? Pick as many as you like.': 'Was sind deine Ziele? Wähle so viele du magst.',
 }

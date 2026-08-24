@@ -1,9 +1,9 @@
 // Declarative walkthrough steps (docs/TUTORIAL.md). Targets resolve through stable
 // data-giwi attributes — never CSS classes or DOM position.
 export const TUTORIAL_STEPS = [
-  { id: 'dashboard', target: 'home-today', route: '/' },
+  { id: 'dashboard', target: 'home-today', route: '/home' },
   { id: 'routines', target: 'navigation-routines', route: '/plan' },
-  { id: 'start', target: 'start-workout', route: '/' },
+  { id: 'start', target: 'start-workout', route: '/home' },
   { id: 'exercise', target: 'exercise', route: '/workout', liveOnly: true },
   { id: 'setlog', target: 'set-row', route: '/workout', liveOnly: true },
   { id: 'rest', target: 'rest-timer', route: '/workout', liveOnly: true },
