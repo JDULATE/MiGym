@@ -3,7 +3,7 @@
 // Every step renders its own action button INSIDE the bubble — no separate controls area.
 import { useState } from 'react'
 import { useStore } from '../store/useStore.js'
-import { normalizeProfile, GOALS, GOAL_LABEL } from '../lib/profile.js'
+import { normalizeProfile, GOALS, GOAL_LABEL, EXPERIENCE, EXPERIENCE_LABEL } from '../lib/profile.js'
 import { todayISO, fmtNum } from '../lib/format.js'
 import { t } from '../lib/i18n.js'
 import Giwi from './Giwi.jsx'
@@ -11,13 +11,13 @@ import { DIALOGUE } from './dialogue.js'
 import { completeOnboarding } from './flags.js'
 import { Button, TextField } from './../components/ui.jsx'
 
-const STEPS = ['welcome', 'name', 'age', 'weight', 'height', 'goal', 'confirm']
+const STEPS = ['welcome', 'name', 'age', 'weight', 'height', 'goal', 'experience', 'days', 'confirm']
 
 export default function GiwiOnboarding({ onDone }) {
   const S = useStore(s => s.S)
   const update = useStore(s => s.update)
   const [step, setStep] = useState(0)
-  const [draft, setDraft] = useState({ name: '', ageYears: '', weight: '', heightCm: '', goal: '' })
+  const [draft, setDraft] = useState({ name: '', ageYears: '', weight: '', heightCm: '', goal: '', experience: '', daysPerWeek: '' })
   const set = patch => setDraft(d => ({ ...d, ...patch }))
   const next = () => setStep(i => Math.min(i + 1, STEPS.length))
   const back = () => setStep(i => Math.max(i - 1, 0))
@@ -30,6 +30,8 @@ export default function GiwiOnboarding({ onDone }) {
         ageYears: draft.ageYears,
         heightCm: draft.heightCm,
         goal: draft.goal,
+        experience: draft.experience,
+        daysPerWeek: draft.daysPerWeek,
       })
       s.bodyweight = [...(s.bodyweight || []), { d: todayISO(), w: Number(draft.weight) }]
     })
@@ -48,6 +50,8 @@ export default function GiwiOnboarding({ onDone }) {
     Number(draft.weight) > 0,                                                                   // weight
     Number(draft.heightCm) >= 50,                                                               // height
     !!draft.goal,                                                                               // goal
+    !!draft.experience,                                                                         // experience
+    Number(draft.daysPerWeek) >= 1,                                                             // days
     true,                                                                                       // confirm
   ]
 
@@ -137,13 +141,39 @@ export default function GiwiOnboarding({ onDone }) {
           </div>
         </>}
 
-        {/* ---- confirm ---- */}
+        {/* ---- experience ---- */}
         {step === 6 && <>
+          {bubble('askExperience')}
+          <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>
+            {EXPERIENCE.map(x => (
+              <Button key={x} variant={draft.experience === x ? 'primary' : 'plain'}
+                onClick={() => { set({ experience: x }); next() }}>{t(EXPERIENCE_LABEL[x])}</Button>
+            ))}
+          </div>
+          <div style={{ marginTop: 10 }}><Button onClick={back}>{t('Back')}</Button></div>
+        </>}
+
+        {/* ---- days per week ---- */}
+        {step === 7 && <>
+          {bubble('askDays')}
+          <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>
+            {[1, 2, 3, 4, 5, 6, 7].map(n => (
+              <Button key={n} variant={Number(draft.daysPerWeek) === n ? 'primary' : 'plain'}
+                onClick={() => { set({ daysPerWeek: n }); next() }}>{t('{0} days/week', n)}</Button>
+            ))}
+          </div>
+          <div style={{ marginTop: 10 }}><Button onClick={back}>{t('Back')}</Button></div>
+        </>}
+
+        {/* ---- confirm ---- */}
+        {step === 8 && <>
           {bubble('perfectLine')}
           <div className="card small" style={{ textAlign: 'left', margin: '10px 0' }}>
             <div><b>{draft.name}</b></div>
             <div className="dim">{t(DIALOGUE.years)}: {fmtNum(Number(draft.ageYears))} · {t(DIALOGUE.currentWeight)}: {fmtNum(Number(draft.weight))} {S.unit} · {t('Height')}: {fmtNum(Number(draft.heightCm))} cm</div>
             <div className="dim">{t('Goal')}: {t(GOAL_LABEL[draft.goal])}</div>
+            {draft.experience && <div className="dim">{t('Experience level')}: {t(EXPERIENCE_LABEL[draft.experience])}</div>}
+            {draft.daysPerWeek && <div className="dim">{t('Days per week')}: {draft.daysPerWeek}</div>}
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <Button onClick={back}>{t('Back')}</Button>

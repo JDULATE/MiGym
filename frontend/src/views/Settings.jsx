@@ -13,7 +13,6 @@ import { mergeStates } from '../lib/sync.js'
 import { DEMO } from '../lib/demo.js'
 import { MOBILE, shareExport, syncReminder } from '../lib/mobile.js'
 import { loadStarterPlan, confirmSheet, importFromApp } from '../sheets.jsx'
-import { coachConfigured, loadCoachCfg, saveCoachCfg } from '../lib/coach.js'
 import { resetTutorial } from '../giwi/flags.js'
 import Icon from '../components/Icon.jsx'
 import { Section, Row, SelectRow, Switch, Segmented, Button, TextField, TextArea, NumberField , ListItem} from '../components/ui.jsx'
@@ -451,36 +450,10 @@ function openMeasurementsSheet() {
 // localStorage key — deliberately outside S, so it never syncs and never lands in a
 // backup or export. Without a configured endpoint the coach UI simply doesn't exist.
 function CoachCard() {
-  const [cfg, setCfg] = useState(() => loadCoachCfg())
-  const toast = useUI(s => s.toast)
-  const set = patch => setCfg(c => { const n = { ...c, ...patch }; saveCoachCfg(n); return n })
-  return <Section title={t('AI coach')}
-    footer={t('Answers come from the endpoint you configure below, built only from your logged data. Nothing is sent anywhere until you ask a question.')}>
-    <Row icon="sparkles" iconTint={coachConfigured(cfg) ? 'var(--acc)' : 'var(--grey)'}
-      title={t('Ask the coach about your training')}
-      subtitle={coachConfigured(cfg)
-        ? t('Ready — questions live in Stats → Progress overview.')
-        : t('Off. Configure an OpenAI-compatible endpoint to enable it.')}>
-      <Switch checked={coachConfigured(cfg)} onChange={v => {
-        if (!v) { set({ model: '' }); toast(t('Coach disabled')) }
-        else if (!cfg.model) toast(t('Pick a model below first'))
-      }} />
-    </Row>
-    <div style={{ padding: '2px 0 10px' }}>
-      <div className="dim small" style={{ marginBottom: 4 }}>{t('Endpoint URL')}</div>
-      <input className="input" aria-label={t('Endpoint URL')} placeholder="http://localhost:11434/v1" value={cfg.baseUrl}
-        onChange={e => set({ baseUrl: e.target.value })} autoCapitalize="off" autoCorrect="off" />
-      <div className="dim small" style={{ marginTop: 6 }}>{t('OpenAI-compatible endpoint — Ollama, LM Studio, OpenAI, Groq…')}</div>
-      <div style={{ height: 8 }} />
-      <div className="dim small" style={{ marginBottom: 4 }}>{t('Model')}</div>
-      <input className="input" aria-label={t('Model')} placeholder="llama3.1" value={cfg.model} onChange={e => set({ model: e.target.value })}
-        autoCapitalize="off" autoCorrect="off" />
-      <div style={{ height: 8 }} />
-      <div className="dim small" style={{ marginBottom: 4 }}>{t('API key (if needed)')}</div>
-      <input className="input" type="password" aria-label={t('API key (if needed)')} value={cfg.key}
-        onChange={e => set({ key: e.target.value })} autoCapitalize="off" autoCorrect="off" />
-      <div className="dim small" style={{ marginTop: 6 }}>{t('Stored only on this device — never synced, never in backups.')}</div>
-    </div>
+  return <Section title={t('AI coach')} footer={t('Training analysis and recommendations powered by AI. Coming soon.')}>
+    <Row icon="sparkles" iconTint="var(--grey)"
+      title={t('Coming soon')}
+      subtitle={t('We\'re working on an AI coach that answers questions about your training.')} />
   </Section>
 }
 

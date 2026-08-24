@@ -20,6 +20,9 @@ export const GOAL_LABEL = {
   general: 'General fitness', performance: 'Performance'
 }
 
+/** Display keys for experience levels. */
+export const EXPERIENCE_LABEL = { beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced' }
+
 /** Self-assessed experience. A declaration, not a measurement. */
 export const EXPERIENCE = ['beginner', 'intermediate', 'advanced']
 

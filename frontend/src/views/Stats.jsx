@@ -285,8 +285,6 @@ function ProgressOverview({ S }) {
   return <div className="card">
     <div className="row between">
       <h2 style={{ margin: 0 }}>{t('Progress overview')}</h2>
-      {coachConfigured(loadCoachCfg()) &&
-        <Button size="sm" icon="sparkles" onClick={() => useUI.getState().openSheet(close => <CoachSheet close={close} />)}>{t('Ask')}</Button>}
     </div>
     <div className="tiles" style={{ marginBottom: 4 }}>
       <div className="tile"><div className="l"><Icon name="plate" />{t('Volume · 7 days')}</div><div className="v">{vol(sum.weekVolume)}</div></div>
@@ -336,47 +334,6 @@ function ProgressOverview({ S }) {
     {mom.improving.length === 0 && mom.stalled.length === 0 && mom.stable.length === 0 &&
       <div className="muted small" style={{ marginTop: 6 }}>{t('A few more sessions and this section fills in.')}</div>}
   </div>
-}
-
-// AI coach sheet (phase 9). One bounded context per question: recorded facts + computed
-// metrics from lib/coach.js, guardrailed system prompt, OpenAI-compatible transport the
-// user configured in Settings. The answer is model output and is labelled as such.
-function CoachSheet({ close }) {
-  const S = useStore(s => s.S)
-  const [q, setQ] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [thread, setThread] = useState([])
-  const ask = async () => {
-    const question = q.trim()
-    if (!question || busy) return
-    setBusy(true); setQ('')
-    try {
-      const cfg = loadCoachCfg()
-      const langName = LANGS[getLang()] || 'English'
-      const text = await askCoach(cfg, buildMessages(buildCoachContext(S), question, langName))
-      setThread(t => [...t, { q: question, a: text }])
-    } catch (e) {
-      setThread(t => [...t, { q: question, error: e.message }])
-    }
-    setBusy(false)
-  }
-  return <>
-    <h3>{t('Ask the coach')}</h3>
-    <div className="muted small" style={{ marginBottom: 10 }}>{t('Answers are built only from your logged data — double-check anything important.')}</div>
-    <TextField value={q} onChange={e => setQ(e.target.value)} placeholder={t('Ask about your training…')}
-      onKeyDown={e => { if (e.key === 'Enter') ask() }} />
-    <div style={{ height: 10 }} />
-    <Button variant="primary" icon="sparkles" disabled={busy || !q.trim()} onClick={ask}>{busy ? t('Thinking…') : t('Ask')}</Button>
-    <div style={{ height: 8 }} />
-    {thread.map((x, i) => (
-      <div key={i} className="card small" style={{ marginTop: 8, textAlign: 'left' }}>
-        <div style={{ fontWeight: 600, marginBottom: 4 }}>{x.q}</div>
-        {x.error ? <span style={{ color: 'var(--red)' }}>{x.error}</span>
-          : <div style={{ whiteSpace: 'pre-wrap' }}>{x.a}</div>}
-      </div>
-    ))}
-    <div style={{ height: 8 }} />
-  </>
 }
 
 // Stats = the analytics hub: all charts, progress and history live here.
