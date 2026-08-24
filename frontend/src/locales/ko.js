@@ -785,4 +785,10 @@ export default {
   'Page not found': '페이지를 찾을 수 없습니다',
   'Giwi looked everywhere but couldn’t find that page. It might have been moved or doesn’t exist.': 'Giwi가 모든 곳을 찾았지만 그 페이지를 찾을 수 없습니다. 이동되었거나 존재하지 않을 수 있습니다.',
   'Go home': '홈으로 가기',
+  'Coming soon': '곧 출시 예정',
+  'Adaptive training': '맞춤형 훈련',
+  'Adapted programs for conditions like diabetes, heart problems or back pain.': '당뇨병, 심장 문제, 허리 통증 등을 위한 맞춤 프로그램.',
+  'Strength ranking': '근력 랭킹',
+  'Rank your lifts from Bronze to Hero and see how you compare.': '당신의 리프트를 브론즈부터 히어로까지 랭킹을 매겨 비교해 보세요.',
+  'What language do you prefer?': '어떤 언어를 선호하시나요?',
 }

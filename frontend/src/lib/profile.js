@@ -50,7 +50,8 @@ export const EQUIPMENT = [
 export const EMPTY_PROFILE = {
   name: '',            // display name override (server profiles already have account names)
   image: null,         // small JPEG data URL (client-side resized); null = no photo
-  goal: null,          // GOALS | null
+  goal: null,          // primary goal (backward compat) — first of goals[]
+  goals: [],           // all selected goals (multi-select from onboarding)
   experience: null,    // EXPERIENCE | null
   daysPerWeek: null,   // intended sessions per week, 1..7 | null
   sessionMinutes: null,// preferred session length, 5..300 | null
@@ -88,6 +89,7 @@ export function normalizeProfile(raw) {
   p.daysPerWeek = clampOpt(src.daysPerWeek, 1, 7)
   p.sessionMinutes = clampOpt(src.sessionMinutes, 5, 300)
   p.heightCm = clampOpt(src.heightCm, 50, 280)
+  if (Array.isArray(src.goals)) p.goals = src.goals.filter(g => GOALS.includes(g))
   p.ageYears = clampOpt(src.ageYears, 10, 100)
   if (Array.isArray(src.equipment)) {
     p.equipment = [...new Set(src.equipment)].filter(eq => EQUIPMENT.includes(eq))

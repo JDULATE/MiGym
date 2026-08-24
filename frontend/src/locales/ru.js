@@ -785,4 +785,10 @@ export default {
   'Page not found': 'Страница не найдена',
   'Giwi looked everywhere but couldn’t find that page. It might have been moved or doesn’t exist.': 'Дживи искал везде, но не нашёл эту страницу. Она могла быть перемещена или не существует.',
   'Go home': 'На главную',
+  'Coming soon': 'Скоро',
+  'Adaptive training': 'Адаптивные тренировки',
+  'Adapted programs for conditions like diabetes, heart problems or back pain.': 'Адаптированные программы при диабете, сердечных проблемах или боли в спине.',
+  'Strength ranking': 'Рейтинг силы',
+  'Rank your lifts from Bronze to Hero and see how you compare.': 'Оцени свои подъёмы от Бронзы до Героя и сравни себя с другими.',
+  'What language do you prefer?': 'Какой язык ты предпочитаешь?',
 }

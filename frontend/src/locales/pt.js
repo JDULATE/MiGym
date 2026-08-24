@@ -785,4 +785,10 @@ export default {
   'Page not found': 'Página não encontrada',
   'Giwi looked everywhere but couldn’t find that page. It might have been moved or doesn’t exist.': 'Giwi procurou em todo lado mas não encontrou essa página. Pode ter sido movida ou não existe.',
   'Go home': 'Ir para início',
+  'Coming soon': 'Em breve',
+  'Adaptive training': 'Treino adaptado',
+  'Adapted programs for conditions like diabetes, heart problems or back pain.': 'Programas adaptados para condições como diabetes, problemas cardíacos ou dores nas costas.',
+  'Strength ranking': 'Ranking de força',
+  'Rank your lifts from Bronze to Hero and see how you compare.': 'Classifica os teus levantamentos de Bronze a Heroi e compara-te.',
+  'What language do you prefer?': 'Que idioma preferes?',
 }

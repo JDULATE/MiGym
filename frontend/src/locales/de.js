@@ -802,4 +802,10 @@ export default {
   'Page not found': 'Seite nicht gefunden',
   'Giwi looked everywhere but couldn’t find that page. It might have been moved or doesn’t exist.': 'Giwi hat überall gesucht, aber diese Seite nicht gefunden. Sie wurde vielleicht verschoben oder existiert nicht.',
   'Go home': 'Zur Startseite',
+  'Coming soon': 'Demnächst',
+  'Adaptive training': 'Adaptives Training',
+  'Adapted programs for conditions like diabetes, heart problems or back pain.': 'Angepasste Programme bei Diabetes, Herzproblemen oder Rückenschmerzen.',
+  'Strength ranking': 'Kraftrangliste',
+  'Rank your lifts from Bronze to Hero and see how you compare.': 'Ordne deine Lifts von Bronze bis Hero ein und vergleiche dich mit anderen.',
+  'What language do you prefer?': 'Welche Sprache bevorzugst du?',
 }

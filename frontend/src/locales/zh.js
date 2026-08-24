@@ -785,4 +785,10 @@ export default {
   'Page not found': '页面未找到',
   'Giwi looked everywhere but couldn’t find that page. It might have been moved or doesn’t exist.': 'Giwi 到处都找过了，但找不到那个页面。它可能已被移动或不存在。',
   'Go home': '回到首页',
+  'Coming soon': '即将推出',
+  'Adaptive training': '适应性训练',
+  'Adapted programs for conditions like diabetes, heart problems or back pain.': '针对糖尿病、心脏问题或腰痛等状况的适应性训练计划。',
+  'Strength ranking': '力量排名',
+  'Rank your lifts from Bronze to Hero and see how you compare.': '将你的举重从青铜排到英雄，看看你的水平。',
+  'What language do you prefer?': '你偏好什么语言？',
 }

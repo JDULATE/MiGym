@@ -1,23 +1,26 @@
 // Giwi first-launch onboarding (docs/ONBOARDING.md).
-// Question → reaction → next question. Everything commits atomically at confirmation.
-// Every step renders its own action button INSIDE the bubble — no separate controls area.
+// Language first (comfort), then friendly questions, multi-select goals.
+// Every step has its action button INSIDE the bubble. Commits atomically at confirm.
 import { useState } from 'react'
 import { useStore } from '../store/useStore.js'
 import { normalizeProfile, GOALS, GOAL_LABEL, EXPERIENCE, EXPERIENCE_LABEL } from '../lib/profile.js'
 import { todayISO, fmtNum } from '../lib/format.js'
-import { t } from '../lib/i18n.js'
+import { t, LANGS, setLang, getLang, dateLocale } from '../lib/i18n.js'
 import Giwi from './Giwi.jsx'
 import { DIALOGUE } from './dialogue.js'
 import { completeOnboarding } from './flags.js'
-import { Button, TextField } from './../components/ui.jsx'
+import { Button, TextField, Check } from './../components/ui.jsx'
 
-const STEPS = ['welcome', 'name', 'age', 'weight', 'height', 'goal', 'experience', 'days', 'confirm']
+const STEPS = ['language', 'welcome', 'name', 'age', 'weight', 'height', 'goal', 'experience', 'days', 'confirm']
 
 export default function GiwiOnboarding({ onDone }) {
   const S = useStore(s => s.S)
   const update = useStore(s => s.update)
   const [step, setStep] = useState(0)
-  const [draft, setDraft] = useState({ name: '', ageYears: '', weight: '', heightCm: '', goal: '', experience: '', daysPerWeek: '' })
+  const [draft, setDraft] = useState({
+    name: '', ageYears: '', weight: '', heightCm: '', goal: '', goals: [],
+    experience: '', daysPerWeek: '',
+  })
   const set = patch => setDraft(d => ({ ...d, ...patch }))
   const next = () => setStep(i => Math.min(i + 1, STEPS.length))
   const back = () => setStep(i => Math.max(i - 1, 0))
@@ -29,120 +32,150 @@ export default function GiwiOnboarding({ onDone }) {
         name: draft.name,
         ageYears: draft.ageYears,
         heightCm: draft.heightCm,
-        goal: draft.goal,
+        goal: draft.goals[0] || draft.goal || null,
+        goals: draft.goals.length ? [...draft.goals] : (draft.goal ? [draft.goal] : []),
         experience: draft.experience,
         daysPerWeek: draft.daysPerWeek,
       })
       s.bodyweight = [...(s.bodyweight || []), { d: todayISO(), w: Number(draft.weight) }]
+      s.lang = draft.lang || s.lang
     })
     completeOnboarding()
     setStep(STEPS.length)
   }
 
   const skipAll = () => { completeOnboarding(); onDone?.() }
-  const bubble = (key, args) => <p className="giwi-line">{t(DIALOGUE[key], ...(args || []))}</p>
+  const bubble = (key, args) => <p className="giwi-line" style={{ fontSize: 16, lineHeight: 1.5, marginBottom: 4 }}>{t(DIALOGUE[key], ...(args || []))}</p>
 
-  // validation per step
   const valid = [
-    true,                                                                                       // welcome
-    !!draft.name.trim(),                                                                        // name
-    Number(draft.ageYears) >= 10 && Number(draft.ageYears) <= 100,                              // age
-    Number(draft.weight) > 0,                                                                   // weight
-    Number(draft.heightCm) >= 50,                                                               // height
-    !!draft.goal,                                                                               // goal
-    !!draft.experience,                                                                         // experience
-    Number(draft.daysPerWeek) >= 1,                                                             // days
-    true,                                                                                       // confirm
+    true,                                                                                     // language
+    true,                                                                                     // welcome
+    !!draft.name.trim(),                                                                      // name
+    Number(draft.ageYears) >= 10 && Number(draft.ageYears) <= 100,                            // age
+    Number(draft.weight) > 0,                                                                 // weight
+    Number(draft.heightCm) >= 50,                                                             // height
+    draft.goals.length > 0,                                                                   // goal
+    !!draft.experience,                                                                       // experience
+    Number(draft.daysPerWeek) >= 1,                                                           // days
+    true,                                                                                     // confirm
   ]
+
+  const canNext = valid[step]
 
   return (
     <div className="narrow giwi-screen" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column',
       justifyContent: 'center', alignItems: 'center', padding: '20px 16px calc(20px + var(--sab))' }}>
-      <Giwi state={step >= STEPS.length ? 'celebrate' : ['name', 'age', 'weight'].includes(STEPS[step]) ? 'thinking' : step === STEPS.length - 1 ? 'happy' : 'welcome'} size={110} />
+
+      <Giwi state={step >= STEPS.length ? 'celebrate'
+        : [STEPS.indexOf('name'), STEPS.indexOf('age'), STEPS.indexOf('weight')].includes(step) ? 'thinking'
+        : step === STEPS.length - 1 ? 'happy'
+        : step === 0 ? 'welcome'
+        : 'encourage'} size={100} />
 
       <div className="giwi-bubble" style={{ margin: '12px auto 0', position: 'relative', width: '100%', maxWidth: 380 }}>
-        {/* ---- welcome ---- */}
+        {/* ---- language (always first — comfort before anything else) ---- */}
         {step === 0 && <>
+          {bubble('askLang')}
+          <div style={{ display: 'grid', gap: 4, marginTop: 8 }}>
+            {Object.entries(LANGS).map(([code, name]) => (
+              <Button key={code} variant={draft.lang === code ? 'primary' : 'plain'}
+                onClick={() => { set({ lang: code }); setLang(code) }}>
+                {name}
+              </Button>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
+            <Button variant="primary" disabled={!draft.lang} onClick={next}>{t(DIALOGUE.start)}</Button>
+            <button className="btn ghost dim" onClick={skipAll}>{t(DIALOGUE.skip)}</button>
+          </div>
+        </>}
+
+        {/* ---- welcome (after language, in their language now) ---- */}
+        {step === 1 && <>
           <h2 className="t-h1">{t('Welcome to MiGym')}</h2>
           {bubble('welcomeLine')}
-          <div style={{ marginTop: 14 }}>
+          <div style={{ marginTop: 14, display: 'flex', gap: 8 }}>
             <Button variant="primary" icon="sparkles" onClick={next}>{t(DIALOGUE.start)}</Button>
-            <button className="btn ghost dim" style={{ marginLeft: 8 }} onClick={skipAll}>{t(DIALOGUE.skip)}</button>
+            <button className="btn ghost dim" onClick={skipAll}>{t(DIALOGUE.skip)}</button>
           </div>
         </>}
 
         {/* ---- name ---- */}
-        {step === 1 && <>
+        {step === 2 && <>
           {bubble('askName')}
           <TextField aria-label={t(DIALOGUE.yourName)} placeholder={t(DIALOGUE.yourName)}
             value={draft.name} maxLength={60} autoFocus
             onChange={e => set({ name: e.target.value })}
-            onKeyDown={e => { if (e.key === 'Enter' && valid[1]) next() }} />
+            onKeyDown={e => { if (e.key === 'Enter' && valid[2]) next() }} />
           {draft.name.trim() && <div className="small dim" style={{ marginTop: 6 }}>{t('niceToMeet', draft.name.trim())}</div>}
-          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+          <div style={{ display: 'flex', gap: 8, marginTop: 12, alignItems: 'center' }}>
             <Button onClick={back}>{t('Back')}</Button>
-            <Button variant="primary" disabled={!valid[1]} onClick={next}>{t('Continue')}</Button>
+            <Button variant="primary" disabled={!canNext} onClick={next}>{t('Continue')}</Button>
           </div>
         </>}
 
         {/* ---- age ---- */}
-        {step === 2 && <>
+        {step === 3 && <>
           {bubble('askAge')}
           <TextField inputMode="numeric" aria-label={t(DIALOGUE.age)} placeholder="30" autoFocus
             value={String(draft.ageYears ?? '')}
             onChange={e => set({ ageYears: e.target.value.replace(/[^0-9]/g, '') })}
-            onKeyDown={e => { if (e.key === 'Enter' && valid[2]) next() }} />
-          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+            onKeyDown={e => { if (e.key === 'Enter' && valid[3]) next() }} />
+          <div style={{ display: 'flex', gap: 8, marginTop: 12, alignItems: 'center' }}>
             <Button onClick={back}>{t('Back')}</Button>
-            <Button variant="primary" disabled={!valid[2]} onClick={next}>{t('Continue')}</Button>
+            <Button variant="primary" disabled={!canNext} onClick={next}>{t('Continue')}</Button>
           </div>
         </>}
 
         {/* ---- weight ---- */}
-        {step === 3 && <>
+        {step === 4 && <>
           {bubble('askWeight')}
           <TextField inputMode="decimal" aria-label={t(DIALOGUE.currentWeight)}
             placeholder={S.unit === 'lb' ? '180' : '80'} autoFocus
             value={String(draft.weight ?? '')}
             onChange={e => set({ weight: e.target.value.replace(',', '.') })}
-            onKeyDown={e => { if (e.key === 'Enter' && valid[3]) next() }} />
+            onKeyDown={e => { if (e.key === 'Enter' && valid[4]) next() }} />
           <div className="dim small" style={{ marginTop: 4 }}>{S.unit}</div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+          <div style={{ display: 'flex', gap: 8, marginTop: 12, alignItems: 'center' }}>
             <Button onClick={back}>{t('Back')}</Button>
-            <Button variant="primary" disabled={!valid[3]} onClick={next}>{t('Continue')}</Button>
+            <Button variant="primary" disabled={!canNext} onClick={next}>{t('Continue')}</Button>
           </div>
         </>}
 
         {/* ---- height ---- */}
-        {step === 4 && <>
+        {step === 5 && <>
           {bubble('askHeight')}
           <TextField inputMode="decimal" aria-label={t(DIALOGUE.height)} placeholder="176" autoFocus
             value={String(draft.heightCm ?? '')}
             onChange={e => set({ heightCm: e.target.value.replace(/[^0-9.]/g, '') })}
-            onKeyDown={e => { if (e.key === 'Enter' && valid[4]) next() }} />
+            onKeyDown={e => { if (e.key === 'Enter' && valid[5]) next() }} />
           <div className="dim small" style={{ marginTop: 4 }}>cm</div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+          <div style={{ display: 'flex', gap: 8, marginTop: 12, alignItems: 'center' }}>
             <Button onClick={back}>{t('Back')}</Button>
-            <Button variant="primary" disabled={!valid[4]} onClick={next}>{t('Continue')}</Button>
+            <Button variant="primary" disabled={!canNext} onClick={next}>{t('Continue')}</Button>
           </div>
         </>}
 
-        {/* ---- goal ---- */}
-        {step === 5 && <>
-          {bubble('askGoal')}
+        {/* ---- goal (multi-select) ---- */}
+        {step === 6 && <>
+          {bubble('askGoalMulti')}
           <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>
             {GOALS.map(g => (
-              <Button key={g} variant={draft.goal === g ? 'primary' : 'plain'}
-                onClick={() => { set({ goal: g }); next() }}>{t(GOAL_LABEL[g])}</Button>
+              <Button key={g} variant={draft.goals.includes(g) ? 'primary' : 'plain'}
+                onClick={() => set(d => {
+                  const goals = d.goals.includes(g) ? d.goals.filter(x => x !== g) : [...d.goals, g]
+                  return { ...d, goals }
+                })}>{t(GOAL_LABEL[g])}</Button>
             ))}
           </div>
-          <div style={{ marginTop: 10 }}>
+          <div style={{ display: 'flex', gap: 8, marginTop: 12, alignItems: 'center' }}>
             <Button onClick={back}>{t('Back')}</Button>
+            <Button variant="primary" disabled={!canNext} onClick={next}>{t('Continue')}</Button>
           </div>
         </>}
 
         {/* ---- experience ---- */}
-        {step === 6 && <>
+        {step === 7 && <>
           {bubble('askExperience')}
           <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>
             {EXPERIENCE.map(x => (
@@ -154,7 +187,7 @@ export default function GiwiOnboarding({ onDone }) {
         </>}
 
         {/* ---- days per week ---- */}
-        {step === 7 && <>
+        {step === 8 && <>
           {bubble('askDays')}
           <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>
             {[1, 2, 3, 4, 5, 6, 7].map(n => (
@@ -166,14 +199,18 @@ export default function GiwiOnboarding({ onDone }) {
         </>}
 
         {/* ---- confirm ---- */}
-        {step === 8 && <>
+        {step === 9 && <>
           {bubble('perfectLine')}
           <div className="card small" style={{ textAlign: 'left', margin: '10px 0' }}>
             <div><b>{draft.name}</b></div>
-            <div className="dim">{t(DIALOGUE.years)}: {fmtNum(Number(draft.ageYears))} · {t(DIALOGUE.currentWeight)}: {fmtNum(Number(draft.weight))} {S.unit} · {t('Height')}: {fmtNum(Number(draft.heightCm))} cm</div>
-            <div className="dim">{t('Goal')}: {t(GOAL_LABEL[draft.goal])}</div>
-            {draft.experience && <div className="dim">{t('Experience level')}: {t(EXPERIENCE_LABEL[draft.experience])}</div>}
-            {draft.daysPerWeek && <div className="dim">{t('Days per week')}: {draft.daysPerWeek}</div>}
+            <div className="dim">
+              {t(DIALOGUE.years)}: {fmtNum(Number(draft.ageYears))} · {t(DIALOGUE.currentWeight)}: {fmtNum(Number(draft.weight))} {S.unit} · {t('Height')}: {fmtNum(Number(draft.heightCm))} cm
+            </div>
+            <div className="dim">
+              {draft.goals.map(g => t(GOAL_LABEL[g])).join(' · ')}
+            </div>
+            {draft.experience && <div className="dim">{t(EXPERIENCE_LABEL[draft.experience])}</div>}
+            {draft.daysPerWeek && <div className="dim">{t('{0} days/week', draft.daysPerWeek)}</div>}
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <Button onClick={back}>{t('Back')}</Button>
@@ -190,7 +227,7 @@ export default function GiwiOnboarding({ onDone }) {
         </>}
       </div>
 
-      {/* skip link — secondary, always available except on the final screen */}
+      {/* skip link */}
       {step > 0 && step < STEPS.length && (
         <button className="btn ghost dim" style={{ marginTop: 12 }} onClick={skipAll}>{t(DIALOGUE.skip)}</button>
       )}

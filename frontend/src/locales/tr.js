@@ -785,4 +785,10 @@ export default {
   'Page not found': 'Sayfa bulunamadı',
   'Giwi looked everywhere but couldn’t find that page. It might have been moved or doesn’t exist.': 'Giwi her yere baktı ama o sayfayı bulamadı. Taınmış veya mevcut olmayabilir.',
   'Go home': 'Ana sayfaya git',
+  'Coming soon': 'Yakında',
+  'Adaptive training': 'Uyarlanabilir antrenman',
+  'Adapted programs for conditions like diabetes, heart problems or back pain.': 'Diyabet, kalp sorunları veya sırt ağrısı gibi durumlar için uyarlanmış programlar.',
+  'Strength ranking': 'Güç sıralaması',
+  'Rank your lifts from Bronze to Hero and see how you compare.': 'Kaldırmalarınızı Bronz ile Hero arasında sıralayın ve karşılaştırın.',
+  'What language do you prefer?': 'Hangi dili tercih edersin?',
 }

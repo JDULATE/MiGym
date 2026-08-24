@@ -785,4 +785,10 @@ export default {
   'Page not found': 'पृष्ठ नहीं मिला',
   'Giwi looked everywhere but couldn’t find that page. It might have been moved or doesn’t exist.': 'Giwi ने हर जगह खोजा लेकिन वह पृष्ठ नहीं मिला। यह स्थानांतरित हो गया हो या मौजूद नहीं हो सकता।',
   'Go home': 'होम पर जाएँ',
+  'Coming soon': 'जल्द आ रहा है',
+  'Adaptive training': 'अनुकूलित प्रशिक्षण',
+  'Adapted programs for conditions like diabetes, heart problems or back pain.': 'मधुमेह, हृदय समस्याओं या पीठ दर्द जैसी स्थितियों के लिए अनुकूलित कार्यक्रम।',
+  'Strength ranking': 'ताकत रैंकिंग',
+  'Rank your lifts from Bronze to Hero and see how you compare.': 'अपने लिफ्ट को कांसे से हीरो तक रैंक करें और तुलना देखें।',
+  'What language do you prefer?': 'आप कौन सी भाषा पसंद करते हैं?',
 }

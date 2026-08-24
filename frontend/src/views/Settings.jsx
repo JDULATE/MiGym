@@ -279,6 +279,14 @@ export default function Settings() {
         accessory="chevron" onClick={() => useUI.getState().openSheet(close => <TermsSheet close={close} />)} />
     </Section>
 
+    {/* ---------- coming soon ---------- */}
+    <Section title={t('Coming soon')}>
+      <Row icon="heart" iconTint="var(--pink)" title={t('Adaptive training')}
+        subtitle={t('Adapted programs for conditions like diabetes, heart problems or back pain.')} />
+      <Row icon="medal" iconTint="var(--gold)" title={t('Strength ranking')}
+        subtitle={t('Rank your lifts from Bronze to Hero and see how you compare.')} />
+    </Section>
+
     {/* ---------- footer ---------- */}
     <div style={{ textAlign: 'center', padding: '20px 0 calc(20px + var(--sab))', lineHeight: 1.7 }}>
       <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--label)' }}>MiGym</div>
