@@ -14,6 +14,7 @@ import { DEMO } from '../lib/demo.js'
 import { MOBILE, shareExport, syncReminder } from '../lib/mobile.js'
 import { loadStarterPlan, confirmSheet, importFromApp } from '../sheets.jsx'
 import { resetTutorial } from '../giwi/flags.js'
+import TermsSheet from './Terms.jsx'
 import Icon from '../components/Icon.jsx'
 import { Section, Row, SelectRow, Switch, Segmented, Button, TextField, TextArea, NumberField , ListItem} from '../components/ui.jsx'
 
@@ -265,9 +266,40 @@ export default function Settings() {
         subtitle={t('to install MiGym as a full-screen app.') + ' ' + (user ? t('Your data syncs with your profile — sign in anywhere to see it.') : t('Guest data stays on this device — export a backup now and then!'))} />
     </Section>}
 
-    <div className="dim small" style={{ textAlign: 'center', marginTop: 4, lineHeight: 1.6 }}>
-      MiGym · {t('free & open source (AGPL v3)')}<br />
-      <a href="https://github.com/DuarteSantos8/openGym" target="_blank" rel="noopener">source code</a> · based on openGym by Duarte Santos · exercise data: hasaneyldrm/exercises-dataset (CC)
+    {/* ---------- help: terms + tutorial ---------- */}
+    <Section title={t('Help')}>
+      <Row icon="sparkles" iconTint="var(--mint)" title={t('Redo the walkthrough')}
+        subtitle={t('Giwi walks you through the app step by step. Your data is untouched.')}
+        accessory="chevron" onClick={() => {
+          resetTutorial()
+          window.dispatchEvent(new Event('migym:start-tutorial'))
+        }} />
+      <Row icon="info" iconTint="var(--blue)" title={t('Terms & privacy')}
+        subtitle={t('Your data stays local. No tracking, no account required.')}
+        accessory="chevron" onClick={() => useUI.getState().openSheet(close => <TermsSheet close={close} />)} />
+    </Section>
+
+    {/* ---------- footer ---------- */}
+    <div style={{ textAlign: 'center', padding: '20px 0 calc(20px + var(--sab))', lineHeight: 1.7 }}>
+      <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--label)' }}>MiGym</div>
+      <div className="dim small" style={{ marginTop: 2 }}>
+        {t('Made by')} <a href="https://github.com/JDULATE" target="_blank" rel="noopener" style={{ color: 'var(--acc)' }}>Jorge Ulate</a>
+        {' '}{t('for')} Ulatech and Systems
+      </div>
+      <div className="dim small" style={{ marginTop: 2 }}>
+        <a href="https://github.com/JDULATE" target="_blank" rel="noopener">GitHub</a>
+        {' · '}
+        <a href="mailto:Ulatechandsystems@gmail.com" style={{ color: 'var(--acc)' }}>Ulatechandsystems@gmail.com</a>
+      </div>
+      <div className="dim small" style={{ marginTop: 6 }}>
+        <button className="btn ghost dim" style={{ padding: '2px 8px', fontSize: 12 }}
+          onClick={() => useUI.getState().openSheet(close => <TermsSheet close={close} />)}>
+          {t('Terms & privacy')}
+        </button>
+      </div>
+      <div className="dim small" style={{ marginTop: 8 }}>
+        {t('free & open source (AGPL v3)')} · based on openGym by Duarte Santos
+      </div>
     </div>
   </div>
 }
