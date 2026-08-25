@@ -130,3 +130,38 @@
 .hs5-row b{font-weight:650;letter-spacing:-.01em}
 .hs5-row em{font-style:normal;font-size:.8rem;font-weight:650;margin-left:4px}
 .hs5-hint{margin-top:22px;text-align:center}
+
+/* ---- production-cut details ---- */
+.hs1 .iconbtn{color:var(--label)}
+.hs1-glances .v2-glance{cursor:default}
+.hs1-glances .v2-glance[role=button]{cursor:pointer}
+.hs1-weight{display:flex;flex-direction:column;align-items:stretch;text-align:left}
+.hs1-weight big{text-align:center}
+.hs1-delta{font-size:.8rem;font-weight:700;margin-left:6px;color:#7db8f5}
+.hs1-chart{margin-top:10px;background:color-mix(in srgb,var(--sur) 60%,transparent);
+  border-radius:12px;padding:4px}
+
+.hs2-pulse{display:inline-block;width:7px;height:7px;border-radius:50%;background:#155a9e;
+  margin-right:6px;animation:v2pulse 1.1s ease-in-out infinite alternate}
+@media(prefers-reduced-motion:reduce){.hs2-pulse{animation:none}}
+.hs2-metaline{font-size:.72rem;letter-spacing:.06em;color:#8a8578;margin:-6px 0 16px}
+.hs2-emptynote{font-size:.9rem;color:#8a8578;line-height:1.7}
+.hs2-emptynote u{text-decoration:none;color:#3b93f0;font-weight:700;cursor:pointer;padding:0 3px}
+.hs2-cal{color:#3b93f0}
+
+.hs3-gear{position:absolute;top:14px;right:14px;z-index:2;width:38px;height:38px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.75);background:rgba(255,255,255,.55);backdrop-filter:blur(12px);
+  cursor:pointer;font-size:1rem}
+.hs3-card:first-child{overflow:visible}
+.hs3-card:first-child > div:first-child{margin:-30px 0 0 -6px}
+.hs3-label{display:block;font-size:.62rem;font-weight:750;letter-spacing:.14em;color:#6b7280;margin-bottom:8px}
+.hs3-count{font-size:.74rem;color:#5c6470;font-weight:600}
+.hs3-card svg{max-width:100%}
+
+.hs4-cfg{background:none;border:1px solid #1f2933;color:#58a6ff;font-family:ui-monospace,monospace;
+  font-size:.64rem;font-weight:700;letter-spacing:.12em;padding:5px 9px;border-radius:8px;cursor:pointer}
+.hs4-lastname{font-size:.95rem!important;display:flex;justify-content:space-between;gap:10px}
+.hs4-lastname u{text-decoration:none;color:#54606e;font-size:.68rem;flex-shrink:0}
+
+.hs5-livetag{font-size:.78rem;font-weight:650;color:#155a9e;background:rgba(59,147,240,.12);
+  padding:7px 14px;border-radius:999px;margin:-12px 0 22px}

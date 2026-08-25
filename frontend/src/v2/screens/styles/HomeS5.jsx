@@ -1,7 +1,8 @@
-// S5 · ZEN RING — warm minimalism. One ring = the week; Start lives inside it.
+// S5 · ZEN RING — production cut. One ring = the week; Start lives inside it.
+// Everything else is quiet rows: racha, peso (± delta, meta), última sesión, ajustes.
 import { useHomeData } from '../useHomeData.js'
 import GiwiLive from '../../ui/GiwiLive.jsx'
-import { fmtNum } from '../../../lib/format.js'
+import { fmtNum, fmtDate } from '../../../lib/format.js'
 
 export default function HomeS5() {
   const d = useHomeData()
@@ -20,7 +21,7 @@ export default function HomeS5() {
 
       <div className="hs5-ringwrap">
         <svg width="220" height="220" viewBox="0 0 220 220" aria-hidden>
-          <circle cx="110" cy="110" r={R} fill="none" stroke="var(--sep)" strokeWidth="7" />
+          <circle cx="110" cy="110" r={R} fill="none" stroke="#e8e4da" strokeWidth="7" />
           <circle cx="110" cy="110" r={R} fill="none" stroke="#3b93f0" strokeWidth="7"
             strokeLinecap="round" strokeDasharray={CIRC}
             strokeDashoffset={CIRC * (1 - pct)}
@@ -31,30 +32,44 @@ export default function HomeS5() {
           {d.active ? '❚❚' : '▶'}
         </button>
         <div className="hs5-ringlabel">
-          <b>{d.wThisWeek}/{goal || '—'}</b>
-          <small>esta semana</small>
+          <b>{d.wThisWeek}/{goal}</b>
+          <small>{Math.round(pct * 100)}% semana</small>
         </div>
       </div>
 
+      {d.active && (
+        <div className="hs5-livetag">● Sesión en curso — toca ❚❚ para terminar</div>
+      )}
+
       <div className="hs5-rows">
         <div className="hs5-row" onClick={d.openCalendar}>
-          <span>Racha</span><b>{d.streak} {d.streak === 1 ? 'semana' : 'semanas'}</b>
+          <span>Racha</span><b>{d.streak} {d.streak === 1 ? 'semana' : 'semanas'} · {d.wThisWeek}/{goal}</b>
         </div>
         <div className="hs5-row" onClick={d.logBW}>
           <span>Peso</span>
           <b>{d.bw ? `${fmtNum(d.bw.w)} ${d.unit}` : '—'}
-            {!!d.delta && <em style={{ color: d.delta > 0 ? '#c47f17' : '#3b93f0' }}> {d.delta > 0 ? '+' : ''}{fmtNum(d.delta)}</em>}
+            {!!d.delta && (
+              <em style={{ color: d.delta > 0 ? '#c47f17' : '#3b93f0' }}>
+                {' '}{d.delta > 0 ? '+' : '−'}{fmtNum(Math.abs(d.delta))}
+              </em>
+            )}
+            {!!d.targetW && <em style={{ color: '#8a8578' }}> · meta {fmtNum(d.targetW)}</em>}
           </b>
         </div>
         <div className="hs5-row">
-          <span>Historial</span><b>{d.totalWorkouts} sesiones</b>
+          <span>Última sesión</span>
+          <b>{d.lastWorkout ? `${d.lastWorkout.name} · ${fmtDate(d.lastWorkout.d, true)}` : '—'}</b>
+        </div>
+        <div className="hs5-row" onClick={() => d.nav('/settings')}>
+          <span>Ajustes</span><b style={{ color: '#8a8578' }}>›</b>
         </div>
       </div>
 
       {d.empty && (
         <p className="muted small hs5-hint">
-          Sin rutina aún — carga el plan inicial para empezar.
-          <button className="v2-minilink" onClick={d.loadStarter}>Cargar plan inicial</button>
+          Sin rutina aún —{' '}
+          <button className="v2-minilink" onClick={d.loadStarter}>carga el plan inicial</button>
+          {' '}para empezar.
         </p>
       )}
     </div>

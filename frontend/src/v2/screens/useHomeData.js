@@ -39,6 +39,10 @@ export function useHomeData() {
 
   const wThisWeek = S.workouts.filter(w => weekKey(w.d) === weekKey(todayISO())).length
   const plannedPerWeek = Object.keys(S.week).filter(k => S.week[k]).length
+  const todayOvr = S.dayPlan[todayISO()] !== undefined && !!routine
+  const lw = S.workouts[S.workouts.length - 1] || null
+  const lastWorkout = lw ? { name: lw.name, d: lw.d } : null
+  const bwPoints = S.bodyweight.slice(-30).map(b => ({ t: b.t || new Date(b.d).getTime(), y: b.w, d: b.d }))
 
   const start = () => {
     if (active) return nav('/workout')
@@ -52,10 +56,10 @@ export function useHomeData() {
     greetingName: user ? user.name : null,
     dateLong: today.toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' }),
     dateCaps: today.toLocaleDateString(dateLocale(), { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase(),
-    routine, active, empty,
-    bw, unit: S.unit, delta, targetW: S.targetW,
+    routine, active, empty, todayOvr,
+    bw, unit: S.unit, delta, targetW: S.targetW, bwPoints,
     streak: streakWeeks(S), wThisWeek, plannedPerWeek,
-    totalWorkouts: S.workouts.length,
+    totalWorkouts: S.workouts.length, lastWorkout,
     days, weekOffset, setWeekOffset,
     start, openDay,
     logBW: () => bwSheet(), setGoal: () => goalSheet(), openCalendar: () => calendarSheet(),
