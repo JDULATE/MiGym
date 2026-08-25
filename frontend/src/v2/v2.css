@@ -41,7 +41,7 @@
 .v2-start .cir{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   background:var(--acc);color:#fff;box-shadow:0 10px 26px color-mix(in srgb,var(--acc) 50%,transparent);
   border:4px solid var(--bg)}
-.v2-start.live .cir{background:var(--orange);box-shadow:0 10px 26px color-mix(in srgb,var(--orange) 50%,transparent)}
+.v2-start.live .cir{background:#1d6fd0;box-shadow:0 10px 26px color-mix(in srgb,#1d6fd0 50%,transparent)}
 
 /* ---------- HOME V2.1 — immersive scene ---------- */
 .v2-home{min-height:100vh;display:flex;flex-direction:column}
@@ -51,8 +51,8 @@
 .v2-stage-home{position:relative;flex:1;min-height:52vh;display:flex;flex-direction:column;
   align-items:center;justify-content:center;text-align:center;padding:20px;overflow:hidden;
   background:radial-gradient(90% 70% at 50% 0%,color-mix(in srgb,var(--acc) 16%,transparent),transparent 70%)}
-.v2-stage-home.rest{background:radial-gradient(90% 70% at 50% 0%,color-mix(in srgb,var(--yellow) 12%,transparent),transparent 70%)}
-.v2-stage-home.live{background:radial-gradient(90% 70% at 50% 0%,color-mix(in srgb,var(--orange) 20%,transparent),transparent 70%)}
+.v2-stage-home.rest{background:radial-gradient(90% 70% at 50% 0%,color-mix(in srgb,var(--acc) 8%,transparent),transparent 70%)}
+.v2-stage-home.live{background:radial-gradient(90% 70% at 50% 0%,color-mix(in srgb,var(--acc) 30%,transparent),transparent 70%)}
 .v2-ghost{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   font-size:min(300px,60vw);opacity:.055;pointer-events:none;line-height:1}
 .v2-kicker{font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--mut,#8b8f98);margin-bottom:10px}
@@ -63,7 +63,7 @@
   background:var(--acc);color:#fff;font-weight:750;font-size:1rem;letter-spacing:-.01em;
   padding:16px 30px;border-radius:999px;
   box-shadow:0 14px 34px color-mix(in srgb,var(--acc) 48%,transparent)}
-.v2-orb.warn{background:var(--orange);box-shadow:0 14px 34px color-mix(in srgb,var(--orange) 48%,transparent)}
+.v2-orb.warn{background:#1d6fd0;box-shadow:0 14px 34px color-mix(in srgb,#1d6fd0 48%,transparent)}
 .v2-orb.ghosted{background:var(--sep);color:var(--label-3);box-shadow:none;cursor:default}
 .v2-livebar{width:120px;height:3px;border-radius:99px;background:var(--sep);overflow:hidden;margin-top:22px}
 .v2-livebar i{display:block;height:100%;width:40%;border-radius:99px;background:var(--orange);
