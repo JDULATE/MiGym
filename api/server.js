@@ -813,8 +813,12 @@ const server = http.createServer(async (req, res) => {
   res.setHeader('Referrer-Policy', 'same-origin');
 
   if (!handler) {
-    // serve static frontend for non-API GET requests (single-service deployment)
-    if (req.method === 'GET' && serveStatic(res, url.pathname)) return;
+    // serve static frontend for non-API GET requests (single-service deployment).
+    // decode %XX escapes so assets with spaces (e.g. "giwi neutral-*.svg") resolve;
+    // serveStatic's PUBLIC_DIR prefix check blocks any ../ traversal after decoding.
+    let decoded = url.pathname;
+    try { decoded = decodeURIComponent(url.pathname); } catch {}
+    if (req.method === 'GET' && serveStatic(res, decoded)) return;
     if (req.method === 'GET' && serveStatic(res, 'index.html')) return;
     return json(res, 404, { error: 'not found' });
   }
