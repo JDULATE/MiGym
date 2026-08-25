@@ -3,13 +3,14 @@
 // rest bar, exercise switcher as unit pills. All behavior via useWorkoutEngine (V1 parity).
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useStore } from '../../store/useStore.js'
+import { t } from '../../lib/i18n.js'
 import { exOr } from '../../lib/exercises.js'
 import {
-  lastEntryFor, bestWeightFor, setLabel, stepEffort,
+  lastEntryFor, bestWeightFor, setLabel, stepEffort, capEffort,
 } from '../../lib/history.js'
 import { isWarmupRow } from '../../lib/workout-model.js'
-import { fmtNum, fmtDate } from '../../lib/format.js'
-import { t } from '../../lib/i18n.js'
+import { fmtNum, fmtDate, exCount } from '../../lib/format.js'
 import Media from '../../components/Media.jsx'
 import Icon from '../../components/Icon.jsx'
 import { exerciseDetailSheet, exercisePicker, finishWorkout } from '../../sheets.jsx'
@@ -17,6 +18,51 @@ import { glyphOf } from '../../lib/glyphs.js'
 import GiwiLive from '../ui/GiwiLive.jsx'
 import { useWorkoutEngine, columnsFor, useStartChooser } from './engine.jsx'
 import './workout.css'
+
+/* ---- demo seeding: a believable push session so the skin can be judged without
+   any real data. Only injects when there is no active session and this tab hasn't
+   seeded yet (sessionStorage), so refreshes keep the demo stable and real sessions
+   are never touched. ---- */
+const DEMO_FLAG = 'migym-wkdemo'
+function seedDemo() {
+  const st = useStore.getState()
+  if (st.S.active || sessionStorage.getItem(DEMO_FLAG)) return
+  sessionStorage.setItem(DEMO_FLAG, '1')
+  const start = Date.now() - 1000 * 60 * 17          // started 17 min ago
+  st.update(s => {
+    s.active = {
+      id: 'demo', routineId: null, name: 'Demo · Empuje', start,
+      entries: [
+        { id: '1254', target: { sets: 4, reps: 8, rest: 90, weight: 60 },
+          plan: { kind: 'up', why: ['{0} — last session you hit all sets, weight goes up', 'Press banca'] },
+          sets: [
+            { w: 60, r: 8, done: true }, { w: 60, r: 8, done: true },
+            { w: 60, r: 8, done: false }, { w: 60, r: 8, done: false },
+          ] },
+        { id: '1012', target: { sets: 3, reps: 10, rest: 90, weight: 35 },
+          sets: [
+            { w: 35, r: 10, done: true }, { w: 35, r: 10, done: false }, { w: 35, r: 10, done: false },
+          ] },
+        { id: '2330', target: { sets: 3, reps: 12, rest: 60, weight: 55 },
+          sets: [
+            { w: 55, r: 12, done: false }, { w: 55, r: 12, done: false }, { w: 55, r: 12, done: false },
+          ] },
+      ],
+      cur: 0,
+    }
+  }, true)
+}
+function DemoBadge({ onExit }) {
+  return (
+    <div style={{ position: 'fixed', top: 10, left: '50%', transform: 'translateX(-50%)', zIndex: 99 }}>
+      <button className="pressable" onClick={onExit}
+        style={{ border: 'none', cursor: 'pointer', fontWeight: 750, fontSize: '.7rem', letterSpacing: '.08em',
+          background: 'rgba(59,147,240,.16)', color: 'var(--acc)', padding: '6px 14px', borderRadius: 999 }}>
+        DATOS FICTICIOS · SALIR DEL DEMO
+      </button>
+    </div>
+  )
+}
 
 /* elapsed clock isolated per second-tick */
 function Elapsed({ start }) {
@@ -31,35 +77,72 @@ function Elapsed({ start }) {
 function StartV2() {
   const nav = useNavigate()
   const d = useStartChooser()
+  const lastFor = rid => {
+    const w = [...d.S.workouts].reverse().find(w => w.routineId === rid)
+    return w ? fmtDate(w.d, true) : null
+  }
   return (
-    <div className="v2-home">
+    <div className="v2-home wk-start">
       <header className="v2-top">
         <span className="v2-datecaps">{d.dateCaps}</span>
         <button className="iconbtn pressable" onClick={() => nav('/home')} aria-label="Inicio"><Icon name="house" size={19} /></button>
       </header>
-      <section className={'v2-stage-home' + (d.todayR ? '' : ' rest')}>
-        <div className="v2-ghost" aria-hidden>{d.todayR ? glyphOf(d.todayR.emoji) : '☾'}</div>
-        <div className="v2-kicker">SIN SESIÓN ACTIVA</div>
-        <h1 className="v2-display">{d.todayR ? d.todayR.name : t('Rest day')}{d.todayOvr ? ' ·↻' : ''}</h1>
-        <button className="v2-orb pressable" disabled={!d.todayR} onClick={() => import('../../sheets.jsx').then(({ startFlow }) => startFlow(d.todayR.id))}>
-          ▶ <span>{t('Start')}</span>
-        </button>
-      </section>
-      {!!d.others.length && (
-        <div style={{ padding: '6px 18px' }}>
-          <div className="v2-kicker" style={{ margin: '10px 0 8px' }}>OTRAS RUTINAS</div>
-          {d.others.map(r => (
-            <button key={r.id} className="hs5-row pressable" onClick={() => import('../../sheets.jsx').then(({ startFlow }) => startFlow(r.id))}>
-              <span>{glyphOf(r.emoji)} {r.name}</span><b>{r.ex.length} ej</b>
-            </button>
-          ))}
+
+      <div style={{ padding: '18px 18px 0' }}>
+        <div className="v2-kicker">ELIGE TU SESIÓN</div>
+      </div>
+
+      {!d.S.routines.length && (
+        <div className="v2-card" style={{ margin: '16px 18px 0', textAlign: 'center' }}>
+          <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 6 }}>Local vacío — es normal</div>
+          <p className="muted small" style={{ margin: '0 0 12px' }}>
+            Este navegador no tiene rutinas guardadas en localhost.
+            Carga un plan inicial para probar el flujo completo.
+          </p>
+          <button className="v2-btn primary" onClick={d.loadStarter}>⚡ Cargar plan inicial</button>
+          <div style={{ height: 6 }} />
+          <button className="v2-btn" onClick={() => nav('/plan')}>Construir mi plan</button>
         </div>
       )}
-      <div style={{ textAlign: 'center', paddingBottom: 30 }}>
-        <button className="v2-minilink" onClick={() => import('../../sheets.jsx').then(({ startFlow }) => startFlow(null))}>
-          ⚡ Freestyle — elegir sobre la marcha
+
+      {d.todayR && (
+        <button className="wk-choice today pressable" onClick={() => import('../../sheets.jsx').then(({ startFlow }) => startFlow(d.todayR.id))}>
+          <span className="wk-choice-glyph">{glyphOf(d.todayR.emoji)}</span>
+          <span className="wk-choice-body">
+            <small>{t('Today')}{d.todayOvr ? ' · ↻' : ''}</small>
+            <b>{d.todayR.name}</b>
+            <span className="dim">{exCount(d.todayR.ex.length)}{lastFor(d.todayR.id) ? ` · última ${lastFor(d.todayR.id)}` : ''}</span>
+          </span>
+          <span className="wk-choice-go">▶</span>
         </button>
-      </div>
+      )}
+
+      {!!d.others.length && <div className="v2-kicker" style={{ padding: '16px 18px 8px' }}>OTRAS RUTINAS</div>}
+      {d.others.map(r => (
+        <button key={r.id} className="wk-choice pressable" onClick={() => import('../../sheets.jsx').then(({ startFlow }) => startFlow(r.id))}>
+          <span className="wk-choice-glyph dim">{glyphOf(r.emoji)}</span>
+          <span className="wk-choice-body">
+            <b>{r.name}</b>
+            <span className="dim">{exCount(r.ex.length)}{lastFor(r.id) ? ` · última ${lastFor(r.id)}` : ''}</span>
+          </span>
+          <span className="wk-choice-go dim">▶</span>
+        </button>
+      ))}
+
+      <button className="wk-choice freestyle pressable" onClick={() => import('../../sheets.jsx').then(({ startFlow }) => startFlow(null))}>
+        <span className="wk-choice-glyph"><Icon name="shuffle" size={20} /></span>
+        <span className="wk-choice-body">
+          <b>Freestyle</b>
+          <span className="dim">elige ejercicios sobre la marcha</span>
+        </span>
+        <span className="wk-choice-go dim">＋</span>
+      </button>
+
+      {!d.S.routines.length && (
+        <p className="muted small" style={{ textAlign: 'center', padding: '14px 18px' }}>
+          …o registra tu peso y crea rutinas desde <b>Inicio → Ajustes</b>.
+        </p>
+      )}
     </div>
   )
 }
@@ -162,8 +245,29 @@ function ExerciseFocus({ engine }) {
 
 export default function WorkoutLive() {
   const active = useStore(s => s.S.active)
+  const [demoOn] = useState(() => !!sessionStorage.getItem(DEMO_FLAG))
+
+  // seed once per tab session when there's nothing live
+  useEffect(() => {
+    if (!active) seedDemo()
+  }, [active])
+
+  if (!active && !demoOn) return <StartV2 />
+
+  const exitDemo = () => {
+    sessionStorage.removeItem(DEMO_FLAG)
+    useStore.getState().update(s => { s.active = null }, true)
+    window.location.hash = '#/app'
+    location.reload()
+  }
+
   if (!active) return <StartV2 />
-  return <ActiveV2 />
+  return (
+    <>
+      {sessionStorage.getItem(DEMO_FLAG) && <DemoBadge onExit={exitDemo} />}
+      <ActiveV2 />
+    </>
+  )
 }
 
 function ActiveV2() {

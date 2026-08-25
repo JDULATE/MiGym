@@ -1,20 +1,21 @@
 // Workout engine (UI-V2) — every mutation and flow from views/Workout.jsx ActiveWorkout,
 // extracted so the new skin and the legacy view share one source of truth for behavior.
 // Zero JSX here. Flows that open sheets/toasts call them exactly like V1 did.
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useStore } from '../../store/useStore.js'
 import { useUI } from '../../store/useUI.js'
+import { t } from '../../lib/i18n.js'
 import { exOr } from '../../lib/exercises.js'
 import {
-  effectiveRoutine, lastEntryFor, bestWeightFor, buildSets, freestyleConfig, defaultConfig,
-  setsDoneActive, supersetUnits, unitOf, modeOf, isBw, EFFORT, effortOf, stepEffort, capEffort,
+  effectiveRoutine, buildSets, freestyleConfig, defaultConfig,
+  setsDoneActive, supersetUnits, unitOf, modeOf, isBw, EFFORT, effortOf,
   cascadeWeight, insertWarmupRow, removeRowAt, pairAdjacent, unpairSuperset, cleanupSg, repStep,
 } from '../../lib/history.js'
 import { setProgressHighWater, supersetFlowStep } from '../../lib/supersetFlow.js'
 import { todayISO } from '../../lib/format.js'
 import { beep, vibrate } from '../../lib/sound.js'
 import { api } from '../../lib/api.js'
-import { topWeightSheet, finishWorkout, confirmSheet } from '../../sheets.jsx'
+import { topWeightSheet, workoutCompleteSheet, confirmSheet } from '../../sheets.jsx'
 import { nextPrescription, applyPrescription } from '../../lib/progression.js'
 
 export { removeActiveExercise } from '../../views/Workout.jsx'
@@ -27,7 +28,6 @@ export function useStartChooser() {
     S, todayR,
     todayOvr: S.dayPlan[todayISO()] !== undefined,
     others: S.routines.filter(r => r !== todayR),
-    dayName: t => null, // view formats via DAYN itself if needed
   }
 }
 
@@ -137,7 +137,7 @@ export function useWorkoutEngine() {
       }
     })
     if (askTop) topWeightSheet(idx)
-    else if (workoutDone) finishWorkout()
+    else if (workoutDone) workoutCompleteSheet()
     else if (exJustDone && cardioEntry) useUI.getState().toast(t('Cardio logged'))
     else if (exJustDone && m === 'time') useUI.getState().toast(t('Hold logged'))
 
@@ -146,7 +146,6 @@ export function useWorkoutEngine() {
       const progress = setProgressHighWater(fresh.entries[idx], progressHighWater.current[idx] || 0)
       progressHighWater.current[idx] = progress.highWater
       if (!progress.isNew) return
-      pendingNav = null
       const freshUnits = supersetUnits(fresh.entries)
       const freshUnit = freshUnits.find(u => u.includes(idx))
       const freshUnitIdx = freshUnits.indexOf(freshUnit)
@@ -162,14 +161,14 @@ export function useWorkoutEngine() {
       if (step.unitDone) {
         if (!freshLastUnit) {
           const nextUnit = freshUnits[freshUnitIdx + 1]
-          if (!askTop && nextUnit?.length) pendingNav = nextUnit[0]
+          // The top-weight sheet's explicit "Just close" path owns the choice not to advance.
+          if (!askTop && nextUnit?.length) update(s => { if (s.active) s.active.cur = nextUnit[0] })
           startRest(restFor(idx))
         }
       } else {
-        if (step.nextIdx != null) pendingNav = step.nextIdx
+        if (step.nextIdx != null) update(s => { if (s.active) s.active.cur = step.nextIdx })
         if (step.roundDone) startRest(restFor(idx))
       }
-      if (pendingNav != null) update(s => { if (s.active) s.active.cur = pendingNav })
     }
   }
 
@@ -192,7 +191,8 @@ export function useWorkoutEngine() {
     const iv = setInterval(() => { if (!stopped) ping(true) }, 20000)
     return () => {
       stopped = true; clearInterval(iv)
-      try { navigator.sendBeacon?.('/api/activity', new Blob([JSON.stringify({ active: false })], { type: 'application/json' })) } catch {}
+      // best-effort "left" signal: sendBeacon survives tab close, fetch covers in-app nav
+      try { navigator.sendBeacon?.('/api/activity', new Blob([JSON.stringify({ active: false })], { type: 'application/json' })) } catch { /* best effort */ }
       api('/api/activity', { method: 'POST', body: JSON.stringify({ active: false }) }).catch(() => {})
     }
   }, [])
@@ -235,7 +235,7 @@ export function columnsFor(S, entry) {
   const bw = !cardio && isBw(cfg)
   const added = bw && entry.sets.some(s => s.w > 0)
   const loadCol = { f: 'w', step: 2.5, dec: true, hd: bw ? t('Added ({0})', S.unit) : t('Weight ({0})', S.unit) }
-  const repCol = { f: 'r', step: repStepSafe(cfg), dec: false, hd: t('Reps') }
+  const repCol = { f: 'r', step: repStep(cfg), dec: false, hd: t('Reps') }
   const col1 = cardio ? { f: 'min', step: 1, dec: false, hd: t('Duration (min)') }
     : timed ? { f: 'sec', step: 5, dec: false, hd: t('Seconds') }
       : (bw && !added) ? repCol : loadCol

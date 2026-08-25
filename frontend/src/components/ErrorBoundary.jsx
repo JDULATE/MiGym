@@ -13,8 +13,8 @@ import { Button } from './ui.jsx'
  * so switching tabs re-mounts it and clears the error by itself.
  */
 export default class ErrorBoundary extends Component {
-  constructor(props) { super(props); this.state = { failed: false } }
-  static getDerivedStateFromError() { return { failed: true } }
+  constructor(props) { super(props); this.state = { failed: false, err: null } }
+  static getDerivedStateFromError(err) { return { failed: true, err } }
   componentDidCatch(err) { console.error('openGym render error:', err) }
 
   render() {
@@ -26,6 +26,13 @@ export default class ErrorBoundary extends Component {
           <div className="ico"><Icon name="info" /></div>
           <div style={{ fontWeight: 600, marginBottom: 6 }}>{t('Something went wrong')}</div>
           {t('This screen could not be drawn. Your data is safe on this device.')}
+          {/* dev aid during the V2 rebuild: tap to reveal the exact error */}
+          <details style={{ marginTop: 10, textAlign: 'left' }}>
+            <summary className="dim small" style={{ cursor: 'pointer' }}>detalles técnicos</summary>
+            <pre className="dim small" style={{ whiteSpace: 'pre-wrap', userSelect: 'all' }}>
+              {String(this.state.err?.stack || this.state.err)}
+            </pre>
+          </details>
         </div>
         <Button variant="primary" icon="reset" onClick={() => location.reload()}>{t('Reload MiGym')}</Button>
         {active && <>

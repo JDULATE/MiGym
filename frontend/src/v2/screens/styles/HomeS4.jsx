@@ -36,7 +36,6 @@ export default function HomeS4() {
 
       <div className="hs4-days">
         {d.days.map(day => {
-          // eslint-disable-next-line react-hooks/purity -- deriving weekday letter from stored ISO date
           const li = new Date(day.iso + 'T12:00:00').getDay()
           return (
             <button key={day.iso} onClick={() => d.openDay(day.iso)}

@@ -74,8 +74,17 @@ function Shell() {
     return <ErrorBoundary><Playground /></ErrorBoundary>
   }
   // UI-V2 workout — focus mode preview route (parity flips /workout later).
+  // Sheets, toasts and the rest timer live in overlay components; the standalone
+  // route must mount them or every sheet-based flow (starter plan, finish…) dies.
   if (loc.pathname === '/workout-v2') {
-    return <ErrorBoundary><WorkoutLive /></ErrorBoundary>
+    return (
+      <ErrorBoundary>
+        <WorkoutLive />
+        <Modals />
+        <Toast />
+        <RestTimer />
+      </ErrorBoundary>
+    )
   }
   // Style bake-off: /styles gallery + /styles/s1…s5 full-screen candidates.
   if (loc.pathname.startsWith('/styles')) {
