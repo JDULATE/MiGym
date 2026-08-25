@@ -307,3 +307,30 @@ Redesign direction (full palette in DESIGN-SYSTEM.md):
   (`#2dd4bf`, contrast ≈ 9:1 on black) as accent with amber reserved for warnings. Both
   options specified; final pick = implementation phase A/B behind the existing accent
   setting so user choice remains (agency principle).
+
+---
+
+# ROUND 3 — Information architecture & coach surfaces (2026-08-24)
+
+Scope: how the coach-marketplace features (ADR-0008) integrate with existing navigation.
+Method: heuristic walkthrough (Apple principles per SKILL.md), desktop + 390px viewport.
+
+## Findings
+
+| # | Sev | Area | Finding | Principle |
+|---|---|---|---|---|
+| R3-1 | P1 | Wayfinding | Coach directory (/coaches) and editor (/coach) reachable ONLY via Settings rows. The marketplace value proposition is undiscoverable. Settings is preferences, not a destination. | Wayfinding; specific labels |
+| R3-2 | P2 | Grouping | Coach-role users split across 3 places: Settings rows, /coach editor, pairing flow started elsewhere. Proximity implies relationship. | Grouping & mapping |
+| R3-3 | P2 | Consistency | Public /coaches page ships its own hero/card styles; chips/buttons duplicate .btn/.tag primitives instead of reusing them. | Craft, component reuse |
+| R3-4 | P3 | Simplicity | Settings keeps two entry rows for a surface moving to primary navigation (redundant after fix). | Simplicity |
+
+Scores: /coaches overall UX 6.5 (wayfinding 5 while hidden, craft 7). Settings wayfinding unaffected until move.
+
+## Root cause
+Features grew faster than the navigation model; Settings absorbed everything without a product-level home.
+
+## Recommended improvements
+1. Promote marketplace to primary navigation.
+2. Consolidate coach tasks into one hub route with segments (Directory / My profile / My clients).
+3. Remove redundant Settings entries after promotion.
+4. Reuse shared primitives inside the hub.

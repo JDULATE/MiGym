@@ -40,6 +40,7 @@ export default function TabBar({ onStart }) {
       </button>
       <Tab nav={nav} active={on('stats')} icon="chart" to="/stats" label={t('Stats')} data-giwi="stats" />
       <Tab nav={nav} active={on('library')} icon="list" to="/library" label={t('Exercises')} />
+      <Tab nav={nav} active={on('coaches')} icon="personCircle" to="/coaches" label={t('Coaches')} />
     </nav>
   )
 }

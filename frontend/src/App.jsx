@@ -66,9 +66,9 @@ function Shell() {
     window.addEventListener('migym:start-tutorial', open)
     return () => window.removeEventListener('migym:start-tutorial', open)
   }, [])
-  // Coach marketplace directory (ADR-0008) is the one public surface: no onboarding,
-  // no account, no tab bar — a visitor (or search engine) lands straight on it.
-  if (loc.pathname === '/coaches') {
+  // Coach marketplace: anonymous visitors get the standalone public page (no tab bar,
+  // no onboarding). Signed-in users get the in-app hub with the tab bar below.
+  if (loc.pathname === '/coaches' && !user) {
     return (
       <>
         <div id="app" key={loc.pathname}>
@@ -103,7 +103,8 @@ function Shell() {
             <Route path="/history" element={<History />} />
             <Route path="/library" element={<Library />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/coach" element={user ? <CoachEdit /> : <Navigate to="/home" replace />} />
+            <Route path="/coach" element={<Navigate to="/coaches?tab=profile" replace />} />
+            <Route path="/coaches" element={<Coaches />} />
             <Route path="/admin" element={user?.admin ? <Admin /> : <Navigate to="/home" replace />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

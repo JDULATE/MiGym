@@ -158,3 +158,42 @@ is the model for any gesture work.
 Each workstream ends with: tests green (no NODE_OPTIONS needed), build green, locale check
 green, dev-server inspection desktop+mobile-width, and a commit. Final gate repeats the
 audit scoring into `docs/UI-UX-AUDIT-FINAL.md`.
+
+---
+
+# ROUND 3 PLAN — IA refactor: coach surfaces to primary navigation (2026-08-24)
+
+Constraint: incremental on existing architecture (no rewrite; ADR-0005/0006 untouched; all
+business logic, stores and API stay as-is). This round moves surfaces, it does not rebuild them.
+
+## Proposed UX architecture
+- TabBar gains a 6th entry: **Coaches** (icon personCircle) → /coaches hub.
+- /coaches becomes a hub with segments:
+  - **Directory** — always visible (logged-in or not).
+  - **My profile** — visible when signed in; opens the existing editor inline.
+  - **My clients** — only when ole === 'coach' (reuses ADR-0007 roster view).
+- Anonymous web visitors keep the current standalone public page (no tab bar), unchanged.
+- Settings: remove the 'Coach marketplace' section (R3-4); everything else stays.
+
+## Screen-by-screen changes
+1. TabBar.jsx — add Coaches tab (data-giwi hook preserved pattern).
+2. App.jsx — /coaches renders inside the shell when a user session exists; standalone
+   public page otherwise. /coach route folds into the hub's 'My profile' segment.
+3. Coaches.jsx — wrap existing directory as 'Directory' segment; mount CoachEdit as segment;
+   mount ClientsSection for coaches. Reuse Section/Row/Button/tag primitives (R3-3).
+4. Settings.jsx — delete marketplace Section.
+5. coaches.css — align to tokens; drop duplicated button/chip styles where primitives fit.
+
+## Motion / responsive / accessibility strategy
+- Segment switch: cross-fade + 4px slide, --motion-fast; disabled under reduced-motion.
+- Tab hit area stays >= 44px; six tabs keep labels but collapse to icon-only under 360px.
+- Focus-visible states inherit from global styles; no color-only meaning (segments have text).
+
+## Risks & mitigations
+- Six tabs crowd small phones → icon-only fallback <360px.
+- Giwi tutorial hooks target tab labels → verify walkthrough still passes after change.
+- Public vs in-app divergence → single component tree, two shells.
+
+## Order
+N1 navigation+hub skeleton → N2 settings cleanup → N3 visual alignment → N4 regression
+(tests, lint, build, locales, dev-server desktop+mobile).

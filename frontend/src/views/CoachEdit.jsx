@@ -17,8 +17,13 @@ const MODALITIES = [
   { v: 'inperson', label: 'In person' },
   { v: 'both', label: 'Online + in person' },
 ]
+const COUNTRIES = ['Costa Rica', 'Nicaragua', 'Panamá', 'México', 'Colombia', 'Venezuela', 'Ecuador', 'Perú',
+  'Chile', 'Argentina', 'Uruguay', 'Paraguay', 'Bolivia', 'Guatemala', 'Honduras', 'El Salvador',
+  'Cuba', 'República Dominicana', 'España', 'Estados Unidos', 'Canadá', 'Brasil', 'Portugal', 'Otro']
+const CR_PROVINCES = ['San José', 'Alajuela', 'Cartago', 'Heredia', 'Guanacaste', 'Puntarenas', 'Limón']
 const EMPTY = {
   bio: '', certs: '', tags: [], langs: [], modality: 'both', rate: '',
+  country: '', province: '', place: '',
   contact: { wa: '', ig: '', email: '', web: '' },
 }
 const STATUS_STYLE = {
@@ -53,7 +58,7 @@ function fileToAvatar(file) {
   })
 }
 
-export default function CoachEdit() {
+export default function CoachEdit({ embedded = false }) {
   const nav = useNavigate()
   const user = useStore(s => s.user)
   const toast = useUI(s => s.toast)
@@ -72,6 +77,7 @@ export default function CoachEdit() {
         setF({
           bio: p.bio || '', certs: p.certs || '', tags: p.tags || [], langs: p.langs || [],
           modality: p.modality || 'both', rate: p.rate || '',
+          country: p.country || '', province: p.province || '', place: p.place || '',
           contact: Object.assign({ wa: '', ig: '', email: '', web: '' }, p.contact),
         })
         setStatus(p.status || null)
@@ -127,12 +133,12 @@ export default function CoachEdit() {
 
   return (
     <div className="narrow" style={{ padding: '14px 16px 60px' }}>
-      <div className="row between" style={{ marginBottom: 4 }}>
+      {!embedded && <div className="row between" style={{ marginBottom: 4 }}>
         <h2 style={{ margin: 0 }}>{t('Coach profile')}</h2>
         <button onClick={() => nav('/coaches')} className="muted small" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
           {t('View directory')} ↗
         </button>
-      </div>
+      </div>}
       <div className="muted small" style={{ marginBottom: 14 }}>{t('Students will see this in the public directory and will contact you outside the app.')}</div>
 
       <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 14, padding: 14 }}>
@@ -206,6 +212,23 @@ export default function CoachEdit() {
 
       <h4 className="sec">{t('Rate (optional)')}</h4>
       <TextField value={f.rate} onChange={e => set('rate', e.target.value)} placeholder="$30/session" />
+
+      <h4 className="sec">{t('Location')}</h4>
+      <div className="list">
+        <select className="field" value={f.country} onChange={e => { set('country', e.target.value); if (e.target.value !== 'Costa Rica') set('province', '') }}>
+          <option value="">{t('Select country')}</option>
+          {COUNTRIES.map(cName => <option key={cName} value={cName}>{cName}</option>)}
+        </select>
+        {f.country === 'Costa Rica' ? (
+          <select className="field" value={f.province} onChange={e => set('province', e.target.value)}>
+            <option value="">{t('Select province')}</option>
+            {CR_PROVINCES.map(pr => <option key={pr} value={pr}>{pr}</option>)}
+          </select>
+        ) : (
+          <TextField value={f.province} onChange={e => set('province', e.target.value)} placeholder={t('Province / state')} />
+        )}
+        <TextField value={f.place} onChange={e => set('place', e.target.value)} placeholder={t('Gym / training place (e.g. Gold\u2019s Gym La Sabana)')} />
+      </div>
 
       <h4 className="sec">{t('Contact (shown publicly)')}</h4>
       <div className="list">
