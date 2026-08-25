@@ -44,3 +44,11 @@ Coaches hub → Settings → Admin → new Onboarding/Tour → cleanup of legacy
 
 New code under `src/v2/**`. Old app keeps running until each screen flips. Demo/playground
 route: `/v2`.
+
+
+## DECISION — style crowned (2026-08-25)
+
+Bake-off result: **AURORA** wins, with Editorial press physics (.pressable scale on every
+tappable surface) adopted as the standard interaction motion. Aurora palette (deep #155a9e →
+#3b93f0 → light #7db8f5, blue-only gradients — no amber in gradients) becomes the V2 design
+system base. Losing candidates stay at /styles for reference until Workout V2 ships.
