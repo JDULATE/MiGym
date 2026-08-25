@@ -1,0 +1,63 @@
+/* WORKOUT V2 · Aurora focus mode */
+.wk{padding-top:8px}
+.wk-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px}
+.wk-top{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px}
+.wk-title{text-align:center;line-height:1.2}
+.wk-title b{font-size:1.02rem;letter-spacing:-.015em}
+.wk-title span{display:block;font-size:.74rem;color:var(--mut,#8b8f98);margin-top:1px}
+.wk-finish{color:var(--acc)}
+.wk-prog{height:3px;background:var(--sep);border-radius:99px;margin:0 16px 6px;overflow:hidden}
+.wk-prog i{display:block;height:100%;background:linear-gradient(90deg,#155a9e,#3b93f0);border-radius:99px;
+  transition:width .5s cubic-bezier(.32,.72,0,1)}
+@media(prefers-reduced-motion:reduce){.wk-prog i{transition:none}}
+
+.wk-units{display:flex;gap:6px;overflow-x:auto;padding:10px 16px 4px;scrollbar-width:none}
+.wk-units::-webkit-scrollbar{display:none}
+.wk-upill{flex:0 0 auto;width:34px;height:34px;border-radius:12px;border:1px solid var(--sep);
+  background:var(--sur);color:var(--label-2,var(--label));font-weight:750;font-size:.85rem;cursor:pointer}
+.wk-upill.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.wk-upill.add{border-style:dashed}
+
+.wk-ssnote{display:flex;align-items:center;gap:6px;font-size:.75rem;color:#7db8f5;padding:8px 18px 0;flex-wrap:wrap}
+
+.wk-exname{margin:0;font-size:clamp(22px,5vw,30px);font-weight:800;letter-spacing:-.03em;line-height:1.05;
+  text-transform:capitalize}
+.wk-tags{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 4px}
+.wk-lasttime{font-size:.76rem;color:var(--mut,#8b8f98);margin-bottom:4px}
+.wk-progline{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--acc);
+  background:var(--acc-soft);border-radius:10px;padding:7px 10px;margin-bottom:8px}
+.wk-progline.warn{color:var(--yellow)}
+
+.wk-setcard{background:var(--sur);border:1px solid var(--sep);border-radius:20px;padding:12px 12px 8px;margin-top:10px}
+.wk-sethead,.wk-setrow{display:grid;grid-template-columns:26px 1fr 1fr 40px;gap:8px;align-items:center}
+.wk-sethead.has-eff,.wk-setrow.has-eff{grid-template-columns:22px 1fr 1fr 1fr 40px}
+.wk-sethead span{font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--mut,#8b8f98);text-align:center}
+.wk-sethead span:first-child{text-align:left}
+.wk-setrow{padding:9px 0;border-top:1px solid var(--sep);cursor:pointer;border-radius:12px}
+.wk-setrow:first-of-type{border-top:none}
+.wk-setrow.done{opacity:.55}
+.wk-setrow.done .wk-val{ text-decoration:line-through }
+.wk-n{font-weight:750;font-size:.95rem;text-align:center;color:var(--label-3)}
+.wk-cell{display:flex;align-items:center;gap:4px}
+.wk-bump{width:30px;height:34px;border-radius:10px;border:1px solid var(--sep);background:var(--bg-el);
+  color:var(--label);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.wk-val{width:100%;min-width:0;text-align:center;font-size:1.15rem;font-weight:700;letter-spacing:-.02em;
+  background:none;border:none;color:var(--label)}
+.wk-check{width:38px;height:38px;border-radius:13px;border:2px solid var(--sep);display:flex;align-items:center;
+  justify-content:center;color:transparent;margin-left:auto;background:var(--bg-el)}
+.wk-setrow.done .wk-check{background:var(--green);border-color:var(--green);color:#fff}
+.wk-go{width:38px;height:38px;border-radius:13px;border:none;background:var(--acc-soft);color:var(--acc);
+  display:flex;align-items:center;justify-content:center;cursor:pointer}
+.wk-sep{grid-column:1/-1;height:1px;background:var(--sep);margin:4px 0}
+
+.wk-settools{display:flex;gap:8px;justify-content:center;padding:10px 0 4px;flex-wrap:wrap}
+.wk-settools button{background:none;border:1px solid var(--sep);color:var(--label-2,var(--label));
+  border-radius:999px;padding:7px 13px;font-size:.74rem;font-weight:600;cursor:pointer}
+.wk-settools button:disabled{opacity:.4;cursor:default}
+.wk-pairrow{display:flex;gap:12px;padding:8px 18px 0}
+
+.wk-nav{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 4px}
+.wk-nav button{background:none;border:1px solid var(--sep);border-radius:999px;padding:10px 16px;
+  color:var(--label);font-weight:650;font-size:.82rem;cursor:pointer}
+.wk-nav button:disabled{opacity:.35;cursor:default}

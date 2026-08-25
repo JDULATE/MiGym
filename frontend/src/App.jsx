@@ -17,6 +17,7 @@ import NotFound from './views/NotFound.jsx'
 import Playground from './v2/Playground.jsx'
 import V2Shell from './v2/shell/Shell.jsx'
 import StyleGallery from './v2/screens/styles/StyleGallery.jsx'
+import WorkoutLive from './v2/workout/WorkoutLive.jsx'
 import Coaches from './views/Coaches.jsx'
 import CoachEdit from './views/CoachEdit.jsx'
 import { startFlow } from './sheets.jsx'
@@ -71,6 +72,10 @@ function Shell() {
   // UI-V2 playground — always standalone, never gated.
   if (loc.pathname === '/v2') {
     return <ErrorBoundary><Playground /></ErrorBoundary>
+  }
+  // UI-V2 workout — focus mode preview route (parity flips /workout later).
+  if (loc.pathname === '/workout-v2') {
+    return <ErrorBoundary><WorkoutLive /></ErrorBoundary>
   }
   // Style bake-off: /styles gallery + /styles/s1…s5 full-screen candidates.
   if (loc.pathname.startsWith('/styles')) {
