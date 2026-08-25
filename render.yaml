@@ -1,5 +1,6 @@
-# Render.com blueprint — free tier, auto-deploy from GitHub
-# Render gives you: free web service, free HTTPS, auto-deploy on push
+# Render.com blueprint — free tier, auto-deploy from GitHub.
+# NOTE: free tier has NO persistent disk — /data resets on restart. MiGym is
+# local-first, so devices keep their data; server-side sync data is ephemeral.
 services:
   - type: web
     name: migym
@@ -7,15 +8,11 @@ services:
     dockerfilePath: ./Dockerfile
     plan: free
     healthCheckPath: /api/health
-    disk:
-      name: migym-data
-      mountPath: /data
-      sizeGB: 1
     envVars:
       - key: RP_ID
-        sync: false      # set to your domain, e.g. migym.us.kg
+        sync: false      # set to your domain, e.g. www.migym.dpdns.org
       - key: ORIGIN
-        sync: false      # set to https://migym.us.kg
+        sync: false      # set to https://www.migym.dpdns.org
       - key: RP_NAME
         value: MiGym
       - key: SESSION_DAYS
