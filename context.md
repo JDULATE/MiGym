@@ -38,13 +38,12 @@ See [PRODUCT.md](PRODUCT.md).
 
 ## Current phase
 
-**UI/UX REDESIGN: ROUNDS 1–2 IMPLEMENTED, FINAL AUDIT WRITTEN.**
-Shipped: semantic design tokens + Ember accent (W1), typography scale (W2), keyboard
-accessibility for all list rows and sheets (W5), dashboard/routine/history polish (W7/W9),
-contrast + reduced-transparency/contrast media queries, chart aria-labels, settings
-labels/order/offline status (round 2). Product UX score ≈7.4 → ≈7.9
-(docs/UI-UX-AUDIT-FINAL.md). Remaining: ESLint decision, bundle split, drag-reorder,
-per-set aria-labels — tracked in the final audit's "Remaining issues".
+**PHASE 15: COACH MARKETPLACE (ADR-0008) — implemented locally, deploy pending.**
+Public coach directory (/coaches, no login) with external contact links; admin-approved
+listings (Admin card); /coach profile editor with client-resized avatars in DATA_DIR/avatars.
+43 new i18n keys ×11 packs; 7 new API integration tests. Freemium ($4/mo tier for AI Coach /
+Adaptive) is the agreed NEXT phase — design ADR not yet written. Previous UI/UX rounds 1–2
+and Giwi onboarding/tutorial shipped earlier (see CHANGELOG).
 
 ## Completed phases
 

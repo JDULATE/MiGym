@@ -1,0 +1,16 @@
+/* Coach marketplace directory (ADR-0008) — public page styles */
+.mkt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.mkt-card{background:var(--sur);border:1px solid var(--sep);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.mkt-head{display:flex;align-items:center;gap:10px}
+.mkt-avatar{width:52px;height:52px;border-radius:50%;object-fit:cover;flex-shrink:0;background:var(--sep)}
+.mkt-avatar-fb{width:52px;height:52px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:18px;color:#fff;letter-spacing:.02em}
+.mkt-name{font-weight:650;font-size:1rem;line-height:1.15;letter-spacing:-.01em}
+.mkt-bio{font-size:.83rem;line-height:1.45;color:var(--mut);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.mkt-chips{display:flex;flex-wrap:wrap;gap:4px}
+.mkt-links{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:6px}
+.mkt-links a{display:inline-flex;align-items:center;gap:4px;font-size:.76rem;font-weight:600;padding:5px 10px;border-radius:999px;
+  background:var(--acc-soft);color:var(--acc);text-decoration:none;border:none;cursor:pointer}
+.mkt-links a:hover{filter:brightness(1.08)}
+.mkt-top{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;align-items:center;gap:10px;
+  padding:12px 16px;border-bottom:1px solid var(--sep)}

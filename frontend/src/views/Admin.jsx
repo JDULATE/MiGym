@@ -63,8 +63,46 @@ function UserDetail({ id, onChanged, close }) {
   </>
 }
 
-function InvitesCard({ invites, reload }) {
+// Marketplace moderation (ADR-0008): approve → listing goes public + user gains the coach
+// capability; reject keeps it private; hide pulls an approved listing back out of the directory.
+// Editing always re-enters the queue, so this doubles as a change-review surface.
+function CoachAppsCard() {
   const toast = useUI(s => s.toast)
+  const [apps, setApps] = useState(null)
+  const load = () => api('/api/admin/coach-apps').then(d => setApps(d.apps)).catch(e => toast(e.message))
+  useEffect(() => { load() }, [])
+  const decide = (uid, decision) => api('/api/admin/coach-decision', { method: 'POST', body: JSON.stringify({ uid, decision }) })
+    .then(() => { toast('Profile ' + decision); load() }).catch(e => toast(e.message))
+  const pending = (apps || []).filter(a => a.status === 'pending')
+  const rest = (apps || []).filter(a => a.status !== 'pending')
+  const Row = ({ a }) => <div className="row between" style={{ padding: '9px 2px', borderBottom: '1px solid var(--sep)', gap: 8 }}>
+    <div style={{ minWidth: 0 }}>
+      <div className="small" style={{ fontWeight: 600 }}>{a.name} <span className="tag" style={{ marginLeft: 4 }}>{a.status}</span></div>
+      <div className="dim" style={{ fontSize: '.72rem' }}>{a.tags.join(', ') || 'no tags'} · {a.modality}{a.rate ? ' · ' + a.rate : ''}</div>
+      {a.bio && <div className="dim" style={{ fontSize: '.72rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 260 }}>{a.bio}</div>}
+    </div>
+    <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+      {a.status !== 'approved' && <Button size="sm" variant="primary" onClick={() => decide(a.uid, 'approved')}>Approve</Button>}
+      {a.status === 'pending' && <Button size="sm" onClick={() => decide(a.uid, 'rejected')}>Reject</Button>}
+      {a.status === 'approved' && <Button size="sm" onClick={() => decide(a.uid, 'hidden')}>Hide</Button>}
+    </div>
+  </div>
+  return <div className="card">
+    <h2 style={{ margin: '0 0 6px' }}>Coach applications</h2>
+    {apps === null && <div className="dim small">Loading…</div>}
+    {apps !== null && !pending.length && !rest.length && <div className="dim small">No coach applications yet.</div>}
+    {!!pending.length && <>
+      <h4 className="sec">Pending review ({pending.length})</h4>
+      {pending.map(a => <Row key={a.uid} a={a} />)}
+    </>}
+    {!!rest.length && <>
+      <h4 className="sec">Decided</h4>
+      {rest.map(a => <Row key={a.uid} a={a} />)}
+    </>}
+  </div>
+}
+
+function InvitesCard({ invites, reload }) {  const toast = useUI(s => s.toast)
   const gen = () => api('/api/admin/invites/new', { method: 'POST', body: '{}' })
     .then(({ invite }) => { navigator.clipboard?.writeText(invite.code).catch(() => {}); toast('Code ' + invite.code + ' created & copied'); reload() })
     .catch(e => toast(e.message))
@@ -132,6 +170,8 @@ export default function Admin() {
         <span className="tag acc">{dur(Date.now() - u.live.startedAt)}</span> {/* eslint-disable-line react-hooks/purity -- live elapsed time is the point */}
       </div>)}
     </div>}
+
+    <CoachAppsCard />
 
     <InvitesCard invites={invites} reload={loadInvites} />
 

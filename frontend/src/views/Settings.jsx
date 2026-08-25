@@ -278,6 +278,16 @@ export default function Settings() {
         accessory="chevron" onClick={() => useUI.getState().openSheet(close => <TermsSheet close={close} />)} />
     </Section>
 
+    {/* ---------- coach marketplace (ADR-0008) ---------- */}
+    <Section title={t('Coach marketplace')} footer={t('Coaches publish a public profile; contact happens outside the app.')}>
+      <Row icon="magnifier" iconTint="var(--blue)" title={t('Find a coach')}
+        subtitle={t('Browse the public directory — no account needed.')}
+        accessory="chevron" onClick={() => nav('/coaches')} />
+      <Row icon="personCircle" iconTint="var(--mint)" title={t('Become a coach')}
+        subtitle={t('Publish your profile for students. An admin approves every listing.')}
+        accessory="chevron" onClick={() => nav('/coach')} />
+    </Section>
+
     {/* ---------- coming soon ---------- */}
     <Section title={t('Coming soon')}>
       <Row icon="sparkles" iconTint="var(--grey)" title={t('AI coach')}

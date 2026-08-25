@@ -6,6 +6,21 @@ This repository continues openGym (© Duarte Santos, AGPL-3.0-or-later) as **MiG
 Upstream history below is preserved unchanged; MiGym phases add entries above the upstream
 log from this point on.
 
+### Phase 15 — Coach Marketplace (2026-08-24, ADR-0008)
+
+✨ **Public coach directory + admin-approved listings** — LinkedIn-style discovery with
+off-platform contact (WhatsApp / Instagram / email / web buttons), per the local-first ethos:
+* Public routes: `GET /api/marketplace/coaches`, avatar files — no login required to browse.
+* Any signed-in user applies via `PUT /api/marketplace/profile`; every edit re-enters the
+  pending queue. Approval grants `role: 'coach'` (unlocking ADR-0007 linking endpoints).
+* Avatars: client-side canvas downscale (256² JPEG ≤250 KB) → `DATA_DIR/avatars/` — zero new
+  dependencies, zero third-party storage.
+* New views: `/coaches` (public, bypasses onboarding), `/coach` editor; Admin gains a
+  moderation card (approve / reject / hide). Settings links into both.
+* i18n: 43 new keys across all 11 packs (910 keys each, parity-checked).
+* Tests: `api/test/marketplace.test.mjs` — 7 integration tests (visibility gating, contact
+  sanitization, avatar validation incl. path traversal, approval flow, re-review on edit).
+
 ### Phase 14 — Deployment hardening (2026-08-22)
 
 🚀 **A production guide you can actually follow** — plus the scripts it references.

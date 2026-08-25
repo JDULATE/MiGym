@@ -14,6 +14,8 @@ import GiwiOnboarding from './giwi/GiwiOnboarding.jsx'
 import GiwiTutorial from './giwi/tutorial/Tutorial.jsx'
 import { getTutorial, resetTutorial } from './giwi/flags.js'
 import NotFound from './views/NotFound.jsx'
+import Coaches from './views/Coaches.jsx'
+import CoachEdit from './views/CoachEdit.jsx'
 import { startFlow } from './sheets.jsx'
 import TabBar from './components/TabBar.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
@@ -64,6 +66,19 @@ function Shell() {
     window.addEventListener('migym:start-tutorial', open)
     return () => window.removeEventListener('migym:start-tutorial', open)
   }, [])
+  // Coach marketplace directory (ADR-0008) is the one public surface: no onboarding,
+  // no account, no tab bar — a visitor (or search engine) lands straight on it.
+  if (loc.pathname === '/coaches') {
+    return (
+      <>
+        <div id="app" key={loc.pathname}>
+          <ErrorBoundary><Coaches /></ErrorBoundary>
+        </div>
+        <Toast />
+      </>
+    )
+  }
+
   if (!onboardingDone) {
     return <GiwiOnboarding onDone={() => {
       completeOnboarding()
@@ -88,6 +103,7 @@ function Shell() {
             <Route path="/history" element={<History />} />
             <Route path="/library" element={<Library />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/coach" element={user ? <CoachEdit /> : <Navigate to="/home" replace />} />
             <Route path="/admin" element={user?.admin ? <Admin /> : <Navigate to="/home" replace />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

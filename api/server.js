@@ -71,8 +71,10 @@ let db = { users: [], creds: [], subs: [], invites: [], pairings: [], links: [] 
 try { db = JSON.parse(fs.readFileSync(dbFile, 'utf8')); } catch {}
 db.subs = db.subs || [];
 db.invites = db.invites || [];
-db.pairings = db.pairings || [];   // coach-platform pairing codes (ADR-0007)
-db.links = db.links || [];         // coach ↔ client links with consent scope
+  db.pairings = db.pairings || [];   // coach-platform pairing codes (ADR-0007)
+  db.links = db.links || [];         // coach ↔ client links with consent scope
+  db.coachProfiles = db.coachProfiles || [];   // marketplace listings (ADR-0008)
+const AVATARS_DIR = path.join(DATA, 'avatars');   // marketplace profile photos (ADR-0008)
 // Coach role is operator-granted: list user ids in COACH_UIDS (like ADMIN_UIDS). The role
 // is stamped onto the stored user so /api/me reports it and routes can check it.
 const COACH_UIDS = (process.env.COACH_UIDS || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -687,6 +689,108 @@ const routes = {
     json(res, 200, { ok: true });
   },
 
+  /* ---------- coach marketplace (ADR-0008) ----------
+     Public directory of coach profiles with external contact links. Browsing is
+     anonymous; publishing requires a signed-in user; listing requires an admin
+     approval. Avatars are client-resized JPEGs stored under DATA_DIR/avatars/. */
+
+  // Public: approved profiles only, business-card fields only.
+  'GET /api/marketplace/coaches': async (req, res) => {
+    const coaches = db.coachProfiles.filter(p => p.status === 'approved').map(p => {
+      const u = db.users.find(x => x.id === p.uid) || {};
+      return {
+        uid: p.uid,
+        name: u.name || 'Coach',
+        bio: p.bio || '',
+        certs: p.certs || '',
+        tags: p.tags || [],
+        modality: p.modality || 'both',
+        langs: p.langs || [],
+        rate: p.rate || '',
+        contact: p.contact || {},
+        avatarV: p.avatarV || 0,
+        since: p.decided || p.updated || null,
+      };
+    });
+    json(res, 200, { coaches });
+  },
+
+  // Public: serve an avatar file. uid is validated so the resolved path can never leave avatars/.
+  'GET /api/marketplace/avatar': async (req, res) => {
+    const urlObj = new URL(req.url, 'http://x');
+    const uid = String(urlObj.searchParams.get('uid') || '');
+    if (!/^[A-Za-z0-9_-]{6,64}$/.test(uid)) { json(res, 400, { error: 'bad uid' }); return; }
+    const file = path.join(AVATARS_DIR, uid + '.jpg');
+    if (!file.startsWith(AVATARS_DIR + path.sep) || !fs.existsSync(file)) { json(res, 404, { error: 'no avatar' }); return; }
+    res.writeHead(200, { 'Content-Type': 'image/jpeg', 'Cache-Control': 'public, max-age=86400' });
+    fs.createReadStream(file).pipe(res);
+  },
+
+  // Own profile: full record incl. moderation status.
+  'GET /api/marketplace/myprofile': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    const p = db.coachProfiles.find(x => x.uid === user.id) || null;
+    json(res, 200, { profile: p ? { ...p, uid: undefined } : null });
+  },
+
+  // Create or update own application. Every save goes back to 'pending' review.
+  'PUT /api/marketplace/profile': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    const body = await readBody(req);
+    const clip = (v, n) => String(v ?? '').trim().slice(0, n);
+    const tags = Array.isArray(body.tags) ? body.tags.slice(0, 8).map(t => clip(t, 24)).filter(Boolean) : [];
+    const langs = Array.isArray(body.langs) ? body.langs.slice(0, 6).map(l => clip(l, 8)).filter(Boolean) : [];
+    const modality = ['online', 'inperson', 'both'].includes(body.modality) ? body.modality : 'both';
+    const c = body.contact || {};
+    const contact = {
+      wa: clip(c.wa, 20).replace(/[^\d+]/g, ''),
+      ig: clip(c.ig, 40).replace(/^@/, '').replace(/[^A-Za-z0-9._]/g, ''),
+      email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(c.email || '').trim()) ? clip(c.email, 80) : '',
+      web: /^https?:\/\//i.test(String(c.web || '').trim()) ? clip(c.web, 120) : '',
+    };
+    let p = db.coachProfiles.find(x => x.uid === user.id);
+    if (!p) { p = { uid: user.id, created: new Date().toISOString() }; db.coachProfiles.push(p); }
+    Object.assign(p, {
+      bio: clip(body.bio, 500),
+      certs: clip(body.certs, 300),
+      tags, langs, modality, contact,
+      rate: clip(body.rate, 60),
+      status: 'pending',
+      updated: new Date().toISOString(),
+    });
+    saveDb();
+    json(res, 200, { status: p.status });
+  },
+
+  // Avatar upload: base64 image data URL, decoded size hard-capped. Client already resized.
+  'PUT /api/marketplace/avatar': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    const body = await readBody(req);
+    const data = String(body.data || '');
+    const m = data.match(/^data:image\/(?:jpeg|png);base64,([A-Za-z0-9+/=]+)$/);
+    if (!m) return json(res, 400, { error: 'expected a jpeg/png data URL' });
+    const buf = Buffer.from(m[1], 'base64');
+    if (buf.length < 100 || buf.length > 250 * 1024) return json(res, 400, { error: 'image must be between 100 B and 250 KB' });
+    fs.mkdirSync(AVATARS_DIR, { recursive: true });
+    fs.writeFileSync(path.join(AVATARS_DIR, user.id + '.jpg'), buf);
+    const p = db.coachProfiles.find(x => x.uid === user.id);
+    if (p) { p.avatarV = (p.avatarV || 0) + 1; saveDb(); }
+    json(res, 200, { ok: true, avatarV: p ? p.avatarV : 1 });
+  },
+
+  'DELETE /api/marketplace/avatar': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    const file = path.join(AVATARS_DIR, user.id + '.jpg');
+    try { fs.unlinkSync(file); } catch {}
+    const p = db.coachProfiles.find(x => x.uid === user.id);
+    if (p) { p.avatarV = (p.avatarV || 0) + 1; saveDb(); }
+    json(res, 200, { ok: true });
+  },
+
   /* ---------- admin dashboard ---------- */
   // One row per user, cheap enough for a personal instance (reads each state file once).
   'GET /api/admin/users': async (req, res) => {
@@ -735,6 +839,40 @@ const routes = {
     if (u.disabled) presence.delete(u.id);   // drop them off "training now" at once
     saveDb();
     json(res, 200, { ok: true, id: u.id, disabled: u.disabled });
+  },
+
+  /* ---------- marketplace moderation (ADR-0008) ---------- */
+  'GET /api/admin/coach-apps': async (req, res) => {
+    if (!requireAdmin(req, res)) return;
+    const apps = db.coachProfiles.map(p => {
+      const u = db.users.find(x => x.id === p.uid) || {};
+      return {
+        uid: p.uid, name: u.name || p.uid, email: u.email || null,
+        status: p.status, bio: p.bio || '', certs: p.certs || '',
+        tags: p.tags || [], modality: p.modality || 'both', langs: p.langs || [],
+        rate: p.rate || '', contact: p.contact || {}, avatarV: p.avatarV || 0,
+        updated: p.updated || null,
+      };
+    });
+    json(res, 200, { apps });
+  },
+
+  'POST /api/admin/coach-decision': async (req, res) => {
+    const admin = requireAdmin(req, res); if (!admin) return;
+    const body = await readBody(req);
+    const p = db.coachProfiles.find(x => x.uid === String(body.uid || ''));
+    if (!p) return json(res, 404, { error: 'no such application' });
+    const decision = String(body.decision || '');
+    if (!['approved', 'rejected', 'hidden'].includes(decision)) {
+      return json(res, 400, { error: 'decision must be approved | rejected | hidden' });
+    }
+    p.status = decision;
+    p.decided = new Date().toISOString();
+    // approval grants the coach capability (ADR-0007 linking); rejection/hiding takes it back
+    const u = db.users.find(x => x.id === p.uid);
+    if (u && !isAdmin(u)) u.role = decision === 'approved' ? 'coach' : undefined;
+    saveDb();
+    json(res, 200, { ok: true, uid: p.uid, status: p.status });
   },
 
   'GET /api/admin/invites': async (req, res) => {
