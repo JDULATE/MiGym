@@ -20,7 +20,7 @@ export default function TabBar({ onStart }) {
   const loc = useLocation()
   const S = useStore(s => s.S)
   const cur = loc.pathname.split('/')[1] || 'home'
-  const on = k => cur === k || (cur === 'history' && k === 'stats') || (cur === 'settings' && k === 'home')
+  const on = k => cur === k || (cur === 'history' && k === 'stats') || (cur === 'settings' && k === 'home') || (cur === 'library' && k === 'plan')
 
   const startWorkout = () => {
     if (!S.active) {
@@ -39,7 +39,6 @@ export default function TabBar({ onStart }) {
         <span>{S.active ? t('Resume') : t('Start')}</span>
       </button>
       <Tab nav={nav} active={on('stats')} icon="chart" to="/stats" label={t('Stats')} data-giwi="stats" />
-      <Tab nav={nav} active={on('library')} icon="list" to="/library" label={t('Exercises')} />
       <Tab nav={nav} active={on('coaches')} icon="personCircle" to="/coaches" label={t('Coaches')} />
     </nav>
   )

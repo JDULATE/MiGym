@@ -1,13 +1,18 @@
+import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore.js'
 import { DAYN, uid, exCount } from '../lib/format.js'
 import { t } from '../lib/i18n.js'
 import { dayAssignSheet, loadStarterPlan, planToolsSheet } from '../sheets.jsx'
 import Icon from '../components/Icon.jsx'
-import { Button, ListItem } from '../components/ui.jsx'
+import { Button, ListItem, Segmented } from '../components/ui.jsx'
 import { glyphOf, DEFAULT_GLYPH } from '../lib/glyphs.js'
+import Library from './Library.jsx'
 
-export default function Plan() {
+// Round 3 IA: Plan and Exercises share one tab (same family — routines and their
+// building blocks), keeping the tab bar symmetric around the Start button.
+function RoutinesBody() {
   const nav = useNavigate()
   const S = useStore(s => s.S)
   const update = useStore(s => s.update)
@@ -49,5 +54,15 @@ export default function Plan() {
         <Button icon="sparkles" onClick={loadStarterPlan}>{t('Load a starter plan')}</Button>
       </>}
     </div></div>
+  </>
+}
+
+export default function Plan() {
+  const loc = useLocation()
+  const [tab, setTab] = useState(() => new URLSearchParams(loc.search).get('tab') === 'exercises' ? 'exercises' : 'routines')
+  return <>
+    <Segmented options={[{ v: 'routines', label: t('Routines') }, { v: 'exercises', label: t('Exercises') }]}
+      value={tab} onChange={setTab} />
+    {tab === 'routines' ? <RoutinesBody /> : <Library />}
   </>
 }

@@ -28,7 +28,6 @@ import RoutineEdit from './views/RoutineEdit.jsx'
 import Workout from './views/Workout.jsx'
 import Stats from './views/Stats.jsx'
 import History from './views/History.jsx'
-import Library from './views/Library.jsx'
 import Settings from './views/Settings.jsx'
 import Admin from './views/Admin.jsx'
 
@@ -101,7 +100,7 @@ function Shell() {
             <Route path="/workout" element={<Workout />} />
             <Route path="/stats" element={<Stats />} />
             <Route path="/history" element={<History />} />
-            <Route path="/library" element={<Library />} />
+            <Route path="/library" element={<Navigate to="/plan?tab=exercises" replace />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/coach" element={<Navigate to="/coaches?tab=profile" replace />} />
             <Route path="/coaches" element={<Coaches />} />
