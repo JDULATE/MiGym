@@ -9,17 +9,27 @@ import attentive from './expressions/giwi attentive.svg'
 import curious from './expressions/giwi curious.svg'
 import shy from './expressions/giwi shy.svg'
 import surprissed from './expressions/giwi surprissed.svg'
+import angry from './expressions/giwi angry.svg'
+import scared from './expressions/giwi scared.svg'
+import unimpressed from './expressions/giwi unimpressed.svg'
 
 const EXPRESSIONS = {
   idle: neutral,
+  neutral,
   welcome: excited,
   thinking: attentive,
   point: curious,
   wave: happy,
-  happy: happy,
-  encourage: shy,
-  celebrate: excited,
-  scared: surprissed,
+  happy,
+  curious,
+  excited,
+  shy,
+  attentive,
+  surprissed,
+  surprised: surprissed,
+  angry,
+  scared,
+  unimpressed,
 }
 
 export default function Giwi({ state = 'idle', size = 120, label = 'Giwi' }) {

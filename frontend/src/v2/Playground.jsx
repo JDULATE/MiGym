@@ -69,10 +69,8 @@ export default function Playground() {
 
         <div className="v2-sec"><h2>Giwi vivo</h2>
           <div className="v2-stage">
-            <span className="v2-hint">Acércale el cursor — lo sigue. Arrástralo y lanzalo. Tócalo para cambiar su ánimo.</span>
-            <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-46%)' }}>
-              <GiwiLive size={170} state="happy" />
-            </div>
+            <span className="v2-hint">Acércale el cursor — lo sigue. Arrástralo en cualquier dirección y lanzalo. Tócalo para cambiar su ánimo (10 estados).</span>
+            <GiwiLive size={170} state="happy" />
           </div>
         </div>
 
