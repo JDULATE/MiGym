@@ -14,6 +14,7 @@ import GiwiOnboarding from './giwi/GiwiOnboarding.jsx'
 import GiwiTutorial from './giwi/tutorial/Tutorial.jsx'
 import { getTutorial, resetTutorial } from './giwi/flags.js'
 import NotFound from './views/NotFound.jsx'
+import Playground from './v2/Playground.jsx'
 import Coaches from './views/Coaches.jsx'
 import CoachEdit from './views/CoachEdit.jsx'
 import { startFlow } from './sheets.jsx'
@@ -65,6 +66,11 @@ function Shell() {
     window.addEventListener('migym:start-tutorial', open)
     return () => window.removeEventListener('migym:start-tutorial', open)
   }, [])
+  // UI-V2 playground — always standalone, never gated.
+  if (loc.pathname === '/v2') {
+    return <ErrorBoundary><Playground /></ErrorBoundary>
+  }
+
   // Coach marketplace: anonymous visitors get the standalone public page (no tab bar,
   // no onboarding). Signed-in users get the in-app hub with the tab bar below.
   if (loc.pathname === '/coaches' && !user) {

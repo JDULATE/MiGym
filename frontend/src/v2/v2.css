@@ -1,0 +1,21 @@
+/* UI-V2 playground styles */
+.v2{min-height:100vh;background:
+  radial-gradient(1200px 500px at 80% -10%,color-mix(in srgb,var(--acc) 14%,transparent),transparent),
+  var(--bg);color:var(--label)}
+.v2-wrap{max-width:860px;margin:0 auto;padding:28px 18px 80px}
+.v2 h1{font-size:clamp(26px,5vw,34px);letter-spacing:-.025em;line-height:1.05;margin:0}
+.v2 .sub{color:var(--mut,#8b8f98);margin-top:6px;font-size:.92rem}
+.v2-sec{margin-top:30px}
+.v2-sec>h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--mut,#8b8f98);margin:0 0 12px}
+.v2-card{background:var(--sur);border:1px solid var(--sep);border-radius:20px;padding:20px}
+.v2-swatches{display:flex;flex-wrap:wrap;gap:10px}
+.v2-sw{display:flex;flex-direction:column;gap:6px;font-size:.7rem;color:var(--mut,#8b8f98)}
+.v2-sw i{width:64px;height:40px;border-radius:12px;display:block;border:1px solid var(--sep)}
+.v2-stage{position:relative;height:340px;border:1px dashed var(--sep);border-radius:20px;overflow:hidden;
+  background:var(--sur);touch-action:none}
+.v2-hint{position:absolute;left:14px;top:12px;font-size:.72rem;color:var(--mut,#8b8f98);pointer-events:none}
+.v2-type{display:flex;flex-direction:column;gap:6px}
+.v2-type .d1{font-size:34px;font-weight:750;letter-spacing:-.02em;line-height:1.05}
+.v2-type .d2{font-size:22px;font-weight:700;letter-spacing:-.015em}
+.v2-type .b{font-size:15px;line-height:1.55}
+.v2-type .c{font-size:12.5px;letter-spacing:.01em;color:var(--mut,#8b8f98)}
