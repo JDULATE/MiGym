@@ -93,3 +93,11 @@
 .v2-glance small{font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mut,#8b8f98)}
 .v2-minilink{background:none;border:none;color:var(--acc);font-weight:650;font-size:.72rem;cursor:pointer;padding:0 2px}
 .v2-empty-scene{text-align:center;padding:30px 20px 40px}
+
+/* ---------- AURORA crowned (bake-off winner) + Editorial press physics ----------
+   Standard motion for every interactive element: press-down is instant (no lag),
+   release springs back. .pressable is now mandatory on all tappable surfaces. */
+.v2-orb,.v2-rday,.v2-tab,.v2-start{will-change:transform}
+.v2-hero.pressable:active{transform:scale(.985)}
+.v2-glance.pressable:active{transform:scale(.96)}
+.v2-rday.pressable:active{transform:scale(.9)}

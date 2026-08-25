@@ -43,7 +43,7 @@ export default function TabBar2({ active, onChange, onStart, startLive }) {
           <span className="cir"><Icon name={startLive ? 'pause' : 'dumbbell'} size={22} /></span>
         </button>
       ) : (
-        <button key={s.k} className={'v2-tab pressable' + (active === s.k ? ' on' : '')}
+        <button key={s.k} className={'v2-tab v2-tab2 pressable' + (active === s.k ? ' on' : '')}
           onClick={() => onChange(s.k)} aria-label={s.label}>
           <Icon name={s.icon} size={22} />
         </button>

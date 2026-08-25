@@ -1,124 +1,85 @@
-// Home V2.1 — immersive scene, not a settings list.
-// The first viewport IS today's session: ghost glyph backdrop, display-scale title,
-// one physical Start orb, Giwi floating in the scene. Below the fold: draggable week
-// strip and hairline glance stats — no card boxes; type + whitespace carry hierarchy.
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useStore } from '../../store/useStore.js'
-import { effectiveRoutine, lastBW, streakWeeks } from '../../lib/history.js'
-import { fmtNum, todayISO, isoOf, weekKey, DAYS, exCount } from '../../lib/format.js'
-import { t, dateLocale } from '../../lib/i18n.js'
-import { bwSheet, goalSheet, dayOverrideSheet, calendarSheet, startFlow, loadStarterPlan, bwDeltaColor } from '../../sheets.jsx'
-import Icon from '../../components/Icon.jsx'
-import { glyphOf } from '../../lib/glyphs.js'
+// HOME V2 · AURORA — ganadora del bake-off (2026-08-25), con la física de botones
+// de Editorial (.pressable en TODO elemento interactivo). Motores: useHomeData +
+// sheets + LineChart — cero lógica duplicada. Estilos: v2.css + styles/homeStyles.css.
+import { useHomeData } from './useHomeData.js'
 import GiwiLive from '../ui/GiwiLive.jsx'
+import { t } from '../../lib/i18n.js'
+import { glyphOf } from '../../lib/glyphs.js'
+import { exCount, fmtNum } from '../../lib/format.js'
+import LineChart from '../../components/LineChart.jsx'
+import Icon from '../../components/Icon.jsx'
+import './styles/homeStyles.css'
 
 export default function HomeScreen({ onGoSettings }) {
-  const nav = useNavigate()
-  const S = useStore(s => s.S)
-  const user = useStore(s => s.user)
-  const [cheer, setCheer] = useState(0)
-
-  const today = new Date()
-  const routine = effectiveRoutine(S, todayISO())
-  const bw = lastBW(S)
-  const prevBW = S.bodyweight.length > 1 ? S.bodyweight[S.bodyweight.length - 2] : null
-  const delta = bw && prevBW ? bw.w - prevBW.w : null
-  const empty = !S.routines.length && !S.active
-
-  const monday = new Date(today); monday.setDate(today.getDate() - ((today.getDay() + 6) % 7))
-  const doneDays = new Set(S.workouts.map(w => w.d))
-  const wThisWeek = S.workouts.filter(w => weekKey(w.d) === weekKey(todayISO())).length
-  const plannedPerWeek = Object.keys(S.week).filter(k => S.week[k]).length
-
-  const onToday = () => {
-    if (S.active) return nav('/workout')
-    if (routine) { setCheer(c => c + 1); return startFlow(routine.id) }
-    return dayOverrideSheet(todayISO())
-  }
-
-  const dateLine = today.toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'short' })
-
+  const d = useHomeData()
   return (
-    <div className="v2-home">
+    <div className="v2-home hs1">
       <header className="v2-top">
-        <span className="v2-datecaps">{dateLine.toUpperCase()}</span>
-        <button className="iconbtn pressable" onClick={onGoSettings} aria-label={t('Settings')}><Icon name="gear" size={19} /></button>
+        <span className="v2-datecaps">{d.dateCaps}</span>
+        <button className="iconbtn pressable" onClick={onGoSettings} aria-label={t('Settings')}>
+          <Icon name="gear" size={19} />
+        </button>
       </header>
 
-      {/* THE SCENE — first viewport is the workout itself */}
-      <section className={'v2-stage-home' + (S.active ? ' live' : '') + (routine ? '' : ' rest')}>
-        <div className="v2-ghost" aria-hidden>{routine ? glyphOf(routine.emoji) : '☾'}</div>
-        {!empty && (
-          <div style={{ position: 'absolute', right: '6%', top: '12%' }}>
-            <GiwiLive size={92} state={S.active ? 'excited' : cheer % 2 ? 'curious' : 'happy'} />
+      <section className={'v2-stage-home' + (d.active ? ' live' : '') + (d.routine ? '' : ' rest')}>
+        <div className="v2-ghost" aria-hidden>{d.routine ? glyphOf(d.routine.emoji) : '☾'}</div>
+        {!d.empty && (
+          <div style={{ position: 'absolute', right: '6%', top: '10%' }}>
+            <GiwiLive size={92} state={d.active ? 'excited' : d.routine ? 'happy' : 'idle'} />
           </div>
         )}
-        <div className="v2-kicker">{S.active ? t('In progress') : routine ? t('Today') : t('Rest day')}</div>
-        <h1 className="v2-display">
-          {S.active ? S.active.name : routine ? routine.name : t('Rest day')}
-        </h1>
-        {routine && !S.active && (
-          <div className="v2-meta">{exCount(routine.ex.length)}{plannedPerWeek ? ` · ${plannedPerWeek}/semana` : ''}</div>
-        )}
-        <button
-          className={'v2-orb pressable' + (S.active ? ' warn' : '') + (empty ? ' ghosted' : '')}
-          onClick={onToday}
-          disabled={empty}>
-          <Icon name={S.active ? 'pause' : 'play'} size={22} />
-          <span>{S.active ? t('Resume') : routine ? t('Start') : t('Rest')}</span>
+        <div className="v2-kicker">
+          {d.active ? t('In progress') : d.todayOvr ? t('Today') + ' · ' + t('rescheduled') : d.routine ? t('Today') : t('Rest day')}
+        </div>
+        <h1 className="v2-display">{d.active ? d.S.active.name : d.routine ? d.routine.name : t('Rest day')}</h1>
+        {d.routine && !d.active && <div className="v2-meta">{exCount(d.routine.ex.length)}</div>}
+        <button className={'v2-orb pressable' + (d.active ? ' warn' : '')} onClick={d.start} disabled={d.empty}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 9 }}>
+            {d.active ? '❚❚' : '▶'}<span>{d.active ? t('Resume') : d.routine ? t('Start') : t('Rest')}</span>
+          </span>
         </button>
-        {S.active && <div className="v2-livebar"><i /></div>}
+        {d.active && <div className="v2-livebar"><i /></div>}
       </section>
 
-      {/* week rail — horizontal drag/scroll, no box */}
+      {/* week rail — cada día responde al tacto como los botones de Editorial */}
       <div className="v2-rail">
-        {[1, 2, 3, 4, 5, 6, 0].map(off => {
-          const d = new Date(monday); d.setDate(monday.getDate() + off)
-          const iso = isoOf(d)
-          const done = doneDays.has(iso), planned = !!S.week[d.getDay()]
-          return (
-            <button key={iso} className={'v2-rday' + (iso === todayISO() ? ' today' : '')}
-              onClick={() => dayOverrideSheet(iso)}>
-              <span className="lbl">{t(DAYS[d.getDay()]).slice(0, 2).toUpperCase()}</span>
-              <span className="num">{d.getDate()}</span>
-              <span className={'rail-dot' + (done ? ' done' : planned ? ' plan' : '')} />
-            </button>
-          )
-        })}
+        {d.days.map(day => (
+          <button key={day.iso}
+            className={'v2-rday pressable' + (day.isToday ? ' today' : '')}
+            onClick={() => d.openDay(day.iso)}
+            title={day.done ? '✓' : day.planned ? '•' : ''}>
+            <span className="lbl">{day.short}</span><span className="num">{day.num}</span>
+            <span className={'rail-dot' + (day.done ? ' done' : day.planned ? ' plan' : '')} />
+          </button>
+        ))}
       </div>
 
-      {/* glance stats — big numbers, hairlines, zero boxes */}
-      <section className="v2-glances">
-        <div className="v2-glance" onClick={() => calendarSheet()} role="button" tabIndex={0}>
-          <big>{streakWeeks(S)}</big>
-          <small>{t('this week')}<br />{wThisWeek}/{plannedPerWeek || '—'}</small>
+      <section className="v2-glances hs1-glances">
+        <div className="v2-glance pressable" onClick={d.openCalendar} role="button" tabIndex={0}>
+          <big><Icon name="flame" size={18} style={{ color: '#7db8f5', verticalAlign: '-2px', marginRight: 6 }} />{d.streak}</big>
+          <small>semanas de racha<br />{d.wThisWeek}/{d.plannedPerWeek || '—'} esta semana</small>
         </div>
-        <div className="v2-glance">
-          <big>{bw ? fmtNum(bw.w) : '—'}<em>{bw ? S.unit : ''}</em></big>
-          <small className="row" style={{ justifyContent: 'center', gap: 4 }}>
-            {!!delta && <>
-              <Icon name={delta > 0 ? 'arrowUp' : 'arrowDown'} size={11}
-                style={{ color: bwDeltaColor(delta, bw.w) }} />
-              {fmtNum(Math.abs(delta))} ·{' '}
-            </>}
-            <button className="v2-minilink" onClick={e => { e.stopPropagation(); bwSheet() }}>{t('Log')}</button>
-            <button className="v2-minilink" onClick={e => { e.stopPropagation(); goalSheet() }}>{S.targetW ? fmtNum(S.targetW) : t('Goal')}</button>
+        <div className="v2-glance hs1-weight">
+          <big>{d.bw ? <>{fmtNum(d.bw.w)}<em>{d.unit}</em></> : '—'}
+            {!!d.delta && (
+              <span className="hs1-delta">
+                <Icon name={d.delta > 0 ? 'arrowUp' : 'arrowDown'} size={11} />
+                {fmtNum(Math.abs(d.delta))}
+              </span>
+            )}
+          </big>
+          <small>
+            {d.targetW ? <>meta {fmtNum(d.targetW)} {d.unit}</> : 'peso corporal'}
+            {' · '}<button className="v2-minilink pressable" onClick={e => { e.stopPropagation(); d.logBW() }}>registrar</button>
           </small>
+          {d.bwPoints.length > 1 && (
+            <div className="hs1-chart" onClick={e => e.stopPropagation()}>
+              <LineChart points={d.bwPoints} h={64} unit={d.unit} goal={d.targetW}
+                label={t('Body weight trend, last 30 days')} />
+            </div>
+          )}
         </div>
       </section>
-
-      {empty && (
-        <div className="v2-empty-scene">
-          <p className="muted small" style={{ maxWidth: 320 }}>
-            {t('Set up your weekly routine to get going — or load a ready-made starter plan.')}
-          </p>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
-            <button className="v2-btn primary" style={{ width: 'auto', padding: '11px 20px' }} onClick={() => loadStarterPlan()}>{t('Load a starter plan')}</button>
-            <button className="v2-btn" style={{ width: 'auto', padding: '11px 20px' }} onClick={() => nav('/plan')}>{t('Build my own plan')}</button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
