@@ -15,6 +15,7 @@ import GiwiTutorial from './giwi/tutorial/Tutorial.jsx'
 import { getTutorial, resetTutorial } from './giwi/flags.js'
 import NotFound from './views/NotFound.jsx'
 import Playground from './v2/Playground.jsx'
+import V2Shell from './v2/shell/Shell.jsx'
 import Coaches from './views/Coaches.jsx'
 import CoachEdit from './views/CoachEdit.jsx'
 import { startFlow } from './sheets.jsx'
@@ -69,6 +70,10 @@ function Shell() {
   // UI-V2 playground — always standalone, never gated.
   if (loc.pathname === '/v2') {
     return <ErrorBoundary><Playground /></ErrorBoundary>
+  }
+  // UI-V2 app shell preview — same rule until parity flips the real routes.
+  if (loc.pathname === '/app') {
+    return <ErrorBoundary><V2Shell /></ErrorBoundary>
   }
 
   // Coach marketplace: anonymous visitors get the standalone public page (no tab bar,
