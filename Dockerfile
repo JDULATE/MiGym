@@ -7,6 +7,12 @@ WORKDIR /app/frontend
 COPY frontend/package.json frontend/package-lock.json* ./
 RUN npm ci 2>/dev/null || npm install
 COPY frontend/ .
+
+# Exercise media (~140 MB) is not shipped in the image — pull it from the dataset CDN,
+# same bases the mobile build uses (see build:mobile in frontend/package.json).
+ENV VITE_IMG_BASE=https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@7455efae41b330c265e7cd4b78dfa848e7ce5ebd/images/
+ENV VITE_GIF_BASE=https://cdn.jsdelivr.net/gh/hasaneyldrm/exercises-dataset@7455efae41b330c265e7cd4b78dfa848e7ce5ebd/videos/
+
 RUN npm run build
 
 FROM node:22-alpine
