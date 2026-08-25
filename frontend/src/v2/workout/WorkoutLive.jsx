@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../../store/useStore.js'
+import { useUI } from '../../store/useUI.js'
 import { t } from '../../lib/i18n.js'
 import { exOr } from '../../lib/exercises.js'
 import {
@@ -20,14 +21,12 @@ import { useWorkoutEngine, columnsFor, useStartChooser } from './engine.jsx'
 import './workout.css'
 
 /* ---- demo seeding: a believable push session so the skin can be judged without
-   any real data. Only injects when there is no active session and this tab hasn't
-   seeded yet (sessionStorage), so refreshes keep the demo stable and real sessions
-   are never touched. ---- */
-const DEMO_FLAG = 'migym-wkdemo'
+   any real data. Seeds on every visit unless you explicitly left the demo (opt-out
+   survives reloads via sessionStorage). Real active sessions are never touched. ---- */
+const DEMO_OPTOUT = 'migym-wkdemo-out'
 function seedDemo() {
   const st = useStore.getState()
-  if (st.S.active || sessionStorage.getItem(DEMO_FLAG)) return
-  sessionStorage.setItem(DEMO_FLAG, '1')
+  if (st.S.active || sessionStorage.getItem(DEMO_OPTOUT)) return
   const start = Date.now() - 1000 * 60 * 17          // started 17 min ago
   st.update(s => {
     s.active = {
@@ -150,37 +149,36 @@ function StartV2() {
 function SetRowV2({ S, entry, s, i, cols, engine }) {
   const warm = isWarmupRow(s)
   const phaseNum = entry.sets.slice(0, i + 1).filter(x => isWarmupRow(x) === warm).length
-  const bump = (col, dir) => {
+  const bump = (col, dir) => e => {
+    e.stopPropagation()
     if (col.eff) return engine.setField(engine.cur, i, col.f, stepEffort(col.eff, s[col.f], dir))
     engine.setField(engine.cur, i, col.f, Math.max(0, Math.round(((s[col.f] || 0) + dir * col.step) * 100) / 100))
   }
-  const cell = (col, cls) => (
-    <div className={'wk-cell ' + cls}>
-      <button className="wk-bump pressable" onClick={() => bump(col, -1)} aria-label="−"><Icon name="minus" size={14} /></button>
-      <input className="wk-val" inputMode="decimal" value={s[col.f] ?? ''}
-        onChange={e => {
-          const v = e.target.value === '' ? null : Number(e.target.value)
-          engine.setField(engine.cur, i, col.f, col.eff ? capEffort(col.eff, v) : (Number.isNaN(v) ? null : v))
-        }} />
-      <button className="wk-bump pressable" onClick={() => bump(col, 1)} aria-label="+"><Icon name="plus" size={14} /></button>
+  const num = (col) => (
+    <div className="wsr-num">
+      <button className="wsr-bump pressable" onClick={bump(col, -1)} aria-label="−">−</button>
+      <span className="wsr-val">{s[col.f] ?? '—'}</span>
+      <button className="wsr-bump pressable" onClick={bump(col, 1)} aria-label="+">+</button>
     </div>
   )
   return (
     <div key={i} data-giwi={i === 0 ? 'set-row' : undefined}
-      className={'wk-setrow pressable' + (s.done ? ' done' : '') + (cols.col3 ? ' has-eff' : '')}
+      className={'wsr pressable' + (s.done ? ' done' : '') + (warm ? ' warm' : '')}
       onClick={() => engine.toggle(engine.cur, i)}>
-      {warm && i > 0 && !isWarmupRow(entry.sets[i - 1]) && <div className="wk-sep" />}
-      <span className="wk-n">{phaseNum}</span>
-      {cell(cols.col1, 'c1')}
-      {cols.col2 && cell(cols.col2, 'c2')}
-      {cols.col3 && cell(cols.col3, 'c3')}
-      {cols.timed && (
-        <button className="wk-go pressable" disabled={s.done || !!engine.work}
-          onClick={e => { e.stopPropagation(); engine.startTimed(engine.cur, i) }} aria-label="▶ hold">
+      <span className={'wsr-n' + (warm ? ' w' : '')}>{warm ? 'W' : phaseNum}</span>
+      {num(cols.col1)}
+      {cols.col2 && <span className="wsr-x">×</span>}
+      {cols.col2 && num(cols.col2)}
+      {cols.col3 && num(cols.col3)}
+      {cols.timed && !s.done && (
+        <button className="wsr-play pressable" onClick={e => { e.stopPropagation(); engine.startTimed(engine.cur, i) }} aria-label="Iniciar hold">
           <Icon name="play" size={16} />
         </button>
       )}
-      <span className={'wk-check' + (s.done ? ' on' : '')}><Icon name="check" size={15} /></span>
+      <span className="wsr-check"><Icon name="check" size={20} /></span>
+      {warm && (
+        <button className="wsr-del" onClick={e => { e.stopPropagation(); engine.removeSetAt(engine.cur, i) }} aria-label="Quitar calentamiento">×</button>
+      )}
     </div>
   )
 }
@@ -193,20 +191,34 @@ function ExerciseFocus({ engine }) {
   const last = lastEntryFor(S, entry.id)
   const best = bestWeightFor(S, entry.id)
   const plan = entry.plan
+  const [showMedia, setShowMedia] = useState(false)
 
   return (
     <>
-      <Media ex={ex} key={entry.id} compact minimizable />
       <div className="row between" style={{ marginTop: 4 }}>
         <h2 className="wk-exname">{ex.n}</h2>
         <button className="iconbtn pressable" onClick={() => exerciseDetailSheet(ex)} aria-label="info"><Icon name="info" size={17} /></button>
       </div>
+      {!showMedia ? (
+        <button className="wk-media-toggle pressable" onClick={() => setShowMedia(true)}>
+          ▶ ver cómo se hace
+        </button>
+      ) : (
+        <div style={{ position: 'relative' }}>
+          <Media ex={ex} key={entry.id} compact minimizable />
+          <button className="wk-media-close pressable" onClick={() => setShowMedia(false)}>ocultar</button>
+        </div>
+      )}
       <div className="wk-tags">
-        {entry.target?.rirTarget != null && <span className="tag acc nocap">RIR ≤ {entry.target.rirTarget}</span>}
-        {best > 0 && <span className="tag nocap">{t('Best:')} {fmtNum(best)} {S.unit}</span>}
+        {best > 0 && <span className="tag acc nocap">Récord: {fmtNum(best)} {S.unit}</span>}
+        {entry.target?.rirTarget != null && <span className="tag nocap">RIR ≤ {entry.target.rirTarget}</span>}
         {(ex.tg || ex.bp) && <span className="tag">{t(ex.tg || ex.bp)}</span>}
       </div>
-      {last && <div className="wk-lasttime">{t('Last time')} ({fmtDate(last.d)}): {last.sets.map(s => setLabel(entry.id, s, last.target)).join(', ')}</div>}
+      {last && (
+        <div className="wk-lasttime">
+          Vez pasada ({fmtDate(last.d)}): {last.sets.map(s => setLabel(entry.id, s, last.target)).join(', ')}
+        </div>
+      )}
       {plan && plan.why && plan.kind !== 'off' && (
         <div className={'wk-progline' + (plan.kind === 'deload' ? ' warn' : '')}>
           <Icon name={plan.kind === 'up' ? 'arrowUp' : 'lightbulb'} size={13} />
@@ -215,12 +227,11 @@ function ExerciseFocus({ engine }) {
       )}
 
       <div className="wk-setcard" data-giwi="exercise">
-        <div className={'wk-sethead' + (cols.col3 ? ' eff3' : '')}>
-          <span />
+        <div className="wk-sethead2">
+          <span>SET</span>
           <span>{cols.col1.hd}</span>
           {cols.col2 && <span>{cols.col2.hd}</span>}
           {cols.col3 && <span>{cols.col3.hd}</span>}
-          {cols.timed && <span />}
           <span />
         </div>
         {entry.sets.map((s, i) => (
@@ -245,26 +256,28 @@ function ExerciseFocus({ engine }) {
 
 export default function WorkoutLive() {
   const active = useStore(s => s.S.active)
-  const [demoOn] = useState(() => !!sessionStorage.getItem(DEMO_FLAG))
+  const optOut = useState(() => !!sessionStorage.getItem(DEMO_OPTOUT))[0]
 
-  // seed once per tab session when there's nothing live
-  useEffect(() => {
-    if (!active) seedDemo()
-  }, [active])
-
-  if (!active && !demoOn) return <StartV2 />
+  // seed on every visit while the user hasn't opted out of the demo
+  useEffect(() => { if (!active) seedDemo() }, [active])
 
   const exitDemo = () => {
-    sessionStorage.removeItem(DEMO_FLAG)
+    sessionStorage.setItem(DEMO_OPTOUT, '1')
     useStore.getState().update(s => { s.active = null }, true)
     window.location.hash = '#/app'
     location.reload()
   }
 
-  if (!active) return <StartV2 />
+  if (optOut && !active) return <StartV2 />
+  if (!active) return (
+    <>
+      <DemoBadge onExit={exitDemo} />
+      <StartV2 />
+    </>
+  )
   return (
     <>
-      {sessionStorage.getItem(DEMO_FLAG) && <DemoBadge onExit={exitDemo} />}
+      <DemoBadge onExit={exitDemo} />
       <ActiveV2 />
     </>
   )
@@ -273,10 +286,12 @@ export default function WorkoutLive() {
 function ActiveV2() {
   const nav = useNavigate()
   const engine = useWorkoutEngine()
+  const timer = useUI(s => s.timer)
   const { A, units, unitIdx, cur, total, done, isSuperset } = engine
   const pct = total ? (done / total) * 100 : 0
   const [, tick] = useState(0)
   useEffect(() => { const iv = setInterval(() => tick(n => n + 1), 30000); return () => clearInterval(iv) }, [])
+  useEffect(() => { if (timer) { const iv = setInterval(() => tick(n => n + 1), 1000); return () => clearInterval(iv) } }, [!!timer])
 
   if (!A.entries.length) return (
     <div className="v2-home wk-empty">
@@ -298,6 +313,18 @@ function ActiveV2() {
         <button className="iconbtn pressable wk-finish" onClick={finishWorkout} aria-label="Terminar"><Icon name="check" size={19} /></button>
       </header>
       <div className="wk-prog"><i style={{ width: pct + '%' }} /></div>
+
+      {timer && (
+        <div className="wk-rest">
+          <div className="wk-rest-clock">{String(Math.floor(timer.left / 60)).padStart(1, '0')}:{String(timer.left % 60).padStart(2, '0')}</div>
+          <div className="wk-rest-actions">
+            <button className="pressable" onClick={() => engine.startRest ? useUI.getState().addRest(-15) : null}>−15s</button>
+            <button className="pressable" onClick={() => useUI.getState().addRest(15)}>+15s</button>
+            <button className="skip pressable" onClick={() => useUI.getState().stopRest()}>Saltar</button>
+          </div>
+          <div className="wk-rest-bar"><i style={{ width: (timer.total ? (timer.left / timer.total) * 100 : 0) + '%' }} /></div>
+        </div>
+      )}
 
       {/* unit switcher */}
       <div className="wk-units">
