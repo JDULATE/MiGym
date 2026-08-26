@@ -893,4 +893,9 @@ export default {
   "I’ll remind you every day.": "매일 알려드릴게요.",
   "Protein": "단백질",
   "Pre-workout": "프리워크아웃",
+  "Today's workout and a quick look at your progress live here.": "오늘의 운동과 진행 상황이 여기에 표시됩니다.",
+  "When you're ready, this button starts today's session.": "준비되면 이 버튼으로 오늘 세션을 시작합니다.",
+  "During a session you'll see the exercise here, with your previous performance right under it.": "세션 중에는 여기에 운동이 표시되고 바로 아래에 이전 기록이 보입니다.",
+  "Weight, reps and optional effort per set - tick a row once you're done.": "세트마다 무게, 반복, 선택적 강도 — 끝나면 행을 체크하세요.",
+  "Creatine, protein, pre-workout… track what you take and get reminders.": "크레아틴, 단백질, 프리워크아웃… 복용을 기록하고 알림을 받으세요.",
 }

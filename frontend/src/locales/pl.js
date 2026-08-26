@@ -893,4 +893,9 @@ export default {
   "I’ll remind you every day.": "Przypominam codziennie.",
   "Protein": "Białko",
   "Pre-workout": "Przedtrening",
+  "Today's workout and a quick look at your progress live here.": "Dzisiejszy trening i szybki podgląd postępów są tutaj.",
+  "When you're ready, this button starts today's session.": "Gdy będziesz gotowy, ten przycisk rozpocznie dzisiejszą sesję.",
+  "During a session you'll see the exercise here, with your previous performance right under it.": "Podczas sesji zobaczysz ćwiczenie tutaj, a wcześniejsze wyniki tuż pod nim.",
+  "Weight, reps and optional effort per set - tick a row once you're done.": "Ciężar, powtórzenia i opcjonalny wysiłek na serię — zaznacz wiersz po skończeniu.",
+  "Creatine, protein, pre-workout… track what you take and get reminders.": "Kreatyna, białko, przedtrening… zapisuj co przyjmujesz i otrzymuj przypomnienia.",
 }

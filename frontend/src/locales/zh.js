@@ -893,4 +893,9 @@ export default {
   "I’ll remind you every day.": "我每天都会提醒你。",
   "Protein": "蛋白质",
   "Pre-workout": "训练前补剂",
+  "Today's workout and a quick look at your progress live here.": "今日训练和进度概览都在这里。",
+  "When you're ready, this button starts today's session.": "准备好后，此按钮开始今天的训练。",
+  "During a session you'll see the exercise here, with your previous performance right under it.": "训练时这里会显示动作，下方是你的过往表现。",
+  "Weight, reps and optional effort per set - tick a row once you're done.": "每组记录重量、次数和可选强度——完成后勾选该行。",
+  "Creatine, protein, pre-workout… track what you take and get reminders.": "肌酸、蛋白粉、预锻炼……记录你的服用并获得提醒。",
 }

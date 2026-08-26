@@ -893,4 +893,9 @@ export default {
   "I’ll remind you every day.": "मैं हर दिन याद दिलाऊँगा।",
   "Protein": "प्रोटीन",
   "Pre-workout": "प्री-वर्कआउट",
+  "Today's workout and a quick look at your progress live here.": "आज की वर्कआउट और प्रगति का सारांश यहाँ है।",
+  "When you're ready, this button starts today's session.": "तैयार होने पर यह बटन आज का सेशन शुरू करता है।",
+  "During a session you'll see the exercise here, with your previous performance right under it.": "सेशन के दौरान यहाँ व्यायाम दिखेगा, और उसके ठीक नीचे आपका पिछला प्रदर्शन।",
+  "Weight, reps and optional effort per set - tick a row once you're done.": "प्रति सेट वज़न, रेप्स और वैकल्पिक प्रयास — पूरा होने पर पंक्ति चिह्नित करें।",
+  "Creatine, protein, pre-workout… track what you take and get reminders.": "क्रिएटिन, प्रोटीन, प्री-वर्कआउट… जो लेते हैं दर्ज करें और रिमाइंडर पाएं。",
 }

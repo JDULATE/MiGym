@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { useStore } from '../store/useStore.js'
 import { normalizeProfile, GOALS, GOAL_LABEL, EXPERIENCE, EXPERIENCE_LABEL } from '../lib/profile.js'
 import { todayISO, fmtNum } from '../lib/format.js'
-import { t, LANGS, setLang } from '../lib/i18n.js'
+import { t, LANGS, setLang, useLang } from '../lib/i18n.js'
 import Icon from '../components/Icon.jsx'
 import Giwi from './Giwi.jsx'
 import { DIALOGUE } from './dialogue.js'
@@ -27,6 +27,7 @@ const SUPP_LABEL = k => t(k.charAt(0).toUpperCase() + k.slice(1))
 export default function GiwiOnboarding({ onDone }) {
   const S = useStore(s => s.S)
   const update = useStore(s => s.update)
+  const _lang = useLang()   // re-render on language switch mid-flow (step 0)
   const [step, setStep] = useState(0)
   const [draft, setDraft] = useState({
     name: '', ageYears: '', weight: '', heightCm: '', goal: '', goals: [],

@@ -893,4 +893,9 @@ export default {
   "I’ll remind you every day.": "Her gün hatırlatırım.",
   "Protein": "Protein",
   "Pre-workout": "Pre-workout",
+  "Today's workout and a quick look at your progress live here.": "Bugünün antrenmanı ve ilerleme özetin burada.",
+  "When you're ready, this button starts today's session.": "Hazır olduğunda bu düğme bugünün antrenmanını başlatır.",
+  "During a session you'll see the exercise here, with your previous performance right under it.": "Seans sırasında egzersizi burada, önceki performansını hemen altında görürsün.",
+  "Weight, reps and optional effort per set - tick a row once you're done.": "Set başına ağırlık, tekrar ve isteğe bağlı efor — bitirince satırı işaretle.",
+  "Creatine, protein, pre-workout… track what you take and get reminders.": "Kreatin, protein, pre-workout… aldıklarını kaydet, hatırlatmalar al.",
 }

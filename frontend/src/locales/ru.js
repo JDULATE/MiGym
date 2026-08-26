@@ -893,4 +893,9 @@ export default {
   "I’ll remind you every day.": "Напоминаю каждый день.",
   "Protein": "Протеин",
   "Pre-workout": "Предтрен",
+  "Today's workout and a quick look at your progress live here.": "Тренировка на сегодня и обзор прогресса — здесь.",
+  "When you're ready, this button starts today's session.": "Когда будешь готов, эта кнопка начнёт сегодняшнюю тренировку.",
+  "During a session you'll see the exercise here, with your previous performance right under it.": "Во время сессии упражнение появится здесь, а прошлая результативность — сразу под ним.",
+  "Weight, reps and optional effort per set - tick a row once you're done.": "Вес, повторения и опциональное усилие на подход — отметь строку, когда закончишь.",
+  "Creatine, protein, pre-workout… track what you take and get reminders.": "Креатин, протеин, предтрен… записывай приёмы и получай напоминания.",
 }
