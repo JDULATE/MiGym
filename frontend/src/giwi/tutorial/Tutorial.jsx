@@ -2,7 +2,7 @@
 // Renders OVER the real app. When the tour reaches the exercise/set/rest steps and no
 // workout is active, it starts one using the first available routine — a REAL session
 // the user can keep training with after the tour ends.
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Giwi from '../Giwi.jsx'
 import { TUTORIAL_STEPS, copyFor } from './steps.js'
@@ -24,10 +24,17 @@ export default function GiwiTutorial({ onDone }) {
   })
   const [rect, setRect] = useState(null)
   const step = TUTORIAL_STEPS[idx]
+  // Pre-tour snapshot of S.active: the tour may create a practice session to have real
+  // UI to spotlight, but finishing (or skipping) restores exactly what existed before,
+  // so the tour never leaves a phantom amber "Resume" behind.
+  const preTourActive = useRef(undefined)
 
   // Start a real workout when the tour needs to show exercise/set/rest UI
   const ensureWorkout = () => {
     const st = useStore.getState()
+    if (preTourActive.current === undefined) {
+      preTourActive.current = st.S.active || null   // null = there was NO session before us
+    }
     if (st.S.active) return
     const routines = st.S.routines
     const routine = routines.find(r => r.ex.length > 0)
@@ -83,6 +90,13 @@ export default function GiwiTutorial({ onDone }) {
   }, [idx, step])
 
   const finish = skipped => {
+    // Revert tour side effects: stop the demo rest timer and put back whatever session
+    // state existed before the tour started (none → clean blue Start).
+    useUI.getState().stopRest()
+    if (preTourActive.current !== undefined) {
+      const restore = preTourActive.current
+      useStore.getState().update(s => { s.active = restore ? { ...restore } : null }, true)
+    }
     setTutorial({ completed: true, skipped: !!skipped, currentStep: null })
     onDone?.()
   }
