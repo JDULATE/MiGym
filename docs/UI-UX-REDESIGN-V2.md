@@ -52,3 +52,12 @@ Bake-off result: **AURORA** wins, with Editorial press physics (.pressable scale
 tappable surface) adopted as the standard interaction motion. Aurora palette (deep #155a9e →
 #3b93f0 → light #7db8f5, blue-only gradients — no amber in gradients) becomes the V2 design
 system base. Losing candidates stay at /styles for reference until Workout V2 ships.
+
+
+## CLOSURE (2026-08-25)
+
+The V2 rebuild was REJECTED after the workout-skin prototype: user verdict — not
+user-friendly, original front retained. All /v2 routes and src/v2/** were removed from main;
+recoverable from local commits 7ab9c4e…e1ef952 if ever revisited. Kept from this cycle:
+ErrorBoundary technical-details disclosure. The coach marketplace + Round-3 IA (original
+design language) remain in force.

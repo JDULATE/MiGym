@@ -14,10 +14,6 @@ import GiwiOnboarding from './giwi/GiwiOnboarding.jsx'
 import GiwiTutorial from './giwi/tutorial/Tutorial.jsx'
 import { getTutorial, resetTutorial } from './giwi/flags.js'
 import NotFound from './views/NotFound.jsx'
-import Playground from './v2/Playground.jsx'
-import V2Shell from './v2/shell/Shell.jsx'
-import StyleGallery from './v2/screens/styles/StyleGallery.jsx'
-import WorkoutLive from './v2/workout/WorkoutLive.jsx'
 import Coaches from './views/Coaches.jsx'
 import CoachEdit from './views/CoachEdit.jsx'
 import { startFlow } from './sheets.jsx'
@@ -69,31 +65,6 @@ function Shell() {
     window.addEventListener('migym:start-tutorial', open)
     return () => window.removeEventListener('migym:start-tutorial', open)
   }, [])
-  // UI-V2 playground — always standalone, never gated.
-  if (loc.pathname === '/v2') {
-    return <ErrorBoundary><Playground /></ErrorBoundary>
-  }
-  // UI-V2 workout — focus mode preview route (parity flips /workout later).
-  // Sheets, toasts and the rest timer live in overlay components; the standalone
-  // route must mount them or every sheet-based flow (starter plan, finish…) dies.
-  if (loc.pathname === '/workout-v2') {
-    return (
-      <ErrorBoundary>
-        <WorkoutLive />
-        <Modals />
-        <Toast />
-        <RestTimer />
-      </ErrorBoundary>
-    )
-  }
-  // Style bake-off: /styles gallery + /styles/s1…s5 full-screen candidates.
-  if (loc.pathname.startsWith('/styles')) {
-    return <ErrorBoundary><StyleGallery /></ErrorBoundary>
-  }
-  // UI-V2 app shell preview — same rule until parity flips the real routes.
-  if (loc.pathname === '/app') {
-    return <ErrorBoundary><V2Shell /></ErrorBoundary>
-  }
 
   // Coach marketplace: anonymous visitors get the standalone public page (no tab bar,
   // no onboarding). Signed-in users get the in-app hub with the tab bar below.
