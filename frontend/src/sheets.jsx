@@ -8,6 +8,8 @@ import { beep, vibrate } from './lib/sound.js'
 import { t, instrFor, getLang, INSTR_LANGS } from './lib/i18n.js'
 import { nav } from './lib/nav.js'
 import { STARTER_TEMPLATES } from './lib/starter.js'
+import * as supplements from './lib/supplements.js'
+const { preworkoutPending, proteinPending, markTaken } = supplements
 import Media, { Thumb } from './components/Media.jsx'
 import Stepper from './components/Stepper.jsx'
 import Icon from './components/Icon.jsx'
@@ -889,7 +891,30 @@ export function WorkoutRow({ w, onClick }) {
 
 /* ============================ workout lifecycle ============================ */
 export function startFlow(routineId) {
-  bwSheet({ required: true, onDone: bw => beginWorkout(routineId, bw) })
+  bwSheet({ required: true, onDone: bw => {
+    // Pre-workout gate: if a pre-workout supp is due today and unlogged, ask before
+    // the session starts — exactly what the user asked for ("¿ya te lo tomaste?").
+    const pw = supplements.preworkoutPending(S())
+    if (pw) {
+      ui().openSheet(close =>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 38 }}><Icon name="rocket" /></div>
+          <h3>{t('Pre-workout check')}</h3>
+          <div className="muted small" style={{ marginBottom: 14 }}>
+            {t('Did you already take your {0}?', pw.name || t('pre-workout'))}
+          </div>
+          <Button variant="primary" icon="check" onClick={() => { markTaken(update, pw.id); close(); beginWorkout(routineId, bw) }}>
+            {t('Yes — logged')}
+          </Button>
+          <div style={{ height: 8 }} />
+          <Button variant="ghost" className="dim" onClick={() => { close(); beginWorkout(routineId, bw) }}>
+            {t('Not yet')}
+          </Button>
+        </div>, { kind: 'center' })
+      return
+    }
+    beginWorkout(routineId, bw)
+  } })
 }
 export function beginWorkout(routineId, bw) {
   const st = S()
@@ -961,10 +986,17 @@ export const topWeightSheet = entryIdx => ui().openSheet(close => <TopWeight ent
 
 // Shown when the last exercise's last set is checked — finish, or keep going.
 function WorkoutComplete({ close }) {
+  const pw = supplements.proteinPending(S())
   return <div style={{ textAlign: 'center', padding: '8px 0' }}>
     <div style={{ fontSize: 44, display: 'flex', justifyContent: 'center', color: 'var(--acc)' }}><Icon name="checkCircle" /></div>
     <h3 style={{ margin: '8px 0' }}>{t("That's the whole workout!")}</h3>
     <div className="muted small" style={{ marginBottom: 16 }}>{t('Every exercise done — great work. Finish up, or keep going and add another exercise.')}</div>
+    {pw && <>
+      <Button icon="arm" onClick={() => { markTaken(update, pw.id); useUI.getState().toast(t('Protein logged')) }}>
+        {t('Log {0}', pw.name || t('protein'))}
+      </Button>
+      <div style={{ height: 8 }} />
+    </>}
     <Button variant="primary" icon="flag" onClick={() => { close(); finishWorkout() }}>{t('Finish workout')}</Button>
     <div style={{ height: 8 }} />
     <Button onClick={() => { close(); useUI.getState().toast(t('Keep going — tap “+ Add exercise” below')) }}>{t('Continue workout')}</Button>

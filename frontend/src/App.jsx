@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { HashRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { useStore } from './store/useStore.js'
+import { t } from './lib/i18n.js'
+import * as supplements from './lib/supplements.js'
 import { useUI } from './store/useUI.js'
 import { hasData } from './store/useStore.js'
 import { bindUI } from './components/ui.jsx'
@@ -105,6 +107,26 @@ function Shell() {
 export default function App() {
   const boot = useStore(s => s.boot)
   useEffect(() => { boot() }, [boot])
+
+  // Supplements daily reminders: while the app is open, nudge once per item/day
+  // after its configured time. Browser notification when permission is granted,
+  // in-app toast otherwise. Local-first: nothing leaves the device.
+  useEffect(() => {
+    const check = () => {
+      const st = useStore.getState()
+      for (const it of supplements.collectTimeReminders(st.S)) {
+        const msg = t('Take your {0}', it.name || it.kind)
+        useUI.getState().toast(msg)
+        if ('Notification' in window && Notification.permission === 'granted') {
+          try { new Notification('MiGym', { body: msg }) } catch { /* best effort */ }
+        }
+      }
+    }
+    const t0 = setTimeout(check, 20000)
+    const iv = setInterval(check, 60000)
+    return () => { clearTimeout(t0); clearInterval(iv) }
+  }, [])
+
   // Android system back — sheet, then page, then press-again-to-exit (see lib/back.js)
   useEffect(() => {
     let stop = null, gone = false

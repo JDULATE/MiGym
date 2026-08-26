@@ -16,6 +16,7 @@ import { loadStarterPlan, confirmSheet, importFromApp } from '../sheets.jsx'
 import { resetTutorial } from '../giwi/flags.js'
 import TermsSheet from './Terms.jsx'
 import ClientsSection from './ClientsSection.jsx'
+import SupplementsSection from './SupplementsSection.jsx'
 import Icon from '../components/Icon.jsx'
 import { Section, Row, SelectRow, Switch, Segmented, Button, TextField, TextArea, NumberField , ListItem} from '../components/ui.jsx'
 
@@ -211,6 +212,7 @@ export default function Settings() {
     </Section>
 
     {(user || MOBILE) && <NotificationsCard S={S} update={update} toast={toast} />}
+    <SupplementsSection />
     {!MOBILE && !DEMO && <CoachSection />}
     {user?.role === 'coach' && <ClientsSection />}
 

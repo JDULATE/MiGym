@@ -9,6 +9,39 @@ import LineChart from '../components/LineChart.jsx'
 import Icon from '../components/Icon.jsx'
 import { Button } from '../components/ui.jsx'
 import { glyphOf } from '../lib/glyphs.js'
+import { items as suppItems, pendingItems as suppPending, markTaken as suppMark } from '../lib/supplements.js'
+
+/* Supplements for today — a glance checklist; tap a row to log the dose. */
+function SuppTodayCard() {
+  const S = useStore(s => s.S)
+  const update = useStore(s => s.update)
+  const all = suppItems(S)
+  if (!all.length) return null
+  const due = suppPending(S)
+  const doneCount = due.length === 0 ? all.length : all.length - due.length
+  return <div className="card">
+    <div className="row between" style={{ marginBottom: 6 }}>
+      <h2 style={{ margin: 0 }}>{t('Supplements')}</h2>
+      <span className={'tag' + (due.length ? '' : ' acc')}>{doneCount}/{all.length}</span>
+    </div>
+    {due.length === 0 && <div className="small" style={{ color: 'var(--green)' }}>{t('All supplements logged — nice')}</div>}
+    {due.map(it => (
+      <div key={it.id} className="row between tappable" style={{ padding: '7px 0', borderBottom: '1px solid var(--sep)' }}
+        onClick={() => suppMark(update, it.id)}>
+        <div className="row" style={{ gap: 8, minWidth: 0 }}>
+          <Icon name="bolt" size={15} style={{ color: 'var(--acc)' }} />
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontWeight: 600, fontSize: '.9rem', textTransform: 'capitalize' }}>
+              {it.name || t(it.kind.charAt(0).toUpperCase() + it.kind.slice(1))}
+            </div>
+            {it.dose && <div className="dim small">{it.dose}</div>}
+          </div>
+        </div>
+        <Button size="sm" icon="check">{t('Taken')}</Button>
+      </div>
+    ))}
+  </div>
+}
 
 // Home = what to do now + a quick glance. Deep charts & history live in Stats.
 export default function Home() {
@@ -85,6 +118,8 @@ export default function Home() {
         <div style={{ height: 8 }} /><Button onClick={() => nav('/plan')}>{t('Build my own plan')}</Button>
       </div>
     )}
+
+    <SuppTodayCard />
 
     <div className="card">
       <div className="row between" style={{ marginBottom: 6 }}>
