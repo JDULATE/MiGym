@@ -185,6 +185,11 @@ export const useStore = create((set, get) => {
     // Boot: local data first, always. A linked server profile (if any) is restored in the
     // background for sync/backup — an unreachable or signed-out server never blocks entry.
     async boot() {
+      // Legacy accent migration: pre-rebrand installs stored warm accents; the
+      // factory look is Giwi blue. One-time, choice-preserving for the new palette.
+      const cur = get().S
+      if (cur.accent === 'ember' || cur.accent === 'orange') cur.accent = 'giwi'
+
       // Mobile build: no backend either — restore from the file mirror (the durable copy;
       // localStorage may have been evicted since the last run) and go straight in.
       if (MOBILE) {

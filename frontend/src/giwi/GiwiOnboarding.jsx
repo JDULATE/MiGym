@@ -158,7 +158,7 @@ export default function GiwiOnboarding({ onDone }) {
 
       {/* name */}
       {step === 2 && <>
-        {questionNode(t(DIALOGUE.askName), draft.name.trim() ? t('niceToMeet', draft.name.trim()) : null)}
+        {questionNode(t(DIALOGUE.askName), draft.name.trim() ? t(DIALOGUE.niceToMeet, draft.name.trim()) : null)}
         <div className="ob-body">
           <input className="ob-input" value={draft.name} maxLength={60} autoFocus
             onChange={e => set({ name: e.target.value })}
@@ -209,7 +209,7 @@ export default function GiwiOnboarding({ onDone }) {
 
       {/* goals */}
       {step === 6 && <>
-        {questionNode(<Icon name="target" size={26} />, t(DIALOGUE.askGoalMulti))}
+        {questionNode(t(DIALOGUE.askGoalMulti))}
         <div className="ob-body">
           <div className="ob-chips">
             {GOALS.map(g => (
@@ -282,7 +282,7 @@ export default function GiwiOnboarding({ onDone }) {
 
       {/* confirm */}
       {step === 10 && <>
-        {questionNode(<Icon name="clipboard" size={26} />, t(DIALOGUE.perfectLine))}
+        {questionNode(t(DIALOGUE.perfectLine))}
         <div className="ob-body">
           <div className="ob-summary">
             <b>{draft.name}</b><br />
