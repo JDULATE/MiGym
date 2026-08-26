@@ -39,7 +39,6 @@ export default function TabBar({ onStart }) {
         <span>{S.active ? t('Resume') : t('Start')}</span>
       </button>
       <Tab nav={nav} active={on('stats')} icon="chart" to="/stats" label={t('Stats')} data-giwi="stats" />
-      <Tab nav={nav} active={on('coaches')} icon="personCircle" to="/coaches" label={t('Coaches')} />
     </nav>
   )
 }

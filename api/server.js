@@ -73,8 +73,6 @@ db.subs = db.subs || [];
 db.invites = db.invites || [];
   db.pairings = db.pairings || [];   // coach-platform pairing codes (ADR-0007)
   db.links = db.links || [];         // coach ↔ client links with consent scope
-  db.coachProfiles = db.coachProfiles || [];   // marketplace listings (ADR-0008)
-const AVATARS_DIR = path.join(DATA, 'avatars');   // marketplace profile photos (ADR-0008)
 // Coach role is operator-granted: list user ids in COACH_UIDS (like ADMIN_UIDS). The role
 // is stamped onto the stored user so /api/me reports it and routes can check it.
 const COACH_UIDS = (process.env.COACH_UIDS || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -845,40 +843,6 @@ const routes = {
     if (u.disabled) presence.delete(u.id);   // drop them off "training now" at once
     saveDb();
     json(res, 200, { ok: true, id: u.id, disabled: u.disabled });
-  },
-
-  /* ---------- marketplace moderation (ADR-0008) ---------- */
-  'GET /api/admin/coach-apps': async (req, res) => {
-    if (!requireAdmin(req, res)) return;
-    const apps = db.coachProfiles.map(p => {
-      const u = db.users.find(x => x.id === p.uid) || {};
-      return {
-        uid: p.uid, name: u.name || p.uid, email: u.email || null,
-        status: p.status, bio: p.bio || '', certs: p.certs || '',
-        tags: p.tags || [], modality: p.modality || 'both', langs: p.langs || [],
-        rate: p.rate || '', contact: p.contact || {}, avatarV: p.avatarV || 0,
-        updated: p.updated || null,
-      };
-    });
-    json(res, 200, { apps });
-  },
-
-  'POST /api/admin/coach-decision': async (req, res) => {
-    const admin = requireAdmin(req, res); if (!admin) return;
-    const body = await readBody(req);
-    const p = db.coachProfiles.find(x => x.uid === String(body.uid || ''));
-    if (!p) return json(res, 404, { error: 'no such application' });
-    const decision = String(body.decision || '');
-    if (!['approved', 'rejected', 'hidden'].includes(decision)) {
-      return json(res, 400, { error: 'decision must be approved | rejected | hidden' });
-    }
-    p.status = decision;
-    p.decided = new Date().toISOString();
-    // approval grants the coach capability (ADR-0007 linking); rejection/hiding takes it back
-    const u = db.users.find(x => x.id === p.uid);
-    if (u && !isAdmin(u)) u.role = decision === 'approved' ? 'coach' : undefined;
-    saveDb();
-    json(res, 200, { ok: true, uid: p.uid, status: p.status });
   },
 
   'GET /api/admin/invites': async (req, res) => {

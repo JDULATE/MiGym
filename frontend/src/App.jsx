@@ -14,8 +14,6 @@ import GiwiOnboarding from './giwi/GiwiOnboarding.jsx'
 import GiwiTutorial from './giwi/tutorial/Tutorial.jsx'
 import { getTutorial, resetTutorial } from './giwi/flags.js'
 import NotFound from './views/NotFound.jsx'
-import Coaches from './views/Coaches.jsx'
-import CoachEdit from './views/CoachEdit.jsx'
 import { startFlow } from './sheets.jsx'
 import TabBar from './components/TabBar.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
@@ -66,19 +64,6 @@ function Shell() {
     return () => window.removeEventListener('migym:start-tutorial', open)
   }, [])
 
-  // Coach marketplace: anonymous visitors get the standalone public page (no tab bar,
-  // no onboarding). Signed-in users get the in-app hub with the tab bar below.
-  if (loc.pathname === '/coaches' && !user) {
-    return (
-      <>
-        <div id="app" key={loc.pathname}>
-          <ErrorBoundary><Coaches /></ErrorBoundary>
-        </div>
-        <Toast />
-      </>
-    )
-  }
-
   if (!onboardingDone) {
     return <GiwiOnboarding onDone={() => {
       completeOnboarding()
@@ -103,8 +88,6 @@ function Shell() {
             <Route path="/history" element={<History />} />
             <Route path="/library" element={<Navigate to="/plan?tab=exercises" replace />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/coach" element={<Navigate to="/coaches?tab=profile" replace />} />
-            <Route path="/coaches" element={<Coaches />} />
             <Route path="/admin" element={user?.admin ? <Admin /> : <Navigate to="/home" replace />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
