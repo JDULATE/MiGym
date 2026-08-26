@@ -106,25 +106,33 @@ export default function SupplementsSection() {
           accessory="chevron" onClick={askNotify} />
       )}
       <Row icon="plus" iconTint="var(--acc)" title={t('Add supplement')}
-        onClick={() => openSheet(close => (
-          <div>
-            <h3>{t('Add supplement')}</h3>
-            <div className="list">
-              {SUPP_PRESETS.map((pr, i) => (
-                <div key={i} className="item" onClick={() => { close(); addNew(pr) }}>
-                  <div className="grow">
-                    <div className="tt">{kindLabel(pr.kind)}</div>
-                    <div className="ss">{pr.dose}</div>
+        onClick={() => {
+          try {
+            console.log('[supp] opening chooser')
+            openSheet(close => (
+              <div>
+                <h3>{t('Add supplement')}</h3>
+                <div className="list">
+                  {SUPP_PRESETS.map((pr, i) => (
+                    <div key={i} className="item" onClick={() => { close(); addNew(pr) }}>
+                      <div className="grow">
+                        <div className="tt">{kindLabel(pr.kind)}</div>
+                        <div className="ss">{pr.dose}</div>
+                      </div>
+                      <Icon name="chevronRight" className="chev" />
+                    </div>
+                  ))}
+                  <div className="item" onClick={() => { close(); addNew(null) }}>
+                    <div className="grow"><div className="tt">{t('Custom…')}</div></div>
+                    <Icon name="chevronRight" className="chev" />
                   </div>
-                  <Icon name="chevronRight" className="chev" />
                 </div>
-              ))}
-              <div className="item" onClick={() => { close(); addNew(null) }}>
-                <div className="grow"><div className="tt">{t('Custom…')}</div></div>
-                <Icon name="chevronRight" className="chev" />
-              </div>
-            </div>
-          </div>))} />
+              </div>))
+          } catch (err) {
+            console.error('[supp]', err)
+            useUI.getState().toast('ERR: ' + err.message)
+          }
+        }} />
     </Section>
   )
 }
