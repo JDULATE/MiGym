@@ -879,4 +879,6 @@ export default {
   "Creatine": "肌酸",
   "Amino acids": "氨基酸",
   "Other": "其他",
+  "Do you take any supplements?": "你服用补剂吗？",
+  "None for now": "暂时不用",
 }

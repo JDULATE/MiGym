@@ -879,4 +879,6 @@ export default {
   "Creatine": "Креатин",
   "Amino acids": "Аминокислоты",
   "Other": "Другое",
+  "Do you take any supplements?": "Принимаешь добавки?",
+  "None for now": "Пока никакие",
 }

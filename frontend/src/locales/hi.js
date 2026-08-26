@@ -879,4 +879,6 @@ export default {
   "Creatine": "क्रिएटिन",
   "Amino acids": "अमीनो एसिड",
   "Other": "अन्य",
+  "Do you take any supplements?": "क्या आप सप्लीमेंट लेते हैं?",
+  "None for now": "अभी कोई नहीं",
 }

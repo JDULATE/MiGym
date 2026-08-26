@@ -10,19 +10,39 @@ import Icon from '../components/Icon.jsx'
 import { Button } from '../components/ui.jsx'
 import { glyphOf } from '../lib/glyphs.js'
 import { items as suppItems, pendingItems as suppPending, markTaken as suppMark } from '../lib/supplements.js'
+import { SuppAddChooser, SuppManageList } from './SupplementsSection.jsx'
+import { useUI } from '../store/useUI.js'
 
-/* Supplements for today — a glance checklist; tap a row to log the dose. */
+/* Supplements for today — a glance checklist; tap a row to log the dose.
+   Empty → CTA. Manage/edit via the pencil (opens the manager sheet). */
 function SuppTodayCard() {
   const S = useStore(s => s.S)
   const update = useStore(s => s.update)
+  const openSheet = useUI(s => s.openSheet)
   const all = suppItems(S)
-  if (!all.length) return null
+  if (!all.length) return (
+    <div className="card">
+      <div className="row between" style={{ marginBottom: 4 }}>
+        <h2 style={{ margin: 0 }}>{t('Supplements')}</h2>
+      </div>
+      <div className="muted small" style={{ marginBottom: 10 }}>
+        {t('Creatine, protein, pre-workout… track what you take and get reminders.')}
+      </div>
+      <Button icon="plus" onClick={() => openSheet(close => <SuppAddChooser close={close} />)}>
+        {t('Add supplement')}
+      </Button>
+    </div>
+  )
   const due = suppPending(S)
   const doneCount = due.length === 0 ? all.length : all.length - due.length
   return <div className="card">
     <div className="row between" style={{ marginBottom: 6 }}>
       <h2 style={{ margin: 0 }}>{t('Supplements')}</h2>
-      <span className={'tag' + (due.length ? '' : ' acc')}>{doneCount}/{all.length}</span>
+      <span className="row" style={{ gap: 8 }}>
+        <button className="iconbtn pressable" onClick={() => openSheet(close => <SuppManageList close={close} />)}
+          aria-label={t('Edit')}><Icon name="pencil" size={15} /></button>
+        <span className={'tag' + (due.length ? '' : ' acc')}>{doneCount}/{all.length}</span>
+      </span>
     </div>
     {due.length === 0 && <div className="small" style={{ color: 'var(--green)' }}>{t('All supplements logged — nice')}</div>}
     {due.map(it => (
@@ -32,7 +52,7 @@ function SuppTodayCard() {
           <Icon name="bolt" size={15} style={{ color: 'var(--acc)' }} />
           <div style={{ minWidth: 0 }}>
             <div style={{ fontWeight: 600, fontSize: '.9rem', textTransform: 'capitalize' }}>
-              {it.name || t(it.kind.charAt(0).toUpperCase() + it.kind.slice(1))}
+              {it.name || it.kind}
             </div>
             {it.dose && <div className="dim small">{it.dose}</div>}
           </div>

@@ -11,7 +11,16 @@ import { DIALOGUE } from './dialogue.js'
 import { completeOnboarding } from './flags.js'
 import { Button, TextField, Check } from './../components/ui.jsx'
 
-const STEPS = ['language', 'welcome', 'name', 'age', 'weight', 'height', 'goal', 'experience', 'days', 'confirm']
+const STEPS = ['language', 'welcome', 'name', 'age', 'weight', 'height', 'goal', 'experience', 'days', 'supps', 'confirm']
+
+// Presets applied per selected kind when the profile commits (lib/supplements.js).
+const SUPP_ONBOARD_PRESET = {
+  creatine: { sched: 'daily', dose: '5 g', time: '09:00' },
+  protein: { sched: 'training', dose: '1 scoop' },
+  preworkout: { sched: 'training', dose: '1 dosis' },
+  amino: { sched: 'training', dose: '1 scoop' },
+}
+const SUPP_KINDS_LIST = ['creatine', 'protein', 'preworkout', 'amino']
 
 export default function GiwiOnboarding({ onDone }) {
   const S = useStore(s => s.S)
@@ -19,7 +28,7 @@ export default function GiwiOnboarding({ onDone }) {
   const [step, setStep] = useState(0)
   const [draft, setDraft] = useState({
     name: '', ageYears: '', weight: '', heightCm: '', goal: '', goals: [],
-    experience: '', daysPerWeek: '',
+    experience: '', daysPerWeek: '', suppsKinds: [],
   })
   const set = patch => setDraft(d => ({ ...d, ...patch }))
   const next = () => setStep(i => Math.min(i + 1, STEPS.length))
@@ -39,6 +48,17 @@ export default function GiwiOnboarding({ onDone }) {
       })
       s.bodyweight = [...(s.bodyweight || []), { d: todayISO(), w: Number(draft.weight) }]
       s.lang = draft.lang || s.lang
+      // supplements chosen during onboarding become real items with sensible presets
+      if (!s.supps) s.supps = { items: [] }
+      for (const kind of draft.suppsKinds) {
+        const preset = SUPP_ONBOARD_PRESET[kind] || {}
+        s.supps.items.push({
+          id: 'u' + Date.now().toString(36) + kind.slice(0, 2),
+          name: t(kind.charAt(0).toUpperCase() + kind.slice(1)),
+          kind, dose: preset.dose || '', sched: preset.sched || 'daily',
+          days: [], time: preset.time || '', log: {},
+        })
+      }
     })
     completeOnboarding()
     setStep(STEPS.length)
@@ -198,8 +218,29 @@ export default function GiwiOnboarding({ onDone }) {
           <div style={{ marginTop: 10 }}><Button onClick={back}>{t('Back')}</Button></div>
         </>}
 
-        {/* ---- confirm ---- */}
+        {/* ---- supplements (optional multi-select) ---- */}
         {step === 9 && <>
+          {bubble('askSupps')}
+          <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>
+            {SUPP_KINDS_LIST.map(kind => (
+              <Button key={kind} variant={draft.suppsKinds.includes(kind) ? 'primary' : 'plain'}
+                onClick={() => {
+                  const suppsKinds = draft.suppsKinds.includes(kind)
+                    ? draft.suppsKinds.filter(x => x !== kind)
+                    : [...draft.suppsKinds, kind]
+                  set({ suppsKinds })
+                }}>{t(kind.charAt(0).toUpperCase() + kind.slice(1))}</Button>
+            ))}
+            <Button variant={draft.suppsKinds.length === 0 ? 'primary' : 'plain'}
+              onClick={() => { set({ suppsKinds: [] }); next() }}>
+              {t('None for now')}
+            </Button>
+          </div>
+          <div style={{ marginTop: 10 }}><Button onClick={back}>{t('Back')}</Button></div>
+        </>}
+
+        {/* ---- confirm ---- */}
+        {step === 10 && <>
           {bubble('perfectLine')}
           <div className="card small" style={{ textAlign: 'left', margin: '10px 0' }}>
             <div><b>{draft.name}</b></div>
@@ -211,6 +252,11 @@ export default function GiwiOnboarding({ onDone }) {
             </div>
             {draft.experience && <div className="dim">{t(EXPERIENCE_LABEL[draft.experience])}</div>}
             {draft.daysPerWeek && <div className="dim">{t('{0} days/week', draft.daysPerWeek)}</div>}
+            {!!draft.suppsKinds.length && (
+              <div className="dim">
+                {t('Supplements')}: {draft.suppsKinds.map(k => t(k.charAt(0).toUpperCase() + k.slice(1))).join(' · ')}
+              </div>
+            )}
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <Button onClick={back}>{t('Back')}</Button>

@@ -896,4 +896,6 @@ export default {
   "Creatine": "Kreatin",
   "Amino acids": "Aminosäuren",
   "Other": "Andere",
+  "Do you take any supplements?": "Nimmst du Supplemente?",
+  "None for now": "Vorerst keiner",
 }

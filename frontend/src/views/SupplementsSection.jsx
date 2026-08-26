@@ -1,13 +1,13 @@
-// Supplements settings section (local-first). List + add/edit/delete; reminder
-// permission lives here too. All mutations via lib/supplements.js helpers.
+// Supplement sheets — edit form + add-chooser, reusable from Home (and anywhere).
+// Mutations go through lib/supplements.js helpers (store persist/sync path).
 import { useState } from 'react'
 import { useStore } from '../store/useStore.js'
 import { useUI } from '../store/useUI.js'
 import { t } from '../lib/i18n.js'
 import { DAYN } from '../lib/format.js'
 import Icon from '../components/Icon.jsx'
-import { Section, Row, Button, TextField, SelectRow } from '../components/ui.jsx'
-import { items as suppItems, SUPP_KINDS, SUPP_PRESETS, patchItem, addItem, removeItem } from '../lib/supplements.js'
+import { Button, TextField, SelectRow } from '../components/ui.jsx'
+import { SUPP_KINDS, SUPP_PRESETS, patchItem, addItem, removeItem } from '../lib/supplements.js'
 
 const KIND_OPTS = SUPP_KINDS.map(k => ({ value: k.v, label: t(k.label) }))
 const SCHED_OPTS = [
@@ -16,10 +16,11 @@ const SCHED_OPTS = [
   { value: 'rest', label: 'Rest days' },
   { value: 'days', label: 'Custom days' },
 ]
-const kindLabel = v => t((SUPP_KINDS.find(k => k.v === v) || { label: v }).label)
-const schedLabel = v => t((SCHED_OPTS.find(o => o.value === (v || 'daily')) || {}).label || 'Daily')
+export const kindLabel = v => t((SUPP_KINDS.find(k => k.v === v) || { label: v }).label)
+export const schedLabel = v => t((SCHED_OPTS.find(o => o.value === (v || 'daily')) || {}).label || 'Daily')
 
-function SuppEditSheet({ close, item, initial }) {
+/* Edit an existing item (`item`) or create a new one (item=null, values from `initial`). */
+export function SuppEditSheet({ close, item, initial }) {
   const update = useStore(s => s.update)
   const toast = useUI(s => s.toast)
   const [f, setF] = useState(() => item || {
@@ -72,67 +73,66 @@ function SuppEditSheet({ close, item, initial }) {
   </>
 }
 
-export default function SupplementsSection() {
-  const S = useStore(s => s.S)
-  const update = useStore(s => s.update)
-  const openSheet = useUI(s => s.openSheet)
-  const all = suppItems(S)
-
-  const addNew = preset => openSheet(close =>
-    // no `item` → treated as NEW: Save runs addItem (the id-less path)
-    <SuppEditSheet close={close} item={null} initial={preset ? { ...preset, name: kindLabel(pr0Kind(preset)) } : null} />)
-
-  const pr0Kind = preset => preset?.kind || 'other'
-
-  const askNotify = async () => {
-    try { await Notification.requestPermission(); useUI.getState().toast(t('Reminders enabled')) } catch { /* denied */ }
-  }
-
+/* Preset chooser shown by the Home card's add button. */
+export function SuppAddChooser({ close }) {
   return (
-    <Section title={t('Supplements')}
-      footer={t('Daily checklist on Home. Pre-workout asks before a session; protein after it.')}>
-      {all.map(it => (
-        <Row key={it.id}
-          icon={(SUPP_KINDS.find(k => k.v === it.kind) || {}).icon || 'heart'}
-          iconTint="var(--acc)"
-          title={it.name || kindLabel(it.kind)}
-          subtitle={[it.dose, schedLabel(it.sched)].filter(Boolean).join(' · ')}
-          accessory="chevron"
-          onClick={() => openSheet(close => <SuppEditSheet close={close} item={it} />)} />
-      ))}
-      {'Notification' in window && Notification.permission === 'default' && (
-        <Row icon="bell" iconTint="var(--yellow)" title={t('Enable reminders')}
-          subtitle={t('Browser notification when a dose is due')}
-          accessory="chevron" onClick={askNotify} />
-      )}
-      <Row icon="plus" iconTint="var(--acc)" title={t('Add supplement')}
-        onClick={() => {
-          try {
-            console.log('[supp] opening chooser')
-            openSheet(close => (
-              <div>
-                <h3>{t('Add supplement')}</h3>
-                <div className="list">
-                  {SUPP_PRESETS.map((pr, i) => (
-                    <div key={i} className="item" onClick={() => { close(); addNew(pr) }}>
-                      <div className="grow">
-                        <div className="tt">{kindLabel(pr.kind)}</div>
-                        <div className="ss">{pr.dose}</div>
-                      </div>
-                      <Icon name="chevronRight" className="chev" />
-                    </div>
-                  ))}
-                  <div className="item" onClick={() => { close(); addNew(null) }}>
-                    <div className="grow"><div className="tt">{t('Custom…')}</div></div>
-                    <Icon name="chevronRight" className="chev" />
-                  </div>
-                </div>
-              </div>))
-          } catch (err) {
-            console.error('[supp]', err)
-            useUI.getState().toast('ERR: ' + err.message)
-          }
-        }} />
-    </Section>
+    <div>
+      <h3>{t('Add supplement')}</h3>
+      <div className="list">
+        {SUPP_PRESETS.map((pr, i) => (
+          <div key={i} className="item"
+            onClick={() => {
+              close()
+              // open the editor prefilled; Save creates it (id-less path)
+              useUI.getState().openSheet(cl =>
+                <SuppEditSheet close={cl} item={null}
+                  initial={{ ...pr, name: kindLabel(pr.kind) }} />)
+            }}>
+              <div className="grow">
+                <div className="tt">{kindLabel(pr.kind)}</div>
+                <div className="ss">{pr.dose}</div>
+              </div>
+              <Icon name="chevronRight" className="chev" />
+            </div>
+        ))}
+        <div className="item" onClick={() => {
+          close()
+          useUI.getState().openSheet(cl => <SuppEditSheet close={cl} item={null} />)
+        }}>
+          <div className="grow"><div className="tt">{t('Custom…')}</div></div>
+          <Icon name="chevronRight" className="chev" />
+        </div>
+      </div>
+    </div>
   )
 }
+
+/* Full manager list (edit/delete existing + add). */
+export function SuppManageList() {
+  const S = useStore(s => s.S)
+  const update = useStore(s => s.update)
+  const all = suppItemsSafe(S)
+  return (
+    <div>
+      <h3>{t('Supplements')}</h3>
+      <div className="list">
+        {all.map(it => (
+          <div key={it.id} className="item"
+            onClick={() => useUI.getState().openSheet(cl => <SuppEditSheet close={cl} item={it} />)}>
+            <div className="grow">
+              <div className="tt capitalize">{it.name || kindLabel(it.kind)}</div>
+              <div className="ss">{[it.dose, schedLabel(it.sched)].filter(Boolean).join(' · ')}</div>
+            </div>
+            <Icon name="chevronRight" className="chev" />
+          </div>
+        ))}
+        {!all.length && <div className="muted small">{t('No supplements yet — add one below.')}</div>}
+      </div>
+      <div style={{ height: 10 }} />
+      <Button icon="plus" onClick={() => useUI.getState().openSheet(cl => <SuppAddChooser close={cl} />)}>
+        {t('Add supplement')}
+      </Button>
+    </div>
+  )
+}
+function suppItemsSafe(S) { return (S.supps && Array.isArray(S.supps.items)) ? S.supps.items : [] }

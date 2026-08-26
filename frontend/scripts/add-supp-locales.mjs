@@ -105,6 +105,17 @@ const T = {
     es: 'Personalizado…', pt: 'Personalizado…', fr: 'Personnalisé…', de: 'Benutzerdefiniert…', it: 'Personalizzato…',
     ru: 'Своё…', tr: 'Özel…', pl: 'Własny…', ko: '직접 입력…', zh: '自定义…', hi: 'कस्टम…',
   },
+  'Do you take any supplements?': {
+    es: '¿Tomas algún suplemento?', pt: 'Você toma algum suplemento?', fr: 'Prends-tu des compléments ?',
+    de: 'Nimmst du Supplemente?', it: 'Prendi degli integratori?', ru: 'Принимаешь добавки?',
+    tr: 'Takviye alıyor musun?', pl: 'Czy bierzesz suplementy?', ko: '보충제를 드시나요?',
+    zh: '你服用补剂吗？', hi: 'क्या आप सप्लीमेंट लेते हैं?',
+  },
+  'None for now': {
+    es: 'Ninguno por ahora', pt: 'Nenhum por agora', fr: 'Aucun pour le moment', de: 'Vorerst keiner',
+    it: 'Nessuno per ora', ru: 'Пока никакие', tr: 'Şimdilik hayır', pl: 'Na razie żadne',
+    ko: '지금은 없음', zh: '暂时不用', hi: 'अभी कोई नहीं',
+  },
   'Supplements for today': {
     es: 'Suplementos de hoy', pt: 'Suplementos de hoje', fr: 'Compléments du jour', de: 'Supplemente für heute',
     it: 'Integratori di oggi', ru: 'Добавки на сегодня', tr: 'Bugünün takviyeleri', pl: 'Suplementy na dziś',

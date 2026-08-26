@@ -879,4 +879,6 @@ export default {
   "Creatine": "Kreatin",
   "Amino acids": "Aminoasitler",
   "Other": "Diğer",
+  "Do you take any supplements?": "Takviye alıyor musun?",
+  "None for now": "Şimdilik hayır",
 }

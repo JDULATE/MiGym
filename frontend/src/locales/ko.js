@@ -879,4 +879,6 @@ export default {
   "Creatine": "크레아틴",
   "Amino acids": "아미노산",
   "Other": "기타",
+  "Do you take any supplements?": "보충제를 드시나요?",
+  "None for now": "지금은 없음",
 }
