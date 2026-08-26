@@ -7,6 +7,7 @@ import { useStore } from '../store/useStore.js'
 import { normalizeProfile, GOALS, GOAL_LABEL, EXPERIENCE, EXPERIENCE_LABEL } from '../lib/profile.js'
 import { todayISO, fmtNum } from '../lib/format.js'
 import { t, LANGS, setLang } from '../lib/i18n.js'
+import Icon from '../components/Icon.jsx'
 import Giwi from './Giwi.jsx'
 import { DIALOGUE } from './dialogue.js'
 import { completeOnboarding } from './flags.js'
@@ -111,7 +112,9 @@ export default function GiwiOnboarding({ onDone }) {
       <div className="ob-top">
         <button className="ob-back" onClick={back}
           style={{ visibility: step > 0 && step < STEPS.length ? 'visible' : 'hidden' }}>
-          ← {t('Back')}
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+            <Icon name="chevronLeft" size={14} /> {t('Back')}
+          </span>
         </button>
         <button className="ob-skip" onClick={skipAll}
           style={{ visibility: step < STEPS.length ? 'visible' : 'hidden' }}>
@@ -144,7 +147,11 @@ export default function GiwiOnboarding({ onDone }) {
         <h2 className="ob-done-title">{t('Welcome to MiGym')}</h2>
         <p className="ob-hint">{t(DIALOGUE.welcomeLine)}</p>
         <div className="ob-nav">
-          <button className="ob-primary pressable" onClick={next}>{t(DIALOGUE.start)} ✨</button>
+          <button className="ob-primary pressable" onClick={next}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              {t(DIALOGUE.start)} <Icon name="sparkles" size={16} />
+            </span>
+          </button>
         </div>
       </>}
 
@@ -201,7 +208,7 @@ export default function GiwiOnboarding({ onDone }) {
 
       {/* goals */}
       {step === 6 && <>
-        {questionNode('✨', t(DIALOGUE.askGoalMulti))}
+        {questionNode(<Icon name="target" size={26} />, t(DIALOGUE.askGoalMulti))}
         <div className="ob-body">
           <div className="ob-chips">
             {GOALS.map(g => (
@@ -274,7 +281,7 @@ export default function GiwiOnboarding({ onDone }) {
 
       {/* confirm */}
       {step === 10 && <>
-        {questionNode('📋', t(DIALOGUE.perfectLine))}
+        {questionNode(<Icon name="clipboard" size={26} />, t(DIALOGUE.perfectLine))}
         <div className="ob-body">
           <div className="ob-summary">
             <b>{draft.name}</b><br />
@@ -284,8 +291,9 @@ export default function GiwiOnboarding({ onDone }) {
             <span className="dim">{draft.goals.map(g => t(GOAL_LABEL[g])).join(' · ')}</span><br />
             <span className="dim">{t(EXPERIENCE_LABEL[draft.experience])} · {t('{0} days/week', draft.daysPerWeek)}</span>
             {!!draft.suppsKinds.length && (
-              <span className="dim">
-                💊 {draft.suppsKinds.map(k =>
+              <span className="dim" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <Icon name="heart" size={12} />
+                {draft.suppsKinds.map(k =>
                   k === 'other' && draft.suppsCustom.trim() ? draft.suppsCustom.trim() : SUPP_LABEL(k)
                 ).join(' · ')}
               </span>
