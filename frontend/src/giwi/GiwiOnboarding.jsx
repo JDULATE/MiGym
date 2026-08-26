@@ -1,19 +1,19 @@
-// Giwi first-launch onboarding (docs/ONBOARDING.md).
-// Language first (comfort), then friendly questions, multi-select goals.
-// Every step has its action button INSIDE the bubble. Commits atomically at confirm.
+// Giwi first-launch onboarding — V2 cinematic scene.
+// One question per screen over a fixed navy canvas: display-type question, chip answers,
+// giant inputs, thin progress. Logic identical to the original flow (incl. supplements
+// step that seeds real items on commit). q()/nav() are render helpers, NOT components.
 import { useState } from 'react'
 import { useStore } from '../store/useStore.js'
 import { normalizeProfile, GOALS, GOAL_LABEL, EXPERIENCE, EXPERIENCE_LABEL } from '../lib/profile.js'
 import { todayISO, fmtNum } from '../lib/format.js'
-import { t, LANGS, setLang, getLang, dateLocale } from '../lib/i18n.js'
+import { t, LANGS, setLang } from '../lib/i18n.js'
 import Giwi from './Giwi.jsx'
 import { DIALOGUE } from './dialogue.js'
 import { completeOnboarding } from './flags.js'
-import { Button, TextField, Check } from './../components/ui.jsx'
+import './onboarding.css'
 
 const STEPS = ['language', 'welcome', 'name', 'age', 'weight', 'height', 'goal', 'experience', 'days', 'supps', 'confirm']
 
-// Presets applied per selected kind when the profile commits (lib/supplements.js).
 const SUPP_ONBOARD_PRESET = {
   creatine: { sched: 'daily', dose: '5 g', time: '09:00' },
   protein: { sched: 'training', dose: '1 scoop' },
@@ -21,6 +21,7 @@ const SUPP_ONBOARD_PRESET = {
   amino: { sched: 'training', dose: '1 scoop' },
 }
 const SUPP_KINDS_LIST = ['creatine', 'protein', 'preworkout', 'amino', 'other']
+const SUPP_LABEL = k => t(k.charAt(0).toUpperCase() + k.slice(1))
 
 export default function GiwiOnboarding({ onDone }) {
   const S = useStore(s => s.S)
@@ -48,7 +49,6 @@ export default function GiwiOnboarding({ onDone }) {
       })
       s.bodyweight = [...(s.bodyweight || []), { d: todayISO(), w: Number(draft.weight) }]
       s.lang = draft.lang || s.lang
-      // supplements chosen during onboarding become real items with sensible presets
       if (!s.supps) s.supps = { items: [] }
       let n = 0
       for (const kind of draft.suppsKinds) {
@@ -57,9 +57,7 @@ export default function GiwiOnboarding({ onDone }) {
         const preset = SUPP_ONBOARD_PRESET[kind] || {}
         s.supps.items.push({
           id: 'u' + Date.now().toString(36) + n,
-          name: custom
-            ? (draft.suppsCustom.trim() || 'Supplement')
-            : t(kind.charAt(0).toUpperCase() + kind.slice(1)),
+          name: custom ? (draft.suppsCustom.trim() || 'Supplement') : SUPP_LABEL(kind),
           kind: custom ? 'other' : kind,
           dose: preset.dose || '', sched: preset.sched || 'daily',
           days: [], time: preset.time || '', log: {},
@@ -71,231 +69,241 @@ export default function GiwiOnboarding({ onDone }) {
   }
 
   const skipAll = () => { completeOnboarding(); onDone?.() }
-  const bubble = (key, args) => <p className="giwi-line" style={{ fontSize: 16, lineHeight: 1.5, marginBottom: 4 }}>{t(DIALOGUE[key], ...(args || []))}</p>
 
   const valid = [
-    true,                                                                                     // language
-    true,                                                                                     // welcome
-    !!draft.name.trim(),                                                                      // name
-    Number(draft.ageYears) >= 10 && Number(draft.ageYears) <= 100,                            // age
-    Number(draft.weight) > 0,                                                                 // weight
-    Number(draft.heightCm) >= 50,                                                             // height
-    draft.goals.length > 0,                                                                   // goal
-    !!draft.experience,                                                                       // experience
-    Number(draft.daysPerWeek) >= 1,                                                           // days
-    true,                                                                                     // confirm
+    true, true,
+    !!draft.name.trim(),
+    Number(draft.ageYears) >= 10 && Number(draft.ageYears) <= 100,
+    Number(draft.weight) > 0,
+    Number(draft.heightCm) >= 50,
+    draft.goals.length > 0,
+    !!draft.experience,
+    Number(draft.daysPerWeek) >= 1,
+    draft.suppsKinds.includes('other') ? !!draft.suppsCustom.trim() : true,
+    true,
   ]
-
   const canNext = valid[step]
+  const giwiState = step >= STEPS.length ? 'celebrate'
+    : ['name', 'age', 'weight'].includes(STEPS[step]) ? 'thinking'
+    : STEPS[step] === 'language' || STEPS[step] === 'welcome' ? 'welcome'
+    : STEPS[step] === 'supps' ? 'point'
+    : step === STEPS.indexOf('confirm') ? 'happy'
+    : 'encourage'
+
+  // render helpers (plain functions returning JSX — never used as components)
+  const giwiNode = size => <div className="ob-giwi"><Giwi state={giwiState} size={size} /></div>
+  const questionNode = (text, hint) => (<>
+    <div className="ob-giwi"><Giwi state={giwiState} size={128} /></div>
+    <h2 className="ob-q">{text}</h2>
+    {hint && <div className="ob-hint">{hint}</div>}
+  </>)
+  const navNode = (onNext, nextLabel) => (
+    <div className="ob-nav">
+      <button className="ob-backbtn pressable" onClick={back}>{t('Back')}</button>
+      <button className="ob-primary pressable" disabled={!canNext} onClick={onNext || next}>
+        {nextLabel || t('Continue')}
+      </button>
+    </div>
+  )
 
   return (
-    <div className="narrow giwi-screen" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column',
-      justifyContent: 'center', alignItems: 'center', padding: '20px 16px calc(20px + var(--sab))' }}>
+    <div className="ob">
+      <div className="ob-top">
+        <button className="ob-back" onClick={back}
+          style={{ visibility: step > 0 && step < STEPS.length ? 'visible' : 'hidden' }}>
+          ← {t('Back')}
+        </button>
+        <button className="ob-skip" onClick={skipAll}
+          style={{ visibility: step < STEPS.length ? 'visible' : 'hidden' }}>
+          {t(DIALOGUE.skip)}
+        </button>
+      </div>
+      <div className="ob-progress"><i style={{ width: `${(step / (STEPS.length - 1)) * 100}%` }} /></div>
 
-      <Giwi state={step >= STEPS.length ? 'celebrate'
-        : [STEPS.indexOf('name'), STEPS.indexOf('age'), STEPS.indexOf('weight')].includes(step) ? 'thinking'
-        : step === STEPS.length - 1 ? 'happy'
-        : step === 0 ? 'welcome'
-        : 'encourage'} size={100} />
-
-      <div className="giwi-bubble" style={{ margin: '12px auto 0', position: 'relative', width: '100%', maxWidth: 380 }}>
-        {/* ---- language (always first — comfort before anything else) ---- */}
-        {step === 0 && <>
-          {bubble('askLang')}
-          <div style={{ display: 'grid', gap: 4, marginTop: 8 }}>
+      {/* language */}
+      {step === 0 && <>
+        {giwiNode(132)}
+        <h2 className="ob-q">{t(DIALOGUE.askLang)}</h2>
+        <div className="ob-body">
+          <div className="ob-chips">
             {Object.entries(LANGS).map(([code, name]) => (
-              <Button key={code} variant={draft.lang === code ? 'primary' : 'plain'}
-                onClick={() => { set({ lang: code }); setLang(code) }}>
-                {name}
-              </Button>
+              <button key={code} className={'ob-chip' + (draft.lang === code ? ' on' : '')}
+                onClick={() => { set({ lang: code }); setLang(code) }}>{name}</button>
             ))}
           </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
-            <Button variant="primary" disabled={!draft.lang} onClick={next}>{t(DIALOGUE.start)}</Button>
-            <button className="btn ghost dim" onClick={skipAll}>{t(DIALOGUE.skip)}</button>
-          </div>
-        </>}
+        </div>
+        <div className="ob-nav">
+          <button className="ob-backbtn" onClick={skipAll}>{t(DIALOGUE.skip)}</button>
+          <button className="ob-primary pressable" disabled={!draft.lang} onClick={next}>{t(DIALOGUE.start)}</button>
+        </div>
+      </>}
 
-        {/* ---- welcome (after language, in their language now) ---- */}
-        {step === 1 && <>
-          <h2 className="t-h1">{t('Welcome to MiGym')}</h2>
-          {bubble('welcomeLine')}
-          <div style={{ marginTop: 14, display: 'flex', gap: 8 }}>
-            <Button variant="primary" icon="sparkles" onClick={next}>{t(DIALOGUE.start)}</Button>
-            <button className="btn ghost dim" onClick={skipAll}>{t(DIALOGUE.skip)}</button>
-          </div>
-        </>}
+      {/* welcome */}
+      {step === 1 && <>
+        {giwiNode(140)}
+        <h2 className="ob-done-title">{t('Welcome to MiGym')}</h2>
+        <p className="ob-hint">{t(DIALOGUE.welcomeLine)}</p>
+        <div className="ob-nav">
+          <button className="ob-primary pressable" onClick={next}>{t(DIALOGUE.start)} ✨</button>
+        </div>
+      </>}
 
-        {/* ---- name ---- */}
-        {step === 2 && <>
-          {bubble('askName')}
-          <TextField aria-label={t(DIALOGUE.yourName)} placeholder={t(DIALOGUE.yourName)}
-            value={draft.name} maxLength={60} autoFocus
+      {/* name */}
+      {step === 2 && <>
+        {questionNode(t(DIALOGUE.askName), draft.name.trim() ? t('niceToMeet', draft.name.trim()) : null)}
+        <div className="ob-body">
+          <input className="ob-input" value={draft.name} maxLength={60} autoFocus
             onChange={e => set({ name: e.target.value })}
-            onKeyDown={e => { if (e.key === 'Enter' && valid[2]) next() }} />
-          {draft.name.trim() && <div className="small dim" style={{ marginTop: 6 }}>{t('niceToMeet', draft.name.trim())}</div>}
-          <div style={{ display: 'flex', gap: 8, marginTop: 12, alignItems: 'center' }}>
-            <Button onClick={back}>{t('Back')}</Button>
-            <Button variant="primary" disabled={!canNext} onClick={next}>{t('Continue')}</Button>
-          </div>
-        </>}
+            onKeyDown={e => { if (e.key === 'Enter' && canNext) next() }} />
+        </div>
+        {navNode(next)}
+      </>}
 
-        {/* ---- age ---- */}
-        {step === 3 && <>
-          {bubble('askAge')}
-          <TextField inputMode="numeric" aria-label={t(DIALOGUE.age)} placeholder="30" autoFocus
+      {/* age */}
+      {step === 3 && <>
+        {questionNode(t(DIALOGUE.askAge))}
+        <div className="ob-body">
+          <input className="ob-input" inputMode="numeric" placeholder="30" autoFocus
             value={String(draft.ageYears ?? '')}
             onChange={e => set({ ageYears: e.target.value.replace(/[^0-9]/g, '') })}
-            onKeyDown={e => { if (e.key === 'Enter' && valid[3]) next() }} />
-          <div style={{ display: 'flex', gap: 8, marginTop: 12, alignItems: 'center' }}>
-            <Button onClick={back}>{t('Back')}</Button>
-            <Button variant="primary" disabled={!canNext} onClick={next}>{t('Continue')}</Button>
-          </div>
-        </>}
+            onKeyDown={e => { if (e.key === 'Enter' && canNext) next() }} />
+          <div className="ob-unit">{t(DIALOGUE.age)}</div>
+        </div>
+        {navNode(next)}
+      </>}
 
-        {/* ---- weight ---- */}
-        {step === 4 && <>
-          {bubble('askWeight')}
-          <TextField inputMode="decimal" aria-label={t(DIALOGUE.currentWeight)}
-            placeholder={S.unit === 'lb' ? '180' : '80'} autoFocus
+      {/* weight */}
+      {step === 4 && <>
+        {questionNode(t(DIALOGUE.askWeight))}
+        <div className="ob-body">
+          <input className="ob-input" inputMode="decimal" autoFocus
+            placeholder={S.unit === 'lb' ? '180' : '80'}
             value={String(draft.weight ?? '')}
             onChange={e => set({ weight: e.target.value.replace(',', '.') })}
-            onKeyDown={e => { if (e.key === 'Enter' && valid[4]) next() }} />
-          <div className="dim small" style={{ marginTop: 4 }}>{S.unit}</div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 12, alignItems: 'center' }}>
-            <Button onClick={back}>{t('Back')}</Button>
-            <Button variant="primary" disabled={!canNext} onClick={next}>{t('Continue')}</Button>
-          </div>
-        </>}
+            onKeyDown={e => { if (e.key === 'Enter' && canNext) next() }} />
+          <div className="ob-unit">{S.unit}</div>
+        </div>
+        {navNode(next)}
+      </>}
 
-        {/* ---- height ---- */}
-        {step === 5 && <>
-          {bubble('askHeight')}
-          <TextField inputMode="decimal" aria-label={t(DIALOGUE.height)} placeholder="176" autoFocus
+      {/* height */}
+      {step === 5 && <>
+        {questionNode(t(DIALOGUE.askHeight))}
+        <div className="ob-body">
+          <input className="ob-input" inputMode="decimal" placeholder="176" autoFocus
             value={String(draft.heightCm ?? '')}
             onChange={e => set({ heightCm: e.target.value.replace(/[^0-9.]/g, '') })}
-            onKeyDown={e => { if (e.key === 'Enter' && valid[5]) next() }} />
-          <div className="dim small" style={{ marginTop: 4 }}>cm</div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 12, alignItems: 'center' }}>
-            <Button onClick={back}>{t('Back')}</Button>
-            <Button variant="primary" disabled={!canNext} onClick={next}>{t('Continue')}</Button>
-          </div>
-        </>}
+            onKeyDown={e => { if (e.key === 'Enter' && canNext) next() }} />
+          <div className="ob-unit">cm</div>
+        </div>
+        {navNode(next)}
+      </>}
 
-        {/* ---- goal (multi-select) ---- */}
-        {step === 6 && <>
-          {bubble('askGoalMulti')}
-          <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>
+      {/* goals */}
+      {step === 6 && <>
+        {questionNode('✨', t(DIALOGUE.askGoalMulti))}
+        <div className="ob-body">
+          <div className="ob-chips">
             {GOALS.map(g => (
-              <Button key={g} variant={draft.goals.includes(g) ? 'primary' : 'plain'}
-                onClick={() => {
-                  const goals = draft.goals.includes(g) ? draft.goals.filter(x => x !== g) : [...draft.goals, g]
-                  set({ goals })
-                }}>{t(GOAL_LABEL[g])}</Button>
+              <button key={g} className={'ob-chip' + (draft.goals.includes(g) ? ' on' : '')}
+                onClick={() => set({
+                  goals: draft.goals.includes(g) ? draft.goals.filter(x => x !== g) : [...draft.goals, g],
+                })}>{t(GOAL_LABEL[g])}</button>
             ))}
           </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 12, alignItems: 'center' }}>
-            <Button onClick={back}>{t('Back')}</Button>
-            <Button variant="primary" disabled={!canNext} onClick={next}>{t('Continue')}</Button>
-          </div>
-        </>}
+        </div>
+        {navNode(next)}
+      </>}
 
-        {/* ---- experience ---- */}
-        {step === 7 && <>
-          {bubble('askExperience')}
-          <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>
+      {/* experience */}
+      {step === 7 && <>
+        {questionNode(t(DIALOGUE.askExperience))}
+        <div className="ob-body">
+          <div className="ob-chips">
             {EXPERIENCE.map(x => (
-              <Button key={x} variant={draft.experience === x ? 'primary' : 'plain'}
-                onClick={() => { set({ experience: x }); next() }}>{t(EXPERIENCE_LABEL[x])}</Button>
+              <button key={x} className={'ob-chip' + (draft.experience === x ? ' on' : '')}
+                onClick={() => { set({ experience: x }); next() }}>{t(EXPERIENCE_LABEL[x])}</button>
             ))}
           </div>
-          <div style={{ marginTop: 10 }}><Button onClick={back}>{t('Back')}</Button></div>
-        </>}
+        </div>
+        <div className="ob-nav">
+          <button className="ob-backbtn pressable" onClick={back}>{t('Back')}</button>
+        </div>
+      </>}
 
-        {/* ---- days per week ---- */}
-        {step === 8 && <>
-          {bubble('askDays')}
-          <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>
+      {/* days per week */}
+      {step === 8 && <>
+        {questionNode(t(DIALOGUE.askDays))}
+        <div className="ob-body">
+          <div className="ob-chips">
             {[1, 2, 3, 4, 5, 6, 7].map(n => (
-              <Button key={n} variant={Number(draft.daysPerWeek) === n ? 'primary' : 'plain'}
-                onClick={() => { set({ daysPerWeek: n }); next() }}>{t('{0} days/week', n)}</Button>
+              <button key={n} className={'ob-chip mini' + (Number(draft.daysPerWeek) === n ? ' on' : '')}
+                onClick={() => { set({ daysPerWeek: n }); next() }}>{n}</button>
             ))}
           </div>
-          <div style={{ marginTop: 10 }}><Button onClick={back}>{t('Back')}</Button></div>
-        </>}
+        </div>
+        <div className="ob-nav">
+          <button className="ob-backbtn pressable" onClick={back}>{t('Back')}</button>
+        </div>
+      </>}
 
-        {/* ---- supplements (optional multi-select + custom) ---- */}
-        {step === 9 && <>
-          {bubble('askSupps')}
-          <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>
+      {/* supplements */}
+      {step === 9 && <>
+        {questionNode(t(DIALOGUE.askSupps), t('I’ll remind you every day.'))}
+        <div className="ob-body">
+          <div className="ob-chips">
             {SUPP_KINDS_LIST.map(kind => (
-              <Button key={kind} variant={draft.suppsKinds.includes(kind) ? 'primary' : 'plain'}
+              <button key={kind} className={'ob-chip' + (draft.suppsKinds.includes(kind) ? ' on' : '')}
                 onClick={() => {
                   const suppsKinds = draft.suppsKinds.includes(kind)
                     ? draft.suppsKinds.filter(x => x !== kind)
                     : [...draft.suppsKinds, kind]
                   if (kind === 'other') set({ suppsKinds, suppsCustom: '' })
                   else set({ suppsKinds })
-                }}>{t(kind.charAt(0).toUpperCase() + kind.slice(1))}</Button>
+                }}>{SUPP_LABEL(kind)}</button>
             ))}
-            {draft.suppsKinds.includes('other') && (
-              <TextField placeholder={t('Which one? (e.g. Omega 3)')} value={draft.suppsCustom}
-                onChange={e => set({ suppsCustom: e.target.value })} autoFocus />
-            )}
           </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-            {draft.suppsKinds.length === 0 && (
-              <Button variant="primary" onClick={next}>{t('None for now')}</Button>
-            )}
-            {!!draft.suppsKinds.length && (
-              <Button variant="primary" onClick={next}>{t('Continue')}</Button>
-            )}
-            <Button onClick={back}>{t('Back')}</Button>
-          </div>
-        </>}
+          {draft.suppsKinds.includes('other') && (
+            <input className="ob-note" placeholder={t('Which one? (e.g. Omega 3)')}
+              value={draft.suppsCustom} autoFocus
+              onChange={e => set({ suppsCustom: e.target.value })} />
+          )}
+        </div>
+        {navNode(next, draft.suppsKinds.length === 0 ? t('None for now') : undefined)}
+      </>}
 
-        {/* ---- confirm ---- */}
-        {step === 10 && <>
-          {bubble('perfectLine')}
-          <div className="card small" style={{ textAlign: 'left', margin: '10px 0' }}>
-            <div><b>{draft.name}</b></div>
-            <div className="dim">
-              {t(DIALOGUE.years)}: {fmtNum(Number(draft.ageYears))} · {t(DIALOGUE.currentWeight)}: {fmtNum(Number(draft.weight))} {S.unit} · {t('Height')}: {fmtNum(Number(draft.heightCm))} cm
-            </div>
-            <div className="dim">
-              {draft.goals.map(g => t(GOAL_LABEL[g])).join(' · ')}
-            </div>
-            {draft.experience && <div className="dim">{t(EXPERIENCE_LABEL[draft.experience])}</div>}
-            {draft.daysPerWeek && <div className="dim">{t('{0} days/week', draft.daysPerWeek)}</div>}
+      {/* confirm */}
+      {step === 10 && <>
+        {questionNode('📋', t(DIALOGUE.perfectLine))}
+        <div className="ob-body">
+          <div className="ob-summary">
+            <b>{draft.name}</b><br />
+            <span className="dim">
+              {fmtNum(Number(draft.ageYears))} · {fmtNum(Number(draft.weight))} {S.unit} · {fmtNum(Number(draft.heightCm))} cm
+            </span><br />
+            <span className="dim">{draft.goals.map(g => t(GOAL_LABEL[g])).join(' · ')}</span><br />
+            <span className="dim">{t(EXPERIENCE_LABEL[draft.experience])} · {t('{0} days/week', draft.daysPerWeek)}</span>
             {!!draft.suppsKinds.length && (
-              <div className="dim">
-                {t('Supplements')}: {draft.suppsKinds.map(k =>
-                  k === 'other' && draft.suppsCustom.trim()
-                    ? draft.suppsCustom.trim()
-                    : t(k.charAt(0).toUpperCase() + k.slice(1))
+              <span className="dim">
+                💊 {draft.suppsKinds.map(k =>
+                  k === 'other' && draft.suppsCustom.trim() ? draft.suppsCustom.trim() : SUPP_LABEL(k)
                 ).join(' · ')}
-              </div>
+              </span>
             )}
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <Button onClick={back}>{t('Back')}</Button>
-            <Button variant="primary" icon="check" onClick={commit}>{t(DIALOGUE.confirmProfile)}</Button>
-          </div>
-        </>}
+        </div>
+        {navNode(commit, t(DIALOGUE.confirmProfile))}
+      </>}
 
-        {/* ---- done / celebrate ---- */}
-        {step >= STEPS.length && <>
-          {bubble('tourLine')}
-          <div className="dim small" style={{ marginTop: 4 }}>{t('You can redo this tour anytime from Settings.')}</div>
-          <div style={{ height: 10 }} />
-          <Button variant="primary" icon="check" onClick={() => onDone?.()}>{t(DIALOGUE.letsGo)}</Button>
-        </>}
-      </div>
-
-      {/* skip link */}
-      {step > 0 && step < STEPS.length && (
-        <button className="btn ghost dim" style={{ marginTop: 12 }} onClick={skipAll}>{t(DIALOGUE.skip)}</button>
-      )}
+      {/* done */}
+      {step >= STEPS.length && <>
+        {giwiNode(150)}
+        <h2 className="ob-done-title">{t(DIALOGUE.tourLine)}</h2>
+        <p className="ob-hint">{t('You can redo this tour anytime from Settings.')}</p>
+        <div className="ob-nav">
+          <button className="ob-primary pressable" onClick={() => onDone?.()}>{t(DIALOGUE.letsGo)}</button>
+        </div>
+      </>}
     </div>
   )
 }

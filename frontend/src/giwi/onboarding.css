@@ -1,0 +1,61 @@
+/* Onboarding V2 — cinematic Aurora scene. One question per screen, display type,
+   chip answers, thin progress. Fixed deep-navy canvas so it reads as a moment,
+   independent of app theme. */
+
+.ob{min-height:100vh;display:flex;flex-direction:column;color:#fff;
+  background:radial-gradient(120% 60% at 50% -10%,#16345e 0%,#0c1a30 55%,#080f1c 100%)}
+
+.ob-top{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 8px}
+.ob-back,.ob-skip{background:none;border:none;color:rgba(255,255,255,.65);cursor:pointer;
+  font-size:.8rem;font-weight:650;padding:8px}
+.ob-back{display:flex;align-items:center}
+
+.ob-progress{height:3px;margin:0 16px;border-radius:99px;background:rgba(255,255,255,.14);overflow:hidden}
+.ob-progress i{display:block;height:100%;border-radius:99px;background:#3b93f0;
+  transition:width .4s cubic-bezier(.32,.72,0,1)}
+@media(prefers-reduced-motion:reduce){.ob-progress i{transition:none}}
+
+.ob-giwi{margin-top:26px;display:flex;justify-content:center}
+
+.ob-q{font-size:clamp(24px,6.2vw,33px);font-weight:800;letter-spacing:-.03em;line-height:1.08;
+  text-align:center;margin:20px 24px 8px}
+.ob-hint{font-size:.86rem;line-height:1.5;color:rgba(255,255,255,.62);text-align:center;
+  margin:0 30px 26px}
+
+.ob-body{flex:1;display:flex;flex-direction:column;width:min(430px,100%);margin:0 auto;padding:0 22px;gap:10px}
+
+.ob-input{width:100%;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.18);
+  border-radius:18px;color:#fff;font-size:24px;font-weight:700;text-align:center;padding:15px;
+  letter-spacing:-.01em;outline:none}
+.ob-input:focus{border-color:#3b93f0;background:rgba(59,147,240,.10)}
+.ob-unit{text-align:center;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(255,255,255,.5);margin-top:-4px}
+
+.ob-chips{display:flex;flex-wrap:wrap;gap:9px;justify-content:center}
+.ob-chip{padding:13px 19px;border-radius:999px;background:rgba(255,255,255,.08);
+  border:1.5px solid rgba(255,255,255,.17);color:#fff;font-weight:650;font-size:.92rem;
+  cursor:pointer;transition:background .12s ease,border-color .12s ease}
+.ob-chip.on{background:#3b93f0;border-color:#3b93f0}
+.ob-chip:active{transform:scale(.96)}
+@media(prefers-reduced-motion:reduce){.ob-chip:active{transform:none}}
+.ob-chip.mini{padding:9px 14px;font-size:.8rem}
+
+.ob-note{background:none;border:none;color:rgba(255,255,255,.85);text-align:center;width:100%;
+  border-bottom:1.5px solid rgba(255,255,255,.3);font-size:1rem;padding:6px 4px;outline:none}
+.ob-note:focus{border-color:#3b93f0}
+
+.ob-summary{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  border-radius:18px;padding:14px 16px;font-size:.88rem;line-height:1.7;text-align:left}
+.ob-summary b{font-size:1.05rem}
+.ob-summary .dim{color:rgba(255,255,255,.6)}
+
+.ob-nav{display:flex;gap:10px;padding:22px 22px calc(22px + env(safe-area-inset-bottom));
+  width:min(430px,100%);margin:0 auto;margin-top:auto}
+.ob-backbtn{flex:0 0 auto;height:54px;padding:0 20px;border-radius:16px;background:rgba(255,255,255,.09);
+  color:#fff;border:none;font-weight:650;cursor:pointer;display:flex;align-items:center}
+.ob-primary{flex:1;height:54px;border-radius:16px;background:#3b93f0;color:#fff;font-weight:750;
+  font-size:1rem;border:none;cursor:pointer;letter-spacing:-.01em;
+  box-shadow:0 12px 28px rgba(59,147,240,.35)}
+.ob-primary:disabled{opacity:.35;box-shadow:none;cursor:default}
+.ob-primary:active:not(:disabled){transform:scale(.98)}
+.ob-done-title{font-size:clamp(26px,7vw,36px);font-weight:800;letter-spacing:-.03em;text-align:center;margin:16px 24px 4px}
