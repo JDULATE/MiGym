@@ -257,7 +257,7 @@ export default function GiwiOnboarding({ onDone }) {
 
       {/* supplements */}
       {step === 9 && <>
-        {questionNode(t(DIALOGUE.askSupps), t('I’ll remind you every day.'))}
+        {questionNode(t('Do you take any supplements?'), t('I’ll remind you every day.'))}
         <div className="ob-body">
           <div className="ob-chips">
             {SUPP_KINDS_LIST.map(kind => (

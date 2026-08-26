@@ -190,6 +190,14 @@ export const useStore = create((set, get) => {
       const cur = get().S
       if (cur.accent === 'ember' || cur.accent === 'orange') cur.accent = 'giwi'
 
+      // Zombie-session guard: a workout orphaned by a crash or closed tab would pin
+      // the tab bar in amber "Resume" mode forever. Sessions older than 36 h are
+      // cleared on boot; same-day pauses stay resumable.
+      if (cur.active && Date.now() - cur.active.start > 36 * 3600 * 1000) {
+        cur.active = null
+      }
+
+
       // Mobile build: no backend either — restore from the file mirror (the durable copy;
       // localStorage may have been evicted since the last run) and go straight in.
       if (MOBILE) {
