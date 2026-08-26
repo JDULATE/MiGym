@@ -881,4 +881,5 @@ export default {
   "Other": "其他",
   "Do you take any supplements?": "你服用补剂吗？",
   "None for now": "暂时不用",
+  "Which one? (e.g. Omega 3)": "哪一种？（如鱼油）",
 }

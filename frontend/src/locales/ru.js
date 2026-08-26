@@ -881,4 +881,5 @@ export default {
   "Other": "Другое",
   "Do you take any supplements?": "Принимаешь добавки?",
   "None for now": "Пока никакие",
+  "Which one? (e.g. Omega 3)": "Какой? (напр. Омега 3)",
 }

@@ -881,4 +881,5 @@ export default {
   "Other": "Diğer",
   "Do you take any supplements?": "Takviye alıyor musun?",
   "None for now": "Şimdilik hayır",
+  "Which one? (e.g. Omega 3)": "Hangisi? (örn. Omega 3)",
 }

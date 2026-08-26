@@ -20,7 +20,7 @@ const SUPP_ONBOARD_PRESET = {
   preworkout: { sched: 'training', dose: '1 dosis' },
   amino: { sched: 'training', dose: '1 scoop' },
 }
-const SUPP_KINDS_LIST = ['creatine', 'protein', 'preworkout', 'amino']
+const SUPP_KINDS_LIST = ['creatine', 'protein', 'preworkout', 'amino', 'other']
 
 export default function GiwiOnboarding({ onDone }) {
   const S = useStore(s => s.S)
@@ -28,7 +28,7 @@ export default function GiwiOnboarding({ onDone }) {
   const [step, setStep] = useState(0)
   const [draft, setDraft] = useState({
     name: '', ageYears: '', weight: '', heightCm: '', goal: '', goals: [],
-    experience: '', daysPerWeek: '', suppsKinds: [],
+    experience: '', daysPerWeek: '', suppsKinds: [], suppsCustom: '',
   })
   const set = patch => setDraft(d => ({ ...d, ...patch }))
   const next = () => setStep(i => Math.min(i + 1, STEPS.length))
@@ -50,12 +50,18 @@ export default function GiwiOnboarding({ onDone }) {
       s.lang = draft.lang || s.lang
       // supplements chosen during onboarding become real items with sensible presets
       if (!s.supps) s.supps = { items: [] }
+      let n = 0
       for (const kind of draft.suppsKinds) {
+        n++
+        const custom = kind === 'other'
         const preset = SUPP_ONBOARD_PRESET[kind] || {}
         s.supps.items.push({
-          id: 'u' + Date.now().toString(36) + kind.slice(0, 2),
-          name: t(kind.charAt(0).toUpperCase() + kind.slice(1)),
-          kind, dose: preset.dose || '', sched: preset.sched || 'daily',
+          id: 'u' + Date.now().toString(36) + n,
+          name: custom
+            ? (draft.suppsCustom.trim() || 'Supplement')
+            : t(kind.charAt(0).toUpperCase() + kind.slice(1)),
+          kind: custom ? 'other' : kind,
+          dose: preset.dose || '', sched: preset.sched || 'daily',
           days: [], time: preset.time || '', log: {},
         })
       }
@@ -218,7 +224,7 @@ export default function GiwiOnboarding({ onDone }) {
           <div style={{ marginTop: 10 }}><Button onClick={back}>{t('Back')}</Button></div>
         </>}
 
-        {/* ---- supplements (optional multi-select) ---- */}
+        {/* ---- supplements (optional multi-select + custom) ---- */}
         {step === 9 && <>
           {bubble('askSupps')}
           <div style={{ display: 'grid', gap: 6, marginTop: 8 }}>
@@ -228,15 +234,24 @@ export default function GiwiOnboarding({ onDone }) {
                   const suppsKinds = draft.suppsKinds.includes(kind)
                     ? draft.suppsKinds.filter(x => x !== kind)
                     : [...draft.suppsKinds, kind]
-                  set({ suppsKinds })
+                  if (kind === 'other') set({ suppsKinds, suppsCustom: '' })
+                  else set({ suppsKinds })
                 }}>{t(kind.charAt(0).toUpperCase() + kind.slice(1))}</Button>
             ))}
-            <Button variant={draft.suppsKinds.length === 0 ? 'primary' : 'plain'}
-              onClick={() => { set({ suppsKinds: [] }); next() }}>
-              {t('None for now')}
-            </Button>
+            {draft.suppsKinds.includes('other') && (
+              <TextField placeholder={t('Which one? (e.g. Omega 3)')} value={draft.suppsCustom}
+                onChange={e => set({ suppsCustom: e.target.value })} autoFocus />
+            )}
           </div>
-          <div style={{ marginTop: 10 }}><Button onClick={back}>{t('Back')}</Button></div>
+          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+            {draft.suppsKinds.length === 0 && (
+              <Button variant="primary" onClick={next}>{t('None for now')}</Button>
+            )}
+            {!!draft.suppsKinds.length && (
+              <Button variant="primary" onClick={next}>{t('Continue')}</Button>
+            )}
+            <Button onClick={back}>{t('Back')}</Button>
+          </div>
         </>}
 
         {/* ---- confirm ---- */}
@@ -254,7 +269,11 @@ export default function GiwiOnboarding({ onDone }) {
             {draft.daysPerWeek && <div className="dim">{t('{0} days/week', draft.daysPerWeek)}</div>}
             {!!draft.suppsKinds.length && (
               <div className="dim">
-                {t('Supplements')}: {draft.suppsKinds.map(k => t(k.charAt(0).toUpperCase() + k.slice(1))).join(' · ')}
+                {t('Supplements')}: {draft.suppsKinds.map(k =>
+                  k === 'other' && draft.suppsCustom.trim()
+                    ? draft.suppsCustom.trim()
+                    : t(k.charAt(0).toUpperCase() + k.slice(1))
+                ).join(' · ')}
               </div>
             )}
           </div>

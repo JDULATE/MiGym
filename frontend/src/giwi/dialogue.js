@@ -19,6 +19,7 @@ export const DIALOGUE = {
   askGoalMulti: 'What are your goals? Pick as many as you like.',
   askExperience: 'What’s your experience level?',
   askDays: 'How many days per week can you train?',
+  askSupps: 'Do you take any supplements? I’ll remind you every day.',
   yourProfile: 'Your profile',
   confirmProfile: 'Confirm',
   editProfile: 'Edit',

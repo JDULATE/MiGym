@@ -881,4 +881,5 @@ export default {
   "Other": "अन्य",
   "Do you take any supplements?": "क्या आप सप्लीमेंट लेते हैं?",
   "None for now": "अभी कोई नहीं",
+  "Which one? (e.g. Omega 3)": "कौन सा? (जैसे ओमेगा 3)",
 }

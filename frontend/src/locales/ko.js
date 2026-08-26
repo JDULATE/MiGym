@@ -881,4 +881,5 @@ export default {
   "Other": "기타",
   "Do you take any supplements?": "보충제를 드시나요?",
   "None for now": "지금은 없음",
+  "Which one? (e.g. Omega 3)": "무엇? (예: 오메가3)",
 }

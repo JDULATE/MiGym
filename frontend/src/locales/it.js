@@ -881,4 +881,5 @@ export default {
   "Other": "Altro",
   "Do you take any supplements?": "Prendi degli integratori?",
   "None for now": "Nessuno per ora",
+  "Which one? (e.g. Omega 3)": "Quale? (es. Omega 3)",
 }

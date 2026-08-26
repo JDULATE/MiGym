@@ -116,6 +116,12 @@ const T = {
     it: 'Nessuno per ora', ru: 'Пока никакие', tr: 'Şimdilik hayır', pl: 'Na razie żadne',
     ko: '지금은 없음', zh: '暂时不用', hi: 'अभी कोई नहीं',
   },
+  'Which one? (e.g. Omega 3)': {
+    es: '¿Cuál? (ej. Omega 3)', pt: 'Qual? (ex. Ômega 3)', fr: 'Lequel ? (ex. Oméga 3)',
+    de: 'Welcher? (z. B. Omega 3)', it: 'Quale? (es. Omega 3)', ru: 'Какой? (напр. Омега 3)',
+    tr: 'Hangisi? (örn. Omega 3)', pl: 'Który? (np. Omega 3)', ko: '무엇? (예: 오메가3)',
+    zh: '哪一种？（如鱼油）', hi: 'कौन सा? (जैसे ओमेगा 3)',
+  },
   'Supplements for today': {
     es: 'Suplementos de hoy', pt: 'Suplementos de hoje', fr: 'Compléments du jour', de: 'Supplemente für heute',
     it: 'Integratori di oggi', ru: 'Добавки на сегодня', tr: 'Bugünün takviyeleri', pl: 'Suplementy na dziś',
