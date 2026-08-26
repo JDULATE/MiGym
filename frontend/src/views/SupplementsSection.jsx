@@ -19,11 +19,12 @@ const SCHED_OPTS = [
 const kindLabel = v => t((SUPP_KINDS.find(k => k.v === v) || { label: v }).label)
 const schedLabel = v => t((SCHED_OPTS.find(o => o.value === (v || 'daily')) || {}).label || 'Daily')
 
-function SuppEditSheet({ close, item }) {
+function SuppEditSheet({ close, item, initial }) {
   const update = useStore(s => s.update)
   const toast = useUI(s => s.toast)
   const [f, setF] = useState(() => item || {
     id: null, name: '', kind: 'creatine', dose: '', sched: 'daily', days: [], time: '',
+    ...(initial || {}),
   })
   const set = (k, v) => setF(x => ({ ...x, [k]: v }))
   const save = () => {
@@ -78,7 +79,10 @@ export default function SupplementsSection() {
   const all = suppItems(S)
 
   const addNew = preset => openSheet(close =>
-    <SuppEditSheet close={close} item={preset ? { id: 'u' + Date.now().toString(36), log: {}, ...preset } : null} />)
+    // no `item` → treated as NEW: Save runs addItem (the id-less path)
+    <SuppEditSheet close={close} item={null} initial={preset ? { ...preset, name: kindLabel(pr0Kind(preset)) } : null} />)
+
+  const pr0Kind = preset => preset?.kind || 'other'
 
   const askNotify = async () => {
     try { await Notification.requestPermission(); useUI.getState().toast(t('Reminders enabled')) } catch { /* denied */ }
@@ -107,7 +111,7 @@ export default function SupplementsSection() {
             <h3>{t('Add supplement')}</h3>
             <div className="list">
               {SUPP_PRESETS.map((pr, i) => (
-                <div key={i} className="item" onClick={() => { close(); addNew({ ...pr, name: kindLabel(pr.kind) }) }}>
+                <div key={i} className="item" onClick={() => { close(); addNew(pr) }}>
                   <div className="grow">
                     <div className="tt">{kindLabel(pr.kind)}</div>
                     <div className="ss">{pr.dose}</div>

@@ -15,6 +15,7 @@ import { needsOnboarding, completeOnboarding } from './giwi/flags.js'
 import GiwiOnboarding from './giwi/GiwiOnboarding.jsx'
 import GiwiTutorial from './giwi/tutorial/Tutorial.jsx'
 import { getTutorial, resetTutorial } from './giwi/flags.js'
+import Library from './views/Library.jsx'
 import NotFound from './views/NotFound.jsx'
 import { startFlow } from './sheets.jsx'
 import TabBar from './components/TabBar.jsx'
@@ -88,7 +89,7 @@ function Shell() {
             <Route path="/workout" element={<Workout />} />
             <Route path="/stats" element={<Stats />} />
             <Route path="/history" element={<History />} />
-            <Route path="/library" element={<Navigate to="/plan?tab=exercises" replace />} />
+            <Route path="/library" element={<Library />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/admin" element={user?.admin ? <Admin /> : <Navigate to="/home" replace />} />
             <Route path="*" element={<NotFound />} />
